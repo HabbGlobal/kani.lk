@@ -12,8 +12,6 @@ const SiteSettingsSchema = new Schema(
       default:
         "Verified blocks, paddy fields and homes across Vavuniya, Mannar, Jaffna, Batticaloa, Trincomalee and Mullaitivu — with the owner's number on every listing.",
     },
-    heroImageUrl: { type: String, default: "/banner.jpg" },
-
     // contact
     contactPhone: { type: String, default: "+94 77 000 0000" },
     contactPhoneAlt: { type: String, default: "" },

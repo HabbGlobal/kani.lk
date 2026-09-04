@@ -7,6 +7,7 @@ import { Card, EmptyState } from "@/components/ui/Card";
 import { Field, Input, Select, Checkbox } from "@/components/ui/Field";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { imageUrl } from "@/lib/image-url";
+import { adminFetch } from "@/lib/admin-fetch";
 import { formatLKR, formatSize } from "@/lib/units";
 import { STATUS_LABELS, PURPOSE_LABELS } from "@/models/types";
 import { cn, formatDate } from "@/lib/utils";
@@ -79,7 +80,7 @@ export function LandsTable({
     setRows((cur) => cur.map((r) => (r._id === row._id ? { ...r, [field]: !prevValue } : r)));
     setError("");
     try {
-      const res = await fetch(`/api/admin/lands/${row._id}`, {
+      const res = await adminFetch(`/api/admin/lands/${row._id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ [field]: !prevValue }),
@@ -108,7 +109,7 @@ export function LandsTable({
     try {
       await Promise.all(
         ids.map((id) =>
-          fetch(`/api/admin/lands/${id}`, {
+          adminFetch(`/api/admin/lands/${id}`, {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ isPublished: true }),

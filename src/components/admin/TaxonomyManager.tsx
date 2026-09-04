@@ -1,13 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
 import { Card, EmptyState } from "@/components/ui/Card";
 import { Field, Input, Select, Checkbox } from "@/components/ui/Field";
 import { Button } from "@/components/ui/Button";
+import { PagerBar } from "@/components/admin/PagerBar";
+import { adminFetch } from "@/lib/admin-fetch";
 import { districtSchema, citySchema, landTypeSchema } from "@/lib/validation";
+
+const PAGE_SIZE = 5;
 
 type Kind = "district" | "city" | "land-type";
 
@@ -47,6 +51,14 @@ export function TaxonomyManager({
   const [editing, setEditing] = useState<Row | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [error, setError] = useState("");
+  const [page, setPage] = useState(1);
+
+  const pageCount = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
+  const safePage = Math.min(page, pageCount);
+  const paged = useMemo(
+    () => rows.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE),
+    [rows, safePage]
+  );
 
   const schema = SCHEMAS[kind];
   const apiBase = API_BASE[kind];
@@ -88,7 +100,7 @@ export function TaxonomyManager({
     const url = editing ? `${apiBase}/${editing._id}` : apiBase;
     const method = editing ? "PATCH" : "POST";
     try {
-      const res = await fetch(url, {
+      const res = await adminFetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(values),
@@ -111,7 +123,7 @@ export function TaxonomyManager({
     if (!confirm(`Delete "${row.name}"? This cannot be undone.`)) return;
     setError("");
     try {
-      const res = await fetch(`${apiBase}/${row._id}`, { method: "DELETE" });
+      const res = await adminFetch(`${apiBase}/${row._id}`, { method: "DELETE" });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error ?? "Could not delete");
       setRows((prev) => prev.filter((r) => r._id !== row._id));
@@ -204,13 +216,13 @@ export function TaxonomyManager({
         </EmptyState>
       ) : (
         <Card className="divide-y divide-[var(--hairline)] overflow-hidden">
-          {rows.map((row) => (
+          {paged.map((row) => (
             <div key={row._id} className="flex items-center justify-between gap-3 p-4">
               <div className="min-w-0">
                 <p className="truncate text-[15px] font-medium text-[var(--ink)]">
                   {row.name}
                   {!row.isActive && (
-                    <span className="ml-2 rounded-[var(--radius-pill)] bg-black/[0.06] px-2 py-0.5 text-[11px] font-semibold uppercase text-[var(--muted)]">
+                    <span className="ml-2 rounded-[var(--radius-pill)] border border-[var(--hairline)] px-2 py-0.5 text-[11px] font-semibold uppercase text-[var(--muted)]">
                       Inactive
                     </span>
                   )}
@@ -231,6 +243,8 @@ export function TaxonomyManager({
           ))}
         </Card>
       )}
+
+      <PagerBar page={safePage} pageCount={pageCount} total={rows.length} itemLabel={`${label}s`} onChange={setPage} />
     </div>
   );
 }

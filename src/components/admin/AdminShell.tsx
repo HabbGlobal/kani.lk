@@ -166,12 +166,7 @@ export function AdminShell({
             collapsed ? "flex-col gap-3 px-2" : "justify-between gap-2 px-5"
           )}
         >
-          {!collapsed && <Logo onDark />}
-          {collapsed && (
-            <span className="text-[22px] font-serif text-[var(--palmyra-gold)]" aria-hidden="true">
-              k.
-            </span>
-          )}
+          <Logo onDark />
           <ThemeToggle dark={dark} onToggle={toggleDark} circle />
         </div>
         {collapsed ? navRail : nav}

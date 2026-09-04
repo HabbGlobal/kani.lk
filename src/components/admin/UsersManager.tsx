@@ -7,6 +7,7 @@ import { Card, EmptyState } from "@/components/ui/Card";
 import { Field, Input, Select, Checkbox } from "@/components/ui/Field";
 import { Button } from "@/components/ui/Button";
 import { adminUserSchema, type AdminUserFormValues } from "@/lib/validation";
+import { adminFetch } from "@/lib/admin-fetch";
 
 type UserRow = {
   _id: string;
@@ -54,7 +55,7 @@ export function UsersManager({
     const url = editing ? `/api/admin/users/${editing._id}` : "/api/admin/users";
     const method = editing ? "PATCH" : "POST";
     try {
-      const res = await fetch(url, {
+      const res = await adminFetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(values),
@@ -77,7 +78,7 @@ export function UsersManager({
     if (row._id === selfId) return;
     setError("");
     try {
-      const res = await fetch(`/api/admin/users/${row._id}`, {
+      const res = await adminFetch(`/api/admin/users/${row._id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: row.name, email: row.email, role: row.role, isActive: !row.isActive }),

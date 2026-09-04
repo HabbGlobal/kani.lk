@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/Button";
 import { LandCard } from "@/components/land/LandCard";
 import { ImageManager, type LandImage } from "@/components/admin/ImageManager";
 import { landSchema, type LandFormValues } from "@/lib/validation";
+import { adminFetch } from "@/lib/admin-fetch";
 import {
   PURPOSES,
   SIZE_UNITS,
@@ -37,6 +38,8 @@ export function LandEditor({
   slug,
   images,
   coverImageId,
+  title,
+  subtitle,
 }: {
   mode: "create" | "edit";
   taxonomies: Taxonomies;
@@ -46,6 +49,9 @@ export function LandEditor({
   slug?: string;
   images: LandImage[];
   coverImageId?: string;
+  /** Rendered as the page heading, with the Save button beside it. */
+  title: string;
+  subtitle?: string;
 }) {
   const router = useRouter();
   const [serverError, setServerError] = useState("");
@@ -90,7 +96,7 @@ export function LandEditor({
     try {
       const url = mode === "create" ? "/api/admin/lands" : `/api/admin/lands/${landId}`;
       const method = mode === "create" ? "POST" : "PATCH";
-      const res = await fetch(url, {
+      const res = await adminFetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -118,8 +124,12 @@ export function LandEditor({
   // a numeric preprocess are optional/unknown here until validated. This is a
   // read-only preview, so coerce defensively rather than importing the full
   // output-side typing just for display.
-  const asNum = (v: unknown): number | undefined =>
-    typeof v === "number" ? v : v ? Number(v) || undefined : undefined;
+  // Clamped to >= 0 — the schema rejects negatives on submit, but the
+  // preview shouldn't flash "-0.13 perches" while someone is still typing.
+  const asNum = (v: unknown): number | undefined => {
+    const n = typeof v === "number" ? v : v ? Number(v) : undefined;
+    return n != null && Number.isFinite(n) && n >= 0 ? n : undefined;
+  };
 
   const previewCard: LandCardType = {
     _id: landId ?? "preview",
@@ -154,29 +164,30 @@ export function LandEditor({
   };
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-      <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-8">
-        {/* ── Publish ────────────────────────────────────────────────── */}
-        <section>
-          <SectionHeading title="Publish" />
-          <Card className="grid gap-4 p-5 sm:grid-cols-3">
-            <Checkbox label="Published" {...register("isPublished")} />
-            <Checkbox label="Featured" {...register("isFeatured")} />
-            <Checkbox label="Popular" {...register("isPopular")} />
-          </Card>
-        </section>
-
-        {serverError && (
-          <p role="alert" className="text-[14px] font-medium text-[var(--laterite)]">{serverError}</p>
+    <div>
+      <header className="mb-6">
+        <h1 className="text-[27px] text-[var(--heading)] md:text-[34px]">{title}</h1>
+        {subtitle && (
+          <p className="tabular mt-1 text-[16px] text-[var(--muted)]">{subtitle}</p>
         )}
+        {serverError && (
+          <p role="alert" className="mt-2 text-[14px] font-medium text-[var(--laterite)]">{serverError}</p>
+        )}
+      </header>
 
-        <div className="flex gap-3">
-          <Button type="submit" size="lg" disabled={isSubmitting}>
-            {isSubmitting ? "Saving…" : mode === "create" ? "Save draft" : "Save changes"}
-          </Button>
-        </div>
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-8">
+          {/* ── Publish ────────────────────────────────────────────────── */}
+          <section>
+            <SectionHeading title="Publish" />
+            <Card className="grid gap-4 p-5 sm:grid-cols-3">
+              <Checkbox label="Published" {...register("isPublished")} />
+              <Checkbox label="Featured" {...register("isFeatured")} />
+              <Checkbox label="Popular" {...register("isPopular")} />
+            </Card>
+          </section>
 
-        {/* ── Basics ─────────────────────────────────────────────────── */}
+          {/* ── Basics ─────────────────────────────────────────────────── */}
         <section>
           <SectionHeading title="Basics" />
           <Card className="grid gap-4 p-5 sm:grid-cols-2">
@@ -234,7 +245,7 @@ export function LandEditor({
               <Input id="nearestTown" {...register("nearestTown")} />
             </Field>
             <Field label="Distance from town (km)" htmlFor="distanceFromTownKm" error={errors.distanceFromTownKm?.message}>
-              <Input id="distanceFromTownKm" type="number" step="0.1" {...register("distanceFromTownKm")} />
+              <Input id="distanceFromTownKm" type="number" min={0} step="0.1" {...register("distanceFromTownKm")} />
             </Field>
             <Field label="Google Maps URL" htmlFor="googleMapsUrl" className="sm:col-span-2" error={errors.googleMapsUrl?.message}>
               <Input id="googleMapsUrl" {...register("googleMapsUrl")} />
@@ -256,7 +267,7 @@ export function LandEditor({
             </Field>
             <div className="grid grid-cols-2 gap-3">
               <Field label="Size" htmlFor="sizeValue" required error={errors.sizeValue?.message}>
-                <Input id="sizeValue" type="number" step="0.01" {...register("sizeValue")} />
+                <Input id="sizeValue" type="number" min={0.01} step="0.01" {...register("sizeValue")} />
               </Field>
               <Field label="Unit" htmlFor="sizeUnit">
                 <Select id="sizeUnit" {...register("sizeUnit")}>
@@ -282,23 +293,23 @@ export function LandEditor({
               </Select>
             </Field>
             <Field label="Access road width (ft)" htmlFor="accessRoadWidthFt" error={errors.accessRoadWidthFt?.message}>
-              <Input id="accessRoadWidthFt" type="number" {...register("accessRoadWidthFt")} />
+              <Input id="accessRoadWidthFt" type="number" min={0} {...register("accessRoadWidthFt")} />
             </Field>
             <Field label="Frontage (ft)" htmlFor="frontageFt" error={errors.frontageFt?.message}>
-              <Input id="frontageFt" type="number" {...register("frontageFt")} />
+              <Input id="frontageFt" type="number" min={0} {...register("frontageFt")} />
             </Field>
 
             {selectedLandType?.hasBuilding && (
               <>
                 <Field label="Building size (sq ft)" htmlFor="buildingSizeSqft" error={errors.buildingSizeSqft?.message}>
-                  <Input id="buildingSizeSqft" type="number" {...register("buildingSizeSqft")} />
+                  <Input id="buildingSizeSqft" type="number" min={0} {...register("buildingSizeSqft")} />
                 </Field>
                 <div className="grid grid-cols-2 gap-3">
                   <Field label="Bedrooms" htmlFor="bedrooms" error={errors.bedrooms?.message}>
-                    <Input id="bedrooms" type="number" {...register("bedrooms")} />
+                    <Input id="bedrooms" type="number" min={0} {...register("bedrooms")} />
                   </Field>
                   <Field label="Bathrooms" htmlFor="bathrooms" error={errors.bathrooms?.message}>
-                    <Input id="bathrooms" type="number" {...register("bathrooms")} />
+                    <Input id="bathrooms" type="number" min={0} {...register("bathrooms")} />
                   </Field>
                 </div>
               </>
@@ -332,13 +343,13 @@ export function LandEditor({
           <Card className="grid gap-4 p-5 sm:grid-cols-2">
             {purpose !== "rent" && (
               <Field label="Sale price (LKR)" htmlFor="salePrice" error={errors.salePrice?.message}>
-                <Input id="salePrice" type="number" {...register("salePrice")} />
+                <Input id="salePrice" type="number" min={0} {...register("salePrice")} />
               </Field>
             )}
             {purpose !== "sale" && (
               <>
                 <Field label="Rent amount (LKR)" htmlFor="rentAmount" error={errors.rentAmount?.message}>
-                  <Input id="rentAmount" type="number" {...register("rentAmount")} />
+                  <Input id="rentAmount" type="number" min={0} {...register("rentAmount")} />
                 </Field>
                 <Field label="Rent period" htmlFor="rentPeriod">
                   <Select id="rentPeriod" {...register("rentPeriod")}>
@@ -347,7 +358,7 @@ export function LandEditor({
                   </Select>
                 </Field>
                 <Field label="Deposit amount (LKR)" htmlFor="depositAmount" error={errors.depositAmount?.message}>
-                  <Input id="depositAmount" type="number" {...register("depositAmount")} />
+                  <Input id="depositAmount" type="number" min={0} {...register("depositAmount")} />
                 </Field>
               </>
             )}
@@ -391,25 +402,42 @@ export function LandEditor({
               <p className="text-[14px] font-medium text-[var(--ink)]">
                 Contact numbers <span className="text-[var(--laterite)]">*</span>
               </p>
-              {contactFields.map((f, i) => (
-                <div key={f.id} className="flex gap-2">
-                  <Input placeholder="077 123 4567" {...register(`contactNumbers.${i}` as const)} />
-                  {contactFields.length > 1 && (
-                    <Button type="button" variant="ghost" size="sm" onClick={() => removeContact(i)}>Remove</Button>
-                  )}
-                </div>
-              ))}
-              {errors.contactNumbers?.message && (
-                <p className="text-[13px] font-medium text-[var(--laterite)]">{errors.contactNumbers.message as string}</p>
+              {contactFields.map((f, i) => {
+                const itemError = (errors.contactNumbers as unknown as { message?: string }[] | undefined)?.[i]
+                  ?.message;
+                return (
+                  <div key={f.id}>
+                    <div className="flex gap-2">
+                      <Input placeholder="0771234567" {...register(`contactNumbers.${i}` as const)} />
+                      {contactFields.length > 1 && (
+                        <Button type="button" variant="ghost" size="sm" onClick={() => removeContact(i)}>Remove</Button>
+                      )}
+                    </div>
+                    {itemError && (
+                      <p className="mt-1 text-[13px] font-medium text-[var(--laterite)]">{itemError}</p>
+                    )}
+                  </div>
+                );
+              })}
+              {typeof errors.contactNumbers?.message === "string" && (
+                <p className="text-[13px] font-medium text-[var(--laterite)]">{errors.contactNumbers.message}</p>
               )}
+              <p className="text-[13px] text-[var(--muted)]">
+                10 digits starting with 0 (0771234567), or the full international format (+94775556667).
+              </p>
               {contactFields.length < 4 && (
                 <Button type="button" variant="outline" size="sm" onClick={() => appendContact("" as never)}>
                   Add number
                 </Button>
               )}
             </div>
-            <Field label="WhatsApp number" htmlFor="whatsappNumber" error={errors.whatsappNumber?.message}>
-              <Input id="whatsappNumber" {...register("whatsappNumber")} />
+            <Field
+              label="WhatsApp number"
+              htmlFor="whatsappNumber"
+              hint="10 digits (0771234567) or +94775556667"
+              error={errors.whatsappNumber?.message}
+            >
+              <Input id="whatsappNumber" placeholder="0771234567" {...register("whatsappNumber")} />
             </Field>
           </Card>
         </section>
@@ -427,14 +455,36 @@ export function LandEditor({
           </Card>
         </section>
 
-      </form>
+        </form>
 
-      {/* ── Live preview ─────────────────────────────────────────────── */}
-      <div className="xl:sticky xl:top-6 xl:self-start">
-        <SectionHeading title="Preview" className="mb-3" />
-        <div className="max-w-sm">
-          <LandCard land={previewCard} />
+        {/* ── Live preview ─────────────────────────────────────────────── */}
+        <div className="xl:sticky xl:top-6 xl:self-start">
+          <SectionHeading title="Preview" className="mb-3" />
+          <div className="max-w-sm">
+            <LandCard
+              land={previewCard}
+              href={mode === "edit" ? `/lands/${slug}?preview=1` : undefined}
+              newTab={mode === "edit"}
+              showFavourite={false}
+            />
+          </div>
+          {mode === "edit" && (
+            <p className="mt-2 text-[13px] text-[var(--muted)]">
+              Opens the live listing page in a new tab.
+            </p>
+          )}
         </div>
+
+        {/* Stays reachable while scrolled deep into a long form. */}
+        <Button
+          type="button"
+          size="lg"
+          disabled={isSubmitting}
+          onClick={handleSubmit(onSubmit)}
+          className="fixed bottom-6 right-6 z-40 shadow-[var(--shadow-lg)]"
+        >
+          {isSubmitting ? "Saving…" : mode === "create" ? "Save draft" : "Save changes"}
+        </Button>
       </div>
     </div>
   );

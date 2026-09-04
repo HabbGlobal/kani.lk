@@ -7,6 +7,7 @@ import { Card, SectionHeading } from "@/components/ui/Card";
 import { Field, Input, Textarea } from "@/components/ui/Field";
 import { Button } from "@/components/ui/Button";
 import { PageBody } from "@/components/site/PageBody";
+import { adminFetch } from "@/lib/admin-fetch";
 import { pageSchema, type PageInput } from "@/lib/validation";
 
 export function PageEditor({
@@ -32,7 +33,7 @@ export function PageEditor({
     setServerError("");
     setSaved(false);
     try {
-      const res = await fetch(`/api/admin/pages/${slug}`, {
+      const res = await adminFetch(`/api/admin/pages/${slug}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(values),

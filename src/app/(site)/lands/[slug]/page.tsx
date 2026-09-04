@@ -22,10 +22,14 @@ import {
   type WaterSource,
 } from "@/models/types";
 import { truncate } from "@/lib/utils";
+import { buildMapEmbedUrl } from "@/lib/maps";
 
 export const revalidate = 300;
 
-type Params = { params: Promise<{ slug: string }> };
+type Params = {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ preview?: string }>;
+};
 
 /** The full listing document, beyond the card projection. */
 type LandDetail = LandCard & {
@@ -77,8 +81,9 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   };
 }
 
-export default async function LandDetailPage({ params }: Params) {
+export default async function LandDetailPage({ params, searchParams }: Params) {
   const { slug } = await params;
+  const { preview } = await searchParams;
   const land = (await getLandBySlug(slug)) as LandDetail | null;
   if (!land) notFound();
 
@@ -91,9 +96,18 @@ export default async function LandDetailPage({ params }: Params) {
 
   const isGone = land.status === "sold" || land.status === "rented";
   const place = [land.area, land.city?.name].filter(Boolean).join(", ");
+  const mapQuery = [land.addressLine, land.area, land.city?.name, land.district?.name, "Sri Lanka"]
+    .filter(Boolean)
+    .join(", ");
+  const mapEmbedUrl = buildMapEmbedUrl(land.googleMapsUrl, mapQuery);
+  const mapLink =
+    land.googleMapsUrl?.trim() ||
+    (mapQuery ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQuery)}` : null);
 
   return (
     <article className="container-kani py-6 md:py-10">
+      {preview === "1" && <PreviewBar landId={land._id} />}
+
       <Breadcrumbs land={land} />
 
       <div className="mt-5 grid gap-8 lg:grid-cols-[1fr_400px] lg:gap-10">
@@ -237,34 +251,52 @@ export default async function LandDetailPage({ params }: Params) {
           {/* ── Location ──────────────────────────────────────────────── */}
           <section className="mt-8">
             <h2 className="mb-3 text-[21px] text-[var(--kani-green)]">Location</h2>
-            <div className="rounded-[var(--radius-lg)] border border-[var(--hairline)] bg-[var(--card)] p-5">
-              <address className="not-italic text-[16px] leading-relaxed text-[var(--ink)]">
-                {[land.addressLine, land.area, land.city?.name, `${land.district?.name} District`]
-                  .filter(Boolean)
-                  .map((line, i) => (
-                    <span key={i} className="block">{line}</span>
-                  ))}
-              </address>
-              {land.distanceFromTownKm != null && land.nearestTown && (
-                <p className="mt-2 text-[15px] text-[var(--muted)]">
-                  About {land.distanceFromTownKm} km from {land.nearestTown} town.
-                </p>
-              )}
-              {land.googleMapsUrl && (
-                <a
-                  href={land.googleMapsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-4 inline-flex h-11 items-center gap-2 rounded-[var(--radius-pill)]
-                             border border-[var(--kani-green)]/35 px-5 text-[15px] font-medium
-                             text-[var(--kani-green)] transition-colors hover:bg-[var(--kani-green)]/6"
+            <div className="rounded-[var(--radius-lg)] border border-[var(--hairline)] bg-[var(--card)] p-5
+                             sm:grid sm:grid-cols-[1fr_auto] sm:gap-5">
+              <div className="min-w-0">
+                <address className="not-italic text-[16px] leading-relaxed text-[var(--ink)]">
+                  {[land.addressLine, land.area, land.city?.name, `${land.district?.name} District`]
+                    .filter(Boolean)
+                    .map((line, i) => (
+                      <span key={i} className="block">{line}</span>
+                    ))}
+                </address>
+                {land.distanceFromTownKm != null && land.nearestTown && (
+                  <p className="mt-2 text-[15px] text-[var(--muted)]">
+                    About {land.distanceFromTownKm} km from {land.nearestTown} town.
+                  </p>
+                )}
+                {mapLink && (
+                  <a
+                    href={mapLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-4 inline-flex h-11 items-center gap-2 rounded-[var(--radius-pill)]
+                               border border-[var(--kani-green)]/35 px-5 text-[15px] font-medium
+                               text-[var(--kani-green)] transition-colors hover:bg-[var(--kani-green)]/6"
+                  >
+                    Open in Google Maps
+                    <svg viewBox="0 0 16 16" className="size-3.5" fill="none" aria-hidden="true">
+                      <path d="M6 3h7v7M13 3L4 12" stroke="currentColor" strokeWidth="1.6"
+                            strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </a>
+                )}
+              </div>
+
+              {mapEmbedUrl && (
+                <div
+                  className="mt-4 h-[220px] w-full overflow-hidden rounded-[var(--radius-md)]
+                             border border-[var(--hairline)] sm:mt-0 sm:h-full sm:w-[320px]"
                 >
-                  Open in Google Maps
-                  <svg viewBox="0 0 16 16" className="size-3.5" fill="none" aria-hidden="true">
-                    <path d="M6 3h7v7M13 3L4 12" stroke="currentColor" strokeWidth="1.6"
-                          strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </a>
+                  <iframe
+                    src={mapEmbedUrl}
+                    title={`Map showing ${place || land.title}`}
+                    className="size-full"
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                  />
+                </div>
               )}
             </div>
           </section>
@@ -380,6 +412,32 @@ function Breadcrumbs({ land }: { land: LandDetail }) {
         </li>
       </ol>
     </nav>
+  );
+}
+
+/** Shown only when this page is opened from the admin editor's live preview. */
+function PreviewBar({ landId }: { landId: string }) {
+  return (
+    <div
+      className="sticky top-3 z-30 mb-5 flex items-center justify-between gap-3 rounded-[var(--radius-md)]
+                 border border-[var(--palmyra-gold)]/40 bg-[var(--palmyra-gold)]/12 px-4 py-3
+                 backdrop-blur-sm"
+    >
+      <p className="text-[14px] font-medium text-[var(--kani-green-deep)]">
+        Previewing this listing as it appears on the public site.
+      </p>
+      <Link
+        href={`/admin/lands/${landId}/edit`}
+        className="inline-flex shrink-0 items-center gap-1.5 rounded-[var(--radius-pill)] bg-[var(--kani-green)]
+                   px-4 py-2 text-[14px] font-medium text-white transition-colors hover:bg-[var(--kani-green-deep)]"
+      >
+        <svg viewBox="0 0 16 16" className="size-3.5" fill="none" aria-hidden="true">
+          <path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.7"
+                strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        Return to dashboard
+      </Link>
+    </div>
   );
 }
 

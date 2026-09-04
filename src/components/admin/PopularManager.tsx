@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { imageUrl } from "@/lib/image-url";
 import { Button } from "@/components/ui/Button";
+import { adminFetch } from "@/lib/admin-fetch";
 import { formatSize, formatLKR } from "@/lib/units";
 import { cn } from "@/lib/utils";
 
@@ -66,7 +67,7 @@ export function PopularManager({ initial }: { initial: PopularLand[] }) {
     setSaving(true);
     setError("");
     try {
-      const res = await fetch("/api/admin/lands/reorder-popular", {
+      const res = await adminFetch("/api/admin/lands/reorder-popular", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ landIds: items.map((i) => i._id) }),

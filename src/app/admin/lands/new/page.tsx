@@ -31,16 +31,14 @@ export default async function NewLandPage() {
 
   return (
     <div className="max-w-6xl">
-      <header className="mb-6">
-        <h1 className="text-[27px] text-[var(--heading)] md:text-[34px]">
-          New listing
-        </h1>
-        <p className="mt-1 text-[16px] text-[var(--muted)]">
-          The reference code and URL are generated automatically when you save.
-        </p>
-      </header>
-
-      <LandEditor mode="create" taxonomies={taxonomies} initial={EMPTY} images={[]} />
+      <LandEditor
+        mode="create"
+        taxonomies={taxonomies}
+        initial={EMPTY}
+        images={[]}
+        title="New listing"
+        subtitle="The reference code and URL are generated automatically when you save."
+      />
     </div>
   );
 }

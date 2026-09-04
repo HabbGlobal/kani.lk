@@ -6,11 +6,11 @@ type Size = "sm" | "md" | "lg";
 
 const VARIANTS: Record<Variant, string> = {
   primary:
-    "bg-[var(--kani-green)] text-white hover:bg-[var(--kani-green-deep)] shadow-[0_1px_2px_rgba(10,44,30,0.16)]",
+    "btn-primary bg-[var(--kani-green)] text-white hover:bg-[var(--kani-green-deep)] shadow-[0_1px_2px_rgba(10,44,30,0.16)]",
   gold: "bg-[var(--palmyra-gold)] text-[var(--kani-green-deep)] hover:bg-[#a9873f] font-600",
   outline:
-    "bg-transparent text-[var(--kani-green)] border border-[var(--kani-green)]/35 hover:bg-[var(--kani-green)]/6 hover:border-[var(--kani-green)]/60",
-  ghost: "bg-transparent text-[var(--ink)] hover:bg-black/5",
+    "bg-transparent text-[var(--heading)] border border-[var(--heading)]/35 hover:bg-[var(--heading)]/10 hover:border-[var(--heading)]/60",
+  ghost: "bg-transparent text-[var(--ink)] hover:bg-[var(--hover-tint)]",
   danger: "bg-[var(--laterite)] text-white hover:bg-[#8d3e23]",
   light:
     "bg-white/92 text-[var(--kani-green)] hover:bg-white backdrop-blur-sm border border-white/60",

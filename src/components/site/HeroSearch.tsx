@@ -17,13 +17,13 @@ export function HeroSearch({
     <form
       action="/lands"
       method="get"
-      className="rounded-[var(--radius-xl)] border border-white/25 bg-white/12 p-3
+      className="rounded-[var(--radius-lg)] border border-white/25 bg-white/12 p-2
                  shadow-[0_20px_60px_-20px_rgba(10,44,30,0.55)]
-                 backdrop-blur-xl backdrop-saturate-150 sm:p-4"
+                 backdrop-blur-xl backdrop-saturate-150 sm:p-3"
     >
-      <div className="rounded-[var(--radius-lg)] bg-[var(--bone)]/97 p-3 sm:p-4">
+      <div className="rounded-[var(--radius-md)] bg-[var(--bone)]/97 p-2.5 sm:p-3">
         {/* Purpose: real radios, styled as a segmented control. */}
-        <fieldset className="mb-3">
+        <fieldset className="mb-2.5">
           <legend className="sr-only">What are you looking for?</legend>
           <div className="flex rounded-[var(--radius-pill)] bg-black/[0.055] p-1">
             {[
@@ -33,8 +33,8 @@ export function HeroSearch({
             ].map((opt, i) => (
               <label
                 key={opt.label}
-                className="flex-1 cursor-pointer rounded-[var(--radius-pill)] px-2 py-2.5 text-center
-                           text-[15px] font-medium text-[var(--muted)]
+                className="flex-1 cursor-pointer rounded-[var(--radius-pill)] px-2 py-1.5 text-center
+                           text-[14px] font-medium text-[var(--muted)]
                            transition-all duration-200 [transition-timing-function:var(--ease-out)]
                            hover:text-[var(--ink)]
                            has-[:checked]:bg-white has-[:checked]:text-[var(--kani-green)]
@@ -55,10 +55,10 @@ export function HeroSearch({
           </div>
         </fieldset>
 
-        <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-[1.2fr_1.2fr_1fr_1fr_auto]">
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-[1.2fr_1.2fr_1fr_1fr_auto]">
           <div>
             <label htmlFor="hero-district" className="sr-only">District</label>
-            <Select id="hero-district" name="district" defaultValue="">
+            <Select id="hero-district" name="district" defaultValue="" className="h-11 text-[15px]">
               <option value="">Any district</option>
               {districts.map((d) => (
                 <option key={d._id} value={d.slug}>{d.name}</option>
@@ -68,7 +68,7 @@ export function HeroSearch({
 
           <div>
             <label htmlFor="hero-type" className="sr-only">Land type</label>
-            <Select id="hero-type" name="landType" defaultValue="">
+            <Select id="hero-type" name="landType" defaultValue="" className="h-11 text-[15px]">
               <option value="">Any land type</option>
               {landTypes.map((t) => (
                 <option key={t._id} value={t.slug}>{t.name}</option>
@@ -78,7 +78,7 @@ export function HeroSearch({
 
           <div>
             <label htmlFor="hero-min" className="sr-only">Minimum size in perches</label>
-            <Select id="hero-min" name="minPerch" defaultValue="">
+            <Select id="hero-min" name="minPerch" defaultValue="" className="h-11 text-[15px]">
               <option value="">Min size</option>
               {[5, 10, 15, 20, 40, 80, 160].map((p) => (
                 <option key={p} value={p}>{p}+ perches</option>
@@ -88,7 +88,7 @@ export function HeroSearch({
 
           <div>
             <label htmlFor="hero-max" className="sr-only">Maximum size in perches</label>
-            <Select id="hero-max" name="maxPerch" defaultValue="">
+            <Select id="hero-max" name="maxPerch" defaultValue="" className="h-11 text-[15px]">
               <option value="">Max size</option>
               {[10, 20, 40, 80, 160, 320, 800].map((p) => (
                 <option key={p} value={p}>
@@ -100,14 +100,14 @@ export function HeroSearch({
 
           <button
             type="submit"
-            className="inline-flex h-12 cursor-pointer items-center justify-center gap-2
-                       rounded-[var(--radius-pill)] bg-[var(--kani-green)] px-7 text-[16px] font-medium text-white
+            className="inline-flex h-11 cursor-pointer items-center justify-center gap-2
+                       rounded-[var(--radius-pill)] bg-[var(--kani-green)] px-6 text-[15px] font-medium text-white
                        transition-[background-color,transform] duration-200
                        [transition-timing-function:var(--ease-out)]
                        hover:bg-[var(--kani-green-deep)] active:scale-[0.97]
                        focus-visible:outline-2 focus-visible:outline-offset-2"
           >
-            <svg viewBox="0 0 20 20" className="size-4.5" fill="none" aria-hidden="true">
+            <svg viewBox="0 0 20 20" className="size-4" fill="none" aria-hidden="true">
               <circle cx="8.75" cy="8.75" r="5.75" stroke="currentColor" strokeWidth="1.8" />
               <path d="M13 13l4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
             </svg>
@@ -115,7 +115,7 @@ export function HeroSearch({
           </button>
         </div>
 
-        <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-[14px] text-[var(--muted)]">
+        <p className="mt-2.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-[var(--muted)]">
           <span>Popular:</span>
           {[
             { label: "Land in Vavuniya", href: "/districts/vavuniya" },

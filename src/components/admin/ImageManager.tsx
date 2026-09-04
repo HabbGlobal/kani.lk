@@ -5,6 +5,7 @@ import Image from "next/image";
 import { imageUrl, MAX_IMAGES_PER_LAND } from "@/lib/image-url";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
+import { adminFetchOrThrow, SessionExpiredError } from "@/lib/admin-fetch";
 
 export type LandImage = { _id: string; alt?: string };
 
@@ -40,7 +41,7 @@ export function ImageManager({
 
   async function persistOrder(nextImages: LandImage[], nextCover?: string) {
     try {
-      const res = await fetch(`/api/admin/lands/${landId}/images`, {
+      const res = await adminFetchOrThrow(`/api/admin/lands/${landId}/images`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -49,8 +50,13 @@ export function ImageManager({
         }),
       });
       if (!res.ok) throw new Error();
-    } catch {
-      setError("Could not save the new photo order — please try again.");
+      setError("");
+    } catch (err) {
+      setError(
+        err instanceof SessionExpiredError
+          ? err.message
+          : "Could not save the new photo order — please try again."
+      );
     }
   }
 
@@ -72,7 +78,7 @@ export function ImageManager({
     if (!confirm("Remove this photo?")) return;
     setError("");
     try {
-      const res = await fetch(`/api/admin/lands/${landId}/images/${id}`, { method: "DELETE" });
+      const res = await adminFetchOrThrow(`/api/admin/lands/${landId}/images/${id}`, { method: "DELETE" });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error ?? "Could not remove photo");
       const next = images.filter((i) => i._id !== id);
@@ -94,7 +100,7 @@ export function ImageManager({
     try {
       const form = new FormData();
       Array.from(files).forEach((f) => form.append("files", f));
-      const res = await fetch(`/api/admin/lands/${landId}/images`, { method: "POST", body: form });
+      const res = await adminFetchOrThrow(`/api/admin/lands/${landId}/images`, { method: "POST", body: form });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error ?? "Upload failed");
 

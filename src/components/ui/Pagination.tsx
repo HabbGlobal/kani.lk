@@ -90,7 +90,7 @@ function PageLink({
     "text-[15px] font-medium transition-colors duration-200",
     active
       ? "bg-[var(--kani-green)] text-white"
-      : "text-[var(--ink)] hover:bg-black/[0.05]"
+      : "text-[var(--ink)] hover:bg-[var(--hover-tint)]"
   );
 
   if (disabled) {

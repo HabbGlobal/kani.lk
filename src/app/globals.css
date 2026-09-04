@@ -183,22 +183,67 @@ p { text-wrap: pretty; }
   --hover-tint: rgba(255, 255, 255, 0.06);
 }
 
+/* Primary (green-fill) buttons — e.g. "New listing", "Save changes" — read as
+   text fine on dark green, but the button itself all but disappears against
+   the dark admin surfaces around it. Flip to gold there instead. */
+.admin-dark .btn-primary {
+  background: var(--palmyra-gold);
+  color: var(--kani-green-deep);
+}
+.admin-dark .btn-primary:hover {
+  background: var(--palmyra-gold-soft);
+}
+
 /* ─── Oval glass navbar ─────────────────────────────────────────────── */
 .glass-nav {
   background: color-mix(in srgb, var(--bone) 62%, transparent);
   backdrop-filter: blur(18px) saturate(180%);
   -webkit-backdrop-filter: blur(18px) saturate(180%);
   border: 1px solid color-mix(in srgb, #ffffff 55%, transparent);
-  box-shadow: var(--shadow-glass);
+  box-shadow: var(--shadow-glass),
+              0 0 0 1px color-mix(in srgb, var(--paddy) 35%, transparent),
+              0 0 28px 2px color-mix(in srgb, var(--paddy) 40%, transparent);
   transition: background var(--dur-base) var(--ease-out),
               border-color var(--dur-base) var(--ease-out),
-              box-shadow var(--dur-base) var(--ease-out);
+              box-shadow var(--dur-base) var(--ease-out),
+              transform var(--dur-base) var(--ease-out);
+}
+
+/* Slides the whole floating bar off-screen on scroll-down, back on scroll-up. */
+.glass-nav-hidden {
+  transform: translate3d(0, -140%, 0);
 }
 
 /* Over the hero photo the bar is dark glass so white text stays legible. */
 .glass-nav--over-hero {
   background: color-mix(in srgb, var(--kani-green-deep) 42%, transparent);
   border-color: color-mix(in srgb, #ffffff 26%, transparent);
+  box-shadow: var(--shadow-glass),
+              0 0 0 1.5px color-mix(in srgb, var(--paddy) 55%, transparent),
+              0 0 40px 4px color-mix(in srgb, var(--paddy) 55%, transparent);
+}
+
+/* Glow on the active nav-link pill — the "current section" indicator inside
+   the oval bar. */
+.nav-pill-glow {
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--paddy) 40%, transparent),
+              0 0 16px 1px color-mix(in srgb, var(--paddy) 65%, transparent);
+}
+.nav-pill-glow--dark {
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--palmyra-gold-soft) 45%, transparent),
+              0 0 16px 1px color-mix(in srgb, var(--palmyra-gold-soft) 60%, transparent);
+}
+
+/* The single oval that holds every nav link as one capsule (rather than one
+   pill per link), with its own soft glowing outline — the active link then
+   gets its own filled, brighter-glowing pill inside this group. */
+.nav-group {
+  border-color: color-mix(in srgb, var(--kani-green) 22%, transparent);
+  box-shadow: 0 0 12px -2px color-mix(in srgb, var(--paddy) 40%, transparent);
+}
+.nav-group--dark {
+  border-color: color-mix(in srgb, var(--palmyra-gold-soft) 28%, transparent);
+  box-shadow: 0 0 14px -2px color-mix(in srgb, var(--paddy) 55%, transparent);
 }
 
 /* Browsers without backdrop-filter get an opaque bar rather than
@@ -230,21 +275,10 @@ p { text-wrap: pretty; }
   from { transform: translate3d(0, 100%, 0); }
   to   { transform: none; }
 }
-@keyframes kani-ken-burns {
-  from { transform: scale(1.06) translate3d(0, 0, 0); }
-  to   { transform: scale(1.14) translate3d(0, -1.2%, 0); }
-}
-
 .animate-rise { animation: kani-rise var(--dur-slow) var(--ease-out) both; }
 .animate-fade { animation: kani-fade var(--dur-slow) var(--ease-out) both; }
 .animate-pop  { animation: kani-pop 320ms var(--ease-spring); }
 .animate-slide-up { animation: kani-slide-up var(--dur-base) var(--ease-out); }
-
-/* Very slow drift on the hero photograph. Barely perceptible by design —
-   it gives the landing page life without competing with the search panel. */
-.animate-ken-burns {
-  animation: kani-ken-burns 26s var(--ease-out) alternate infinite;
-}
 
 /* Scroll-reveal: elements start hidden and are released by IntersectionObserver.
    Guarded so that if JS never runs, content is still visible. */
@@ -301,7 +335,6 @@ p { text-wrap: pretty; }
   .reveal { opacity: 1; transform: none; }
   .lift:hover { transform: none; }
   .group:hover .zoom-frame img { transform: none; }
-  .animate-ken-burns { animation: none; transform: scale(1.06); }
 }
 
 /* ─── Utilities ─────────────────────────────────────────────────────── */

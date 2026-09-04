@@ -7,6 +7,7 @@ import { Card, SectionHeading } from "@/components/ui/Card";
 import { Field, Input, Textarea, Segmented, Checkbox } from "@/components/ui/Field";
 import { Button } from "@/components/ui/Button";
 import { settingsSchema, type SettingsFormValues } from "@/lib/validation";
+import { adminFetch } from "@/lib/admin-fetch";
 
 export function SettingsForm({ initial }: { initial: SettingsFormValues }) {
   const [serverError, setServerError] = useState("");
@@ -26,7 +27,7 @@ export function SettingsForm({ initial }: { initial: SettingsFormValues }) {
     setServerError("");
     setSaved(false);
     try {
-      const res = await fetch("/api/admin/settings", {
+      const res = await adminFetch("/api/admin/settings", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(values),
@@ -49,9 +50,6 @@ export function SettingsForm({ initial }: { initial: SettingsFormValues }) {
           </Field>
           <Field label="Hero subtitle" htmlFor="heroSubtitle" className="sm:col-span-2" error={errors.heroSubtitle?.message}>
             <Textarea id="heroSubtitle" {...register("heroSubtitle")} />
-          </Field>
-          <Field label="Hero image URL" htmlFor="heroImageUrl" className="sm:col-span-2" error={errors.heroImageUrl?.message}>
-            <Input id="heroImageUrl" {...register("heroImageUrl")} />
           </Field>
         </Card>
       </section>

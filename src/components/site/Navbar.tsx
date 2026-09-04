@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Logo } from "./Logo";
@@ -24,19 +24,43 @@ const LINKS = [
 export function Navbar({ overHero = false }: { overHero?: boolean }) {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
+  const [hidden, setHidden] = useState(false);
   const [open, setOpen] = useState(false);
   const { ids, ready } = useFavourites();
+  const lastY = useRef(0);
 
   useEffect(() => {
     // The hero is ~72vh; switch the treatment a little before its bottom edge.
     const threshold = overHero ? Math.round(window.innerHeight * 0.62) : 24;
-    const onScroll = () => setScrolled(window.scrollY > threshold);
+    lastY.current = window.scrollY;
+
+    const onScroll = () => {
+      const y = window.scrollY;
+      setScrolled(y > threshold);
+
+      // Ignore the top of the page entirely, and small jitters — only a real
+      // scroll of ~8px in one direction toggles the bar.
+      const delta = y - lastY.current;
+      if (y < 80) {
+        setHidden(false);
+      } else if (delta > 8) {
+        setHidden(true);
+      } else if (delta < -8) {
+        setHidden(false);
+      }
+      lastY.current = y;
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, [overHero]);
 
   useEffect(() => setOpen(false), [pathname]);
+
+  // Never hide it behind the visitor's back while the mobile menu is open.
+  useEffect(() => {
+    if (open) setHidden(false);
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -75,7 +99,8 @@ export function Navbar({ overHero = false }: { overHero?: boolean }) {
             // The oval: a fully rounded pill, floating clear of the page edge.
             "h-16 rounded-[var(--radius-pill)] glass-nav md:h-[68px]",
             dark && "glass-nav--over-hero",
-            scrolled && "md:h-[62px]"
+            scrolled && "md:h-[62px]",
+            hidden && "glass-nav-hidden"
           )}
         >
           <Link
@@ -86,8 +111,14 @@ export function Navbar({ overHero = false }: { overHero?: boolean }) {
             <Logo onDark={dark} />
           </Link>
 
-          {/* Desktop links */}
-          <ul className="ml-auto hidden items-center gap-0.5 lg:flex">
+          {/* Desktop links — one glowing oval group, not a separate pill per
+              link, echoing a single capsule holding every nav item. */}
+          <ul
+            className={cn(
+              "ml-auto hidden items-center gap-0.5 rounded-[var(--radius-pill)] border px-1.5 py-1.5 lg:flex",
+              dark ? "nav-group--dark" : "nav-group"
+            )}
+          >
             {LINKS.map((link) => {
               const active =
                 pathname === link.href || pathname.startsWith(`${link.href}/`);
@@ -97,24 +128,18 @@ export function Navbar({ overHero = false }: { overHero?: boolean }) {
                     href={link.href}
                     aria-current={active ? "page" : undefined}
                     className={cn(
-                      "relative rounded-[var(--radius-pill)] px-3.5 py-2.5 text-[15px] font-medium",
-                      "transition-colors duration-200",
-                      dark
-                        ? "text-white/85 hover:bg-white/12 hover:text-white"
-                        : "text-[var(--ink)] hover:bg-black/[0.05] hover:text-[var(--kani-green)]",
-                      active && (dark ? "bg-white/15 text-white" : "text-[var(--kani-green)]")
+                      "relative rounded-[var(--radius-pill)] px-3.5 py-2 text-[15px] font-medium",
+                      "transition-[background-color,color,box-shadow] duration-200",
+                      active
+                        ? dark
+                          ? "bg-[var(--palmyra-gold)] text-[var(--kani-green-deep)] nav-pill-glow--dark"
+                          : "bg-[var(--kani-green)] text-white nav-pill-glow"
+                        : dark
+                          ? "text-white/85 hover:bg-white/12 hover:text-white"
+                          : "text-[var(--ink)] hover:bg-[var(--kani-green)]/8 hover:text-[var(--kani-green)]"
                     )}
                   >
                     {link.label}
-                    {active && (
-                      <span
-                        aria-hidden="true"
-                        className={cn(
-                          "absolute inset-x-3.5 -bottom-0.5 h-[2px] rounded-full",
-                          dark ? "bg-[var(--palmyra-gold-soft)]" : "bg-[var(--palmyra-gold)]"
-                        )}
-                      />
-                    )}
                   </Link>
                 </li>
               );

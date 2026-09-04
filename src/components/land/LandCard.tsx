@@ -18,12 +18,20 @@ export function LandCard({
   priority = false,
   className,
   sizes = "(min-width: 1024px) 380px, (min-width: 640px) 45vw, 92vw",
+  href,
+  newTab = false,
+  showFavourite = true,
 }: {
   land: LandCardType;
   /** Set on the first couple of above-the-fold cards only. */
   priority?: boolean;
   className?: string;
   sizes?: string;
+  /** Overrides the default `/lands/[slug]` target — used by the admin preview. */
+  href?: string;
+  newTab?: boolean;
+  /** Off for the admin editor's live preview — favouriting isn't an admin action. */
+  showFavourite?: boolean;
 }) {
   const isGone = land.status === "sold" || land.status === "rented";
   const place = [land.area, land.city?.name].filter(Boolean).join(" · ");
@@ -57,9 +65,11 @@ export function LandCard({
           <PurposeBadge purpose={land.purpose} size="sm" />
         </div>
 
-        <div className="absolute right-3 top-3 z-10">
-          <FavouriteButton landId={land._id} title={land.title} />
-        </div>
+        {showFavourite && (
+          <div className="absolute right-3 top-3 z-10">
+            <FavouriteButton landId={land._id} title={land.title} />
+          </div>
+        )}
 
         {land.imageCount > 1 && (
           <span
@@ -85,7 +95,9 @@ export function LandCard({
         <div>
           <h3 className="text-[19px] leading-snug text-[var(--kani-green)]">
             <Link
-              href={`/lands/${land.slug}`}
+              href={href ?? `/lands/${land.slug}`}
+              target={newTab ? "_blank" : undefined}
+              rel={newTab ? "noopener noreferrer" : undefined}
               className="after:absolute after:inset-0 after:content-['']"
             >
               {formatSize(land.sizeValue, land.sizeUnit)}

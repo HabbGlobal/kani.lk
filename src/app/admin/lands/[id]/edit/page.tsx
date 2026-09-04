@@ -76,15 +76,6 @@ export default async function EditLandPage({ params }: Params) {
 
   return (
     <div className="max-w-6xl">
-      <header className="mb-6">
-        <h1 className="text-[27px] text-[var(--heading)] md:text-[34px]">
-          {land.title}
-        </h1>
-        <p className="tabular mt-1 text-[16px] text-[var(--muted)]">
-          {land.refCode} · {land.isPublished ? "Published" : "Draft"}
-        </p>
-      </header>
-
       <LandEditor
         mode="edit"
         taxonomies={taxonomies}
@@ -94,6 +85,8 @@ export default async function EditLandPage({ params }: Params) {
         slug={land.slug}
         images={plain(images)}
         coverImageId={land.coverImageId ? String(land.coverImageId) : undefined}
+        title={land.title}
+        subtitle={`${land.refCode} · ${land.isPublished ? "Published" : "Draft"}`}
       />
     </div>
   );

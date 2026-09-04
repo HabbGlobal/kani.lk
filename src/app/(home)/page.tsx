@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { HeroSearch } from "@/components/site/HeroSearch";
+import { HeroWelcomeText } from "@/components/site/HeroWelcomeText";
 import { LandRail } from "@/components/site/LandRail";
 import { SectionHeading } from "@/components/ui/Card";
 import { ButtonLink } from "@/components/ui/Button";
@@ -45,17 +46,17 @@ export default async function HomePage() {
   return (
     <>
       {/* ── Hero ─────────────────────────────────────────────────────── */}
-      <section className="relative isolate min-h-[92svh] overflow-hidden pb-16 pt-32 md:min-h-[86vh] md:pb-24 md:pt-40">
+      <section className="relative isolate min-h-[56svh] overflow-hidden pb-12 pt-32 md:min-h-[52vh] md:pb-16 md:pt-40">
         <div className="absolute inset-0 -z-10">
           <Image
-            src={String(settings.heroImageUrl || "/banner.jpg")}
+            src="/banner-hero.webp"
             alt="Paddy fields and palmyra palms in the Vanni at first light"
             fill
             priority
             fetchPriority="high"
             sizes="100vw"
-            quality={78}
-            className="animate-ken-burns object-cover object-center"
+            quality={90}
+            className="object-cover object-center"
           />
           {/* Scrim only where text actually sits: a band behind the navbar and
               headline, and a soft floor under the search panel. The middle of
@@ -81,13 +82,10 @@ export default async function HomePage() {
               </span>
             </p>
 
-            <h1 className="text-[34px] leading-[1.1] text-white sm:text-[44px] lg:text-[56px]">
-              {String(settings.heroTitle)}
-            </h1>
-
-            <p className="mt-4 max-w-2xl text-[17px] leading-relaxed text-white/85 md:text-[19px]">
-              {String(settings.heroSubtitle)}
-            </p>
+            <HeroWelcomeText
+              title={String(settings.heroTitle)}
+              subtitle={String(settings.heroSubtitle)}
+            />
           </div>
 
           <div

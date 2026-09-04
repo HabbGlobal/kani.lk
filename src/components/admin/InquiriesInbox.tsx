@@ -4,7 +4,11 @@ import { useMemo, useState } from "react";
 import { Card, EmptyState } from "@/components/ui/Card";
 import { Field, Input, Select } from "@/components/ui/Field";
 import { Button, ButtonAnchor } from "@/components/ui/Button";
+import { PagerBar } from "@/components/admin/PagerBar";
+import { adminFetch } from "@/lib/admin-fetch";
 import { timeAgo, formatDate, cn } from "@/lib/utils";
+
+const PAGE_SIZE = 5;
 
 type InquiryRow = {
   _id: string;
@@ -33,6 +37,7 @@ export function InquiriesInbox({
   const [to, setTo] = useState("");
   const [showHandled, setShowHandled] = useState(true);
   const [error, setError] = useState("");
+  const [page, setPage] = useState(1);
 
   const filtered = useMemo(() => {
     return rows.filter((r) => {
@@ -46,11 +51,23 @@ export function InquiriesInbox({
 
   const newCount = rows.filter((r) => !r.isHandled).length;
 
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, pageCount);
+  const paged = useMemo(
+    () => filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE),
+    [filtered, safePage]
+  );
+
+  function updateFilter<T>(setter: (v: T) => void, value: T) {
+    setter(value);
+    setPage(1);
+  }
+
   async function markHandled(row: InquiryRow, handled: boolean) {
     const prev = rows;
     setRows((cur) => cur.map((r) => (r._id === row._id ? { ...r, isHandled: handled } : r)));
     try {
-      const res = await fetch(`/api/admin/inquiries/${row._id}`, {
+      const res = await adminFetch(`/api/admin/inquiries/${row._id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ isHandled: handled }),
@@ -88,7 +105,7 @@ export function InquiriesInbox({
 
       <Card className="grid gap-3 p-4 sm:grid-cols-4">
         <Field label="Listing" htmlFor="landFilter">
-          <Select id="landFilter" value={landFilter} onChange={(e) => setLandFilter(e.target.value)}>
+          <Select id="landFilter" value={landFilter} onChange={(e) => updateFilter(setLandFilter, e.target.value)}>
             <option value="">All listings</option>
             {landOptions.map((l) => (
               <option key={l._id} value={l._id}>{l.refCode} — {l.title}</option>
@@ -96,16 +113,16 @@ export function InquiriesInbox({
           </Select>
         </Field>
         <Field label="From" htmlFor="from">
-          <Input id="from" type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+          <Input id="from" type="date" value={from} onChange={(e) => updateFilter(setFrom, e.target.value)} />
         </Field>
         <Field label="To" htmlFor="to">
-          <Input id="to" type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+          <Input id="to" type="date" value={to} onChange={(e) => updateFilter(setTo, e.target.value)} />
         </Field>
         <Field label="Status" htmlFor="showHandled">
           <Select
             id="showHandled"
             value={showHandled ? "all" : "new"}
-            onChange={(e) => setShowHandled(e.target.value === "all")}
+            onChange={(e) => updateFilter(setShowHandled, e.target.value === "all")}
           >
             <option value="all">All</option>
             <option value="new">New only</option>
@@ -119,7 +136,7 @@ export function InquiriesInbox({
         <EmptyState title="No enquiries match these filters" />
       ) : (
         <ul className="space-y-3">
-          {filtered.map((r) => (
+          {paged.map((r) => (
             <li key={r._id}>
               <Card className={cn("p-4", !r.isHandled && "border-[var(--laterite)]/40")}>
                 <div className="flex flex-wrap items-start justify-between gap-3">
@@ -160,6 +177,8 @@ export function InquiriesInbox({
           ))}
         </ul>
       )}
+
+      <PagerBar page={safePage} pageCount={pageCount} total={filtered.length} itemLabel="enquiries" onChange={setPage} />
     </div>
   );
 }

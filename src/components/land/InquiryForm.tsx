@@ -122,7 +122,7 @@ export function InquiryForm({
             type="tel"
             inputMode="tel"
             autoComplete="tel"
-            placeholder="077 123 4567"
+            placeholder="0771234567"
             aria-invalid={!!errors.phone}
             {...register("phone")}
           />

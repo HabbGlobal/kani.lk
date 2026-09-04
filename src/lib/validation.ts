@@ -6,19 +6,17 @@ import { PURPOSES, SIZE_UNITS, DEED_TYPES, LAND_STATUSES, WATER_SOURCES } from "
  * Validation can never drift between the two.
  */
 
-/** Accepts 077…, +9477…, 9477… and rejects anything that is not a real LK mobile/landline. */
+/**
+ * Exactly two accepted shapes, no spaces or extra punctuation either way:
+ *  - a plain 10-digit local number starting with 0, e.g. 0771234567
+ *  - the full international format, e.g. +94775556667
+ */
+const PHONE_PATTERN = /^(0\d{9}|\+94\d{9})$/;
 const phone = z
   .string()
   .trim()
   .min(1, "Please enter a phone number")
-  .refine((v) => {
-    const d = v.replace(/\D/g, "");
-    return (
-      (d.length === 10 && d.startsWith("0")) ||
-      (d.length === 11 && d.startsWith("94")) ||
-      d.length === 9
-    );
-  }, "Enter a valid Sri Lankan number, for example 077 123 4567");
+  .regex(PHONE_PATTERN, "Enter a 10-digit number (0771234567) or +94775556667");
 
 export const inquirySchema = z.object({
   name: z.string().trim().min(2, "Please enter your name").max(120),
@@ -51,7 +49,7 @@ export type LoginInput = z.infer<typeof loginSchema>;
 /** Optional number coming from a form field that may be an empty string. */
 const optionalNumber = z.preprocess(
   (v) => (v === "" || v == null ? undefined : Number(v)),
-  z.number().min(0).optional()
+  z.number().min(0, "This can't be negative").optional()
 );
 
 export const landSchema = z
@@ -181,7 +179,6 @@ export type PageInput = z.infer<typeof pageSchema>;
 export const settingsSchema = z.object({
   heroTitle: z.string().trim().max(200),
   heroSubtitle: z.string().trim().max(600),
-  heroImageUrl: z.string().trim().max(400),
   contactPhone: z.string().trim().max(40),
   contactPhoneAlt: z.string().trim().max(40).optional(),
   contactEmail: z.union([z.string().trim().email(), z.literal("")]),
