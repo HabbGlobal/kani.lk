@@ -26,3 +26,22 @@ export function buildLandSlug(parts: {
     .join(" ");
   return slugify(words);
 }
+
+/**
+ * Unique slug for a taxonomy row (district/city/land type). These are admin-
+ * typed names that can collide ("Jaffna town" twice), so append -2, -3… on
+ * conflict rather than failing the save.
+ */
+export async function uniqueSlug(
+  base: string,
+  exists: (candidate: string) => Promise<boolean>
+): Promise<string> {
+  const root = slugify(base) || "item";
+  let candidate = root;
+  let n = 2;
+  while (await exists(candidate)) {
+    candidate = `${root}-${n}`;
+    n += 1;
+  }
+  return candidate;
+}

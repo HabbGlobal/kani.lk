@@ -2,7 +2,9 @@ import { NextResponse, type NextRequest } from "next/server";
 import { jwtVerify } from "jose";
 
 /**
- * Guards every /admin route and every mutating admin API call.
+ * Guards every /admin route and every mutating admin API call. Named `proxy`
+ * (not `middleware`) per the Next 16 convention — the file itself keeps the
+ * same behavior.
  *
  * This runs on the edge, so it cannot import the Node-only auth module or touch
  * Mongo. It verifies the JWT signature and nothing more — the route handlers
@@ -24,7 +26,7 @@ async function isValidAccessToken(token: string | undefined): Promise<boolean> {
   }
 }
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const token = req.cookies.get("kani_at")?.value;
   const signedIn = await isValidAccessToken(token);

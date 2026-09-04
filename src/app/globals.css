@@ -98,6 +98,16 @@ html {
   scroll-behavior: smooth;
 }
 
+html, body {
+  /* Hard guard against horizontal scroll — a 360px viewport is the floor this
+     site is built for. Belt-and-braces: the real fix is never letting a
+     child grow wider than the viewport in the first place (a fixed-position
+     element still needs its own content to fit), but this catches anything
+     that slips through. */
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
 body {
   background: var(--bone);
   color: var(--ink);

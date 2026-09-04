@@ -72,11 +72,13 @@ export default async function HomePage() {
 
         <div className="container-kani on-dark">
           <div className="max-w-3xl animate-rise">
-            <p className="mb-4 inline-flex items-center gap-2 rounded-[var(--radius-pill)]
-                          border border-white/25 bg-white/12 px-4 py-1.5 text-[14px]
+            <p className="mb-4 inline-flex max-w-full items-center gap-2 rounded-[var(--radius-pill)]
+                          border border-white/25 bg-white/12 px-4 py-1.5 text-[13px] sm:text-[14px]
                           font-medium text-white backdrop-blur-sm">
-              <span className="size-1.5 rounded-full bg-[var(--palmyra-gold)]" aria-hidden="true" />
-              {totalListings} lands listed across {districts.length} districts
+              <span className="size-1.5 shrink-0 rounded-full bg-[var(--palmyra-gold)]" aria-hidden="true" />
+              <span className="truncate">
+                {totalListings} lands listed across {districts.length} districts
+              </span>
             </p>
 
             <h1 className="text-[34px] leading-[1.1] text-white sm:text-[44px] lg:text-[56px]">
@@ -299,6 +301,34 @@ export default async function HomePage() {
           </div>
         </Reveal>
       </section>
+
+      <OrganizationJsonLd phone={phone} email={String(settings.contactEmail ?? "")} />
     </>
+  );
+}
+
+/** Organization schema, once per site, on the homepage. */
+function OrganizationJsonLd({ phone, email }: { phone: string; email: string }) {
+  const site = process.env.NEXT_PUBLIC_SITE_URL ?? "https://kani.lk";
+  const data = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "@id": `${site}/#organization`,
+    name: "kani.lk",
+    url: site,
+    logo: `${site}/logo.png`,
+    slogan: "Find. Invest. Own.",
+    areaServed: [
+      "Vavuniya", "Mannar", "Jaffna", "Mullaitivu", "Trincomalee", "Batticaloa",
+    ],
+    ...(phone ? { telephone: phone } : {}),
+    ...(email ? { email } : {}),
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+    />
   );
 }

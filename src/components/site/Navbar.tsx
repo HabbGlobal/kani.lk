@@ -83,7 +83,7 @@ export function Navbar({ overHero = false }: { overHero?: boolean }) {
             aria-label="kani.lk home"
             className="ml-2 shrink-0 rounded-full md:ml-3"
           >
-            <Logo onDark={dark} className="scale-[0.86] origin-left md:scale-100" />
+            <Logo onDark={dark} />
           </Link>
 
           {/* Desktop links */}

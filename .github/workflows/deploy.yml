@@ -1,0 +1,50 @@
+name: Deploy to VPS
+
+# Only relevant if hosting on a VPS (see docs/DEPLOYMENT.md Path B). If you
+# deploy to Vercel instead, disable this workflow — Vercel's own GitHub
+# integration handles deploys and this one becomes redundant.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  typecheck-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      # A real build needs real env vars — a placeholder Mongo URI is enough
+      # to prove the build compiles; it never connects during `next build`.
+      - run: npm run build
+        env:
+          MONGODB_URI: mongodb://placeholder/placeholder
+          JWT_SECRET: placeholder-build-only-secret
+          JWT_REFRESH_SECRET: placeholder-build-only-refresh-secret
+          NEXT_PUBLIC_SITE_URL: https://kani.lk
+
+  deploy:
+    needs: typecheck-and-build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -e
+            cd ~/kani.lk
+            git fetch origin main
+            git reset --hard origin/main
+            npm ci
+            npm run build
+            pm2 restart kani

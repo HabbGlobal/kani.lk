@@ -20,13 +20,13 @@ export function Logo({
         <MarkGlyph className="mr-1.5 size-[1.15em] self-center" onDark={onDark} />
         <span
           className={cn(
-            "font-serif text-[26px] font-semibold tracking-[-0.02em]",
+            "font-serif text-[21px] font-semibold tracking-[-0.02em] sm:text-[26px]",
             onDark ? "text-white" : "text-[var(--kani-green)]"
           )}
         >
           kani
         </span>
-        <span className="font-serif text-[26px] font-semibold tracking-[-0.02em] text-[var(--palmyra-gold)]">
+        <span className="font-serif text-[21px] font-semibold tracking-[-0.02em] text-[var(--palmyra-gold)] sm:text-[26px]">
           .lk
         </span>
       </span>

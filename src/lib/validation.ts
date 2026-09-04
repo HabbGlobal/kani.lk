@@ -132,7 +132,9 @@ export const landSchema = z
     { message: "Enter a rent amount, or tick 'price on request'", path: ["rentAmount"] }
   );
 
-export type LandInput = z.infer<typeof landSchema>;
+export type LandInput = z.output<typeof landSchema>;
+/** Input side — what react-hook-form actually holds before Zod defaults apply. */
+export type LandFormValues = z.input<typeof landSchema>;
 
 export const districtSchema = z.object({
   name: z.string().trim().min(2, "Enter a district name").max(80),
@@ -174,6 +176,8 @@ export const pageSchema = z.object({
   seoDescription: z.string().trim().max(400).optional(),
 });
 
+export type PageInput = z.infer<typeof pageSchema>;
+
 export const settingsSchema = z.object({
   heroTitle: z.string().trim().max(200),
   heroSubtitle: z.string().trim().max(600),
@@ -195,6 +199,9 @@ export const settingsSchema = z.object({
   showSoldRow: z.boolean().default(true),
 });
 
+export type SettingsInput = z.output<typeof settingsSchema>;
+export type SettingsFormValues = z.input<typeof settingsSchema>;
+
 export const adminUserSchema = z.object({
   name: z.string().trim().min(2).max(120),
   email: z.string().trim().toLowerCase().email(),
@@ -204,3 +211,6 @@ export const adminUserSchema = z.object({
     .union([z.string().min(8, "Use at least 8 characters"), z.literal("")])
     .optional(),
 });
+
+export type AdminUserInput = z.output<typeof adminUserSchema>;
+export type AdminUserFormValues = z.input<typeof adminUserSchema>;

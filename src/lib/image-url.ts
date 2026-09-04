@@ -9,3 +9,7 @@
 export function imageUrl(id: string | { toString(): string } | null | undefined): string {
   return id ? `/api/images/${String(id)}` : "/placeholder-land.svg";
 }
+
+/** Mirrors lib/images.ts's MAX_IMAGES_PER_LAND — duplicated so client components
+ * needing the number never have to import the sharp-dependent module. */
+export const MAX_IMAGES_PER_LAND = 15;

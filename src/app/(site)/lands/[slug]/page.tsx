@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Gallery } from "@/components/land/Gallery";
+import { ViewTracker } from "@/components/land/ViewTracker";
 import { ContactPanel } from "@/components/land/ContactPanel";
 import { LandGrid } from "@/components/site/LandRail";
 import { StatusPill, Chip } from "@/components/ui/Badge";
@@ -287,6 +288,7 @@ export default async function LandDetailPage({ params }: Params) {
       )}
 
       <JsonLd land={land} images={images} />
+      <ViewTracker landId={land._id} />
     </article>
   );
 }
