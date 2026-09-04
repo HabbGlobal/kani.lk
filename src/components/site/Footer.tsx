@@ -24,7 +24,7 @@ export async function Footer() {
   }[];
 
   return (
-    <footer className="relative mt-24 overflow-hidden bg-[var(--kani-green-deep)] text-white/70 on-dark">
+    <footer className="relative mt-16 overflow-hidden bg-[var(--kani-green-deep)] text-white/70 on-dark">
       <AsciiWave color="#d8bd82" speed={0.6} opacity={0.22} />
       {/* Fades the wave out from the top so the page edge stays clean. */}
       <div
@@ -35,11 +35,11 @@ export async function Footer() {
 
       <div className="relative">
         {/* Masthead — the wordmark and the one line that says what this is. */}
-        <div className="container-kani flex flex-col gap-6 border-b border-white/10 py-12
+        <div className="container-kani flex flex-col gap-4 border-b border-white/10 py-8
                         md:flex-row md:items-end md:justify-between">
           <div>
             <Logo onDark withTagline />
-            <p className="mt-5 max-w-md text-[16px] leading-relaxed text-white/75">
+            <p className="mt-3 max-w-md text-[15px] leading-relaxed text-white/75">
               Land and property across the Northern and Eastern provinces of
               Sri Lanka. Every listing carries the owner&rsquo;s own number.
             </p>
@@ -65,7 +65,7 @@ export async function Footer() {
           )}
         </div>
 
-        <div className="container-kani grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="container-kani grid gap-8 py-9 sm:grid-cols-2 lg:grid-cols-4">
           <FooterColumn id="foot-browse" title="Browse">
             <FooterLink href="/lands">All listings</FooterLink>
             <FooterLink href="/for-sale">Land for sale</FooterLink>
@@ -98,7 +98,7 @@ export async function Footer() {
             >
               Talk to us
             </h2>
-            <div className="mt-4 space-y-3 text-[15px]">
+            <div className="mt-3 space-y-2 text-[15px]">
               {phone && (
                 <a
                   href={`tel:${toE164(phone)}`}
@@ -127,7 +127,7 @@ export async function Footer() {
         </div>
 
         <div className="border-t border-white/10">
-          <div className="container-kani flex flex-col gap-2 py-6 text-[14px] text-white/50
+          <div className="container-kani flex flex-col gap-2 py-4 text-[13px] text-white/50
                           md:flex-row md:items-center md:justify-between">
             <p>© {new Date().getFullYear()} kani.lk. All rights reserved.</p>
             <p>Verify every deed and survey plan with a lawyer before you pay.</p>
@@ -155,7 +155,7 @@ function FooterColumn({
       >
         {title}
       </h2>
-      <ul className="mt-4 space-y-2.5 text-[15px]">
+      <ul className="mt-3 space-y-2 text-[15px]">
         {Array.isArray(children)
           ? children.map((child, i) => <li key={i}>{child}</li>)
           : <li>{children}</li>}

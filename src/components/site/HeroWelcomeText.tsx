@@ -1,6 +1,3 @@
-"use client";
-
-import { useEffect, useRef, useState } from "react";
 import { Lobster_Two, Comfortaa } from "next/font/google";
 import { ScrollReveal } from "./ScrollReveal";
 
@@ -22,14 +19,9 @@ const comfortaa = Comfortaa({
 });
 
 /**
- * The hero's welcome line, typed on. A short Comfortaa eyebrow ("Welcome to
- * kani.lk") types first, then the admin-editable headline types in Lobster
- * Two underneath — one pairing, two roles: geometric sans for the greeting,
- * script serif for the promise.
- *
- * Typing is done by hand with a timer rather than a library, since nothing
- * in this repo pulls in the `lightswind` package. Respects reduced motion
- * by skipping straight to the full text.
+ * The hero's welcome line. A short Comfortaa eyebrow ("Welcome to kani.lk")
+ * sits above the admin-editable headline, set in Lobster Two — one pairing,
+ * two roles: geometric sans for the greeting, script serif for the promise.
  */
 export function HeroWelcomeText({
   title,
@@ -38,55 +30,6 @@ export function HeroWelcomeText({
   title: string;
   subtitle?: string;
 }) {
-  const eyebrow = "Welcome to kani.lk";
-  const [eyebrowText, setEyebrowText] = useState("");
-  const [titleText, setTitleText] = useState("");
-  const [eyebrowDone, setEyebrowDone] = useState(false);
-  const [titleDone, setTitleDone] = useState(false);
-  const reduced = useRef(false);
-
-  useEffect(() => {
-    reduced.current =
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    if (reduced.current) {
-      setEyebrowText(eyebrow);
-      setTitleText(title);
-      setEyebrowDone(true);
-      setTitleDone(true);
-      return;
-    }
-
-    let i = 0;
-    const eyebrowTimer = window.setInterval(() => {
-      i += 1;
-      setEyebrowText(eyebrow.slice(0, i));
-      if (i >= eyebrow.length) {
-        window.clearInterval(eyebrowTimer);
-        setEyebrowDone(true);
-      }
-    }, 55);
-
-    return () => window.clearInterval(eyebrowTimer);
-    // Eyebrow text is fixed; only run once on mount.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    if (!eyebrowDone || reduced.current) return;
-    let i = 0;
-    const titleTimer = window.setInterval(() => {
-      i += 1;
-      setTitleText(title.slice(0, i));
-      if (i >= title.length) {
-        window.clearInterval(titleTimer);
-        setTitleDone(true);
-      }
-    }, 40);
-    return () => window.clearInterval(titleTimer);
-  }, [eyebrowDone, title]);
-
   return (
     <div className={`${lobsterTwo.variable} ${comfortaa.variable}`}>
       <p
@@ -96,23 +39,19 @@ export function HeroWelcomeText({
           textShadow: "0 1px 3px rgba(10, 44, 30, 0.65), 0 1px 12px rgba(10, 44, 30, 0.35)",
         }}
       >
-        {eyebrowText}
-        {!eyebrowDone && <span className="animate-pulse">|</span>}
+        Welcome to kani.lk
       </p>
 
       <h1
         className="mt-1 text-[38px] leading-[1.15] text-white sm:text-[50px] lg:text-[64px]"
         style={{ fontFamily: "var(--font-lobster-two), var(--font-serif)" }}
       >
-        {titleText}
-        {eyebrowDone && titleText.length < title.length && (
-          <span className="animate-pulse">|</span>
-        )}
+        {title}
       </h1>
 
       {subtitle && (
         <ScrollReveal
-          startWhen={titleDone}
+          startWhen
           staggerMs={22}
           baseRotation={3}
           className="mt-4 max-w-2xl text-[16px] leading-relaxed text-white/85 md:text-[18px]"

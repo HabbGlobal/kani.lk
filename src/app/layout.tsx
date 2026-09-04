@@ -39,8 +39,8 @@ export const metadata: Metadata = {
     "Browse land, paddy fields, coconut estates and houses for sale or rent across Vavuniya, Mannar, Jaffna, Batticaloa, Trincomalee and Mullaitivu. Contact owners directly.",
   applicationName: "kani.lk",
   icons: {
-    icon: [{ url: "/logo.png", type: "image/png", sizes: "512x512" }],
-    shortcut: "/logo.png",
+    icon: [{ url: "/favicon.png", type: "image/png" }],
+    shortcut: "/favicon.png",
     apple: "/logo.png",
   },
   openGraph: {

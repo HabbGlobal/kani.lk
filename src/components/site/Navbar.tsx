@@ -74,7 +74,11 @@ export function Navbar({ overHero = false }: { overHero?: boolean }) {
     };
   }, [open]);
 
-  const dark = overHero && !scrolled;
+  // The bar is solid black in every state now, so its text/icon colors stay
+  // on the light (on-dark) branch throughout — only the glow/border variant
+  // still shifts with scroll position.
+  const dark = true;
+  const overHeroGlow = overHero && !scrolled;
 
   return (
     <>
@@ -97,9 +101,9 @@ export function Navbar({ overHero = false }: { overHero?: boolean }) {
           className={cn(
             "container-kani flex items-center gap-3 !px-2 md:!px-3",
             // The oval: a fully rounded pill, floating clear of the page edge.
-            "h-16 rounded-[var(--radius-pill)] glass-nav md:h-[68px]",
-            dark && "glass-nav--over-hero",
-            scrolled && "md:h-[62px]",
+            "h-[68px] rounded-[var(--radius-pill)] glass-nav md:h-[76px]",
+            overHeroGlow && "glass-nav--over-hero",
+            scrolled && "md:h-[70px]",
             hidden && "glass-nav-hidden"
           )}
         >

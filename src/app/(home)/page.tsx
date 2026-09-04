@@ -1,7 +1,7 @@
-import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { HeroSearch } from "@/components/site/HeroSearch";
+import { HeroSlideshow } from "@/components/site/HeroSlideshow";
 import { HeroWelcomeText } from "@/components/site/HeroWelcomeText";
 import { LandRail } from "@/components/site/LandRail";
 import { SectionHeading } from "@/components/ui/Card";
@@ -47,29 +47,18 @@ export default async function HomePage() {
     <>
       {/* ── Hero ─────────────────────────────────────────────────────── */}
       <section className="relative isolate min-h-[56svh] overflow-hidden pb-12 pt-32 md:min-h-[52vh] md:pb-16 md:pt-40">
-        <div className="absolute inset-0 -z-10">
-          <Image
-            src="/banner-hero.webp"
-            alt="Paddy fields and palmyra palms in the Vanni at first light"
-            fill
-            priority
-            fetchPriority="high"
-            sizes="100vw"
-            quality={90}
-            className="object-cover object-center"
-          />
-          {/* Scrim only where text actually sits: a band behind the navbar and
-              headline, and a soft floor under the search panel. The middle of
-              the photograph is left alone so it still reads as a photograph. */}
-          <div
-            aria-hidden="true"
-            className="absolute inset-0 bg-gradient-to-b from-[var(--kani-green-deep)]/60 via-[var(--kani-green-deep)]/12 via-45% to-[var(--kani-green-deep)]/45"
-          />
-          <div
-            aria-hidden="true"
-            className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[var(--bone)] to-transparent"
-          />
-        </div>
+        <HeroSlideshow />
+        {/* Scrim only where text actually sits: a band behind the navbar and
+            headline, and a soft floor under the search panel. The middle of
+            the photograph is left alone so it still reads as a photograph. */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 -z-10 bg-gradient-to-b from-[var(--kani-green-deep)]/60 via-[var(--kani-green-deep)]/12 via-45% to-[var(--kani-green-deep)]/45"
+        />
+        <div
+          aria-hidden="true"
+          className="absolute inset-x-0 bottom-0 -z-10 h-24 bg-gradient-to-t from-[var(--bone)] to-transparent"
+        />
 
         <div className="container-kani on-dark">
           <div className="max-w-3xl animate-rise">
