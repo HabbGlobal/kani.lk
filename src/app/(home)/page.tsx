@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { HeroSearch } from "@/components/site/HeroSearch";
 import { HeroSlideshow } from "@/components/site/HeroSlideshow";
+import { HeroStats } from "@/components/site/HeroStats";
 import { HeroWelcomeText } from "@/components/site/HeroWelcomeText";
 import { LandRail } from "@/components/site/LandRail";
 import { ListLandCta } from "@/components/site/ListLandCta";
@@ -45,41 +46,81 @@ export default async function HomePage() {
 
   return (
     <>
-      {/* ── Hero ─────────────────────────────────────────────────────── */}
-      <section className="relative isolate min-h-[56svh] overflow-hidden pb-12 pt-32 md:min-h-[52vh] md:pb-16 md:pt-40">
-        <HeroSlideshow />
-        {/* Scrim only where text actually sits: a band behind the navbar and
-            headline, and a soft floor under the search panel. The middle of
-            the photograph is left alone so it still reads as a photograph. */}
+      {/* ── Hero ─────────────────────────────────────────────────────────
+          Three layers: this outer wrapper stays overflow-visible so the
+          search panel below can overlap the media layer's bottom edge;
+          the media layer (slideshow + scrims) is the only thing clipped;
+          the search panel sits after it, pulled up with a negative margin
+          so it's never inside the clipped layer. ────────────────────── */}
+      <section className="kani-hero-shell relative isolate">
         <div
-          aria-hidden="true"
-          className="absolute inset-0 -z-10 bg-gradient-to-b from-[var(--kani-green-deep)]/60 via-[var(--kani-green-deep)]/12 via-45% to-[var(--kani-green-deep)]/45"
-        />
-        <div
-          aria-hidden="true"
-          className="absolute inset-x-0 bottom-0 -z-10 h-24 bg-gradient-to-t from-[var(--bone)] to-transparent"
-        />
+          className="kani-hero-media relative isolate overflow-hidden rounded-b-[28px]
+                     [height:clamp(620px,78svh,760px)]
+                     md:[height:clamp(560px,66vh,660px)]"
+        >
+          <HeroSlideshow />
+          {/* Directional scrim: solid enough for text on the left, easing off
+              so the land itself stays visible on the right. Pointer-events
+              none throughout — purely decorative, never blocks the slider
+              or any control drawn above it. */}
+          <div
+            aria-hidden="true"
+            className="kani-hero-overlay pointer-events-none absolute inset-0 -z-10"
+            style={{
+              background:
+                "linear-gradient(90deg, rgba(4,12,9,0.62) 0%, rgba(4,12,9,0.42) 38%, rgba(4,12,9,0.14) 68%, rgba(4,12,9,0.04) 100%)",
+            }}
+          />
+          {/* Band behind the floating navbar — the media layer now starts at
+              the very top of the section (matches the original hero), so
+              this keeps the wordmark/links readable over a bright slide. */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-40
+                       bg-gradient-to-b from-[var(--kani-green-deep)]/55 to-transparent"
+          />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-28
+                       bg-gradient-to-t from-[var(--kani-green-deep)]/55 to-transparent"
+          />
 
-        <div className="container-kani on-dark">
-          <div className="max-w-3xl animate-rise">
-            <p className="mb-4 inline-flex max-w-full items-center gap-2 rounded-[var(--radius-pill)]
-                          border border-white/25 bg-white/12 px-4 py-1.5 text-[13px] sm:text-[14px]
-                          font-medium text-white backdrop-blur-sm">
+          <div className="kani-hero-content container-kani on-dark flex h-full flex-col justify-center pt-28 pb-16 md:pt-32 md:pb-20">
+            <div className="max-w-[620px] animate-rise">
+              <HeroWelcomeText
+                title={String(settings.heroTitle)}
+                subtitle={String(settings.heroSubtitle)}
+              />
+
+              <HeroStats
+                listings={totalListings}
+                districts={districts.length}
+                categories={taxonomies.landTypes.length}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Search panel: normal document flow on mobile (overlap causes
+            cramped stacking below ~640px), pulled up to overlap the media
+            layer's bottom edge from sm upward. */}
+        <div className="container-kani relative z-10 -mt-6 pb-10 sm:-mt-16 md:pb-4">
+          <p className="mb-3 flex justify-center animate-rise">
+            <span
+              className="inline-flex max-w-full items-center gap-2 rounded-[var(--radius-pill)]
+                         border border-[var(--palmyra-gold)]/40 bg-[var(--kani-green-deep)] px-4 py-1.5
+                         text-[13px] font-medium text-white shadow-[0_6px_18px_-6px_rgba(10,44,30,0.45)]
+                         sm:text-[14px]"
+            >
               <span className="size-1.5 shrink-0 rounded-full bg-[var(--palmyra-gold)]" aria-hidden="true" />
               <span className="truncate">
                 {totalListings} lands listed across {districts.length} districts
               </span>
-            </p>
-
-            <HeroWelcomeText
-              title={String(settings.heroTitle)}
-              subtitle={String(settings.heroSubtitle)}
-            />
-          </div>
-
+            </span>
+          </p>
           <div
-            className="mt-8 animate-rise md:mt-10"
-            style={{ animationDelay: "120ms" }}
+            className="mt-8 animate-rise sm:mt-0"
+            style={{ animationDelay: "160ms" }}
           >
             <HeroSearch
               districts={taxonomies.districts}
@@ -209,7 +250,7 @@ export default async function HomePage() {
       )}
 
       {/* ── How it works ─────────────────────────────────────────────── */}
-      <section className="container-kani pt-16 md:pt-20">
+      <section id="how-it-works" className="container-kani scroll-mt-24 pt-16 md:pt-20">
         <Reveal>
           <SectionHeading
             title="How kani.lk works"

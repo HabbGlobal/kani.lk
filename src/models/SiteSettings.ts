@@ -10,7 +10,7 @@ const SiteSettingsSchema = new Schema(
     heroSubtitle: {
       type: String,
       default:
-        "Verified blocks, paddy fields and homes across Vavuniya, Mannar, Jaffna, Batticaloa, Trincomalee and Mullaitivu — with the owner's number on every listing.",
+        "Explore paddy fields, residential plots and properties across Sri Lanka's Northern and Eastern provinces, with direct contact details on every listing.",
     },
     // contact
     contactPhone: { type: String, default: "+94 77 000 0000" },

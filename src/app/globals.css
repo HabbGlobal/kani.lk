@@ -196,7 +196,7 @@ p { text-wrap: pretty; }
 
 /* ─── Oval glass navbar ─────────────────────────────────────────────── */
 .glass-nav {
-  background: color-mix(in srgb, #060606 94%, transparent);
+  background: color-mix(in srgb, #060606 84%, transparent);
   backdrop-filter: blur(18px) saturate(180%);
   -webkit-backdrop-filter: blur(18px) saturate(180%);
   border: 1px solid color-mix(in srgb, var(--palmyra-gold-soft) 30%, transparent);
@@ -217,7 +217,7 @@ p { text-wrap: pretty; }
 /* Over the hero photo the bar stays the same black — one consistent navbar
    color everywhere, rather than swapping tint by what's behind it. */
 .glass-nav--over-hero {
-  background: color-mix(in srgb, #060606 96%, transparent);
+  background: color-mix(in srgb, #060606 86%, transparent);
   border-color: color-mix(in srgb, var(--palmyra-gold-soft) 38%, transparent);
   box-shadow: var(--shadow-glass),
               0 0 0 1.5px color-mix(in srgb, var(--palmyra-gold) 28%, transparent),
@@ -280,6 +280,70 @@ p { text-wrap: pretty; }
 .animate-fade { animation: kani-fade var(--dur-slow) var(--ease-out) both; }
 .animate-pop  { animation: kani-pop 320ms var(--ease-spring); }
 .animate-slide-up { animation: kani-slide-up var(--dur-base) var(--ease-out); }
+
+/* Hero heading: each word masked in its own overflow-hidden box, sliding up
+   from below on load — the CSS equivalent of a per-word Framer Motion
+   reveal, without the animation-library dependency. 600ms/ease-out is the
+   standard duration for this kind of entrance mask — matches the reference
+   component's own timing. */
+@keyframes kani-word-reveal {
+  from { transform: translate3d(0, 110%, 0); }
+  to   { transform: none; }
+}
+.kani-word-reveal {
+  animation: kani-word-reveal 600ms var(--ease-out) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .kani-word-reveal { animation: none; }
+}
+
+/* Hero search panel: a slow gold arc that orbits the panel's edge, plus a
+   soft ambient glow behind it — the "border beam" look, done with a single
+   rotating conic-gradient layer instead of a JS/canvas effect or a third
+   library. The glow wrapper supplies the ring's 1.5px inset via padding;
+   the beam sits behind the form (paint order) and never intercepts input. */
+@keyframes kani-beam-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes kani-glow-pulse {
+  0%, 100% { opacity: 0.75; }
+  50%      { opacity: 1; }
+}
+.kani-hero-search-glow {
+  isolation: isolate;
+  box-shadow: 0 0 90px -8px color-mix(in srgb, var(--palmyra-gold) 75%, transparent),
+              0 0 34px -4px color-mix(in srgb, var(--palmyra-gold-soft) 65%, transparent);
+  animation: kani-glow-pulse 3.2s ease-in-out infinite;
+}
+.kani-hero-search-beam {
+  z-index: -1;
+  overflow: hidden;
+}
+.kani-hero-search-beam::before {
+  content: "";
+  position: absolute;
+  inset: -85%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 220deg,
+    var(--palmyra-gold-soft) 285deg,
+    var(--palmyra-gold) 320deg,
+    var(--palmyra-gold) 340deg,
+    var(--palmyra-gold-soft) 358deg,
+    transparent 360deg
+  );
+  animation: kani-beam-spin 3s linear infinite;
+}
+/* Hovering the panel pauses the orbiting beam — a deliberate "settle" cue
+   rather than a distraction while someone's actually using the fields. */
+.kani-hero-search-glow:hover .kani-hero-search-beam::before {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .kani-hero-search-beam::before { animation: none; }
+  .kani-hero-search-glow { animation: none; opacity: 1; }
+}
 
 /* Scroll-reveal: elements start hidden and are released by IntersectionObserver.
    Guarded so that if JS never runs, content is still visible. */

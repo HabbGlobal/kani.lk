@@ -39,14 +39,37 @@ export function HeroWelcomeText({
           textShadow: "0 1px 3px rgba(10, 44, 30, 0.65), 0 1px 12px rgba(10, 44, 30, 0.35)",
         }}
       >
-        Welcome to kani.lk
+        Welcome to{" "}
+        <span style={{ color: "var(--palmyra-gold-soft)" }}>kani</span>
+        <span style={{ color: "var(--paddy)" }}>.lk</span>
       </p>
 
       <h1
         className="mt-1 text-[38px] leading-[1.15] text-white sm:text-[50px] lg:text-[64px]"
         style={{ fontFamily: "var(--font-lobster-two), var(--font-serif)" }}
       >
-        {title}
+        {/* Per-word reveal: each word is masked in its own overflow-hidden
+            box and the inner span slides up from below on load — pure CSS
+            (kani-word-reveal, globals.css), so this stays a Server Component
+            with no client JS or animation library. */}
+        {title.split(" ").map((word, i, words) => {
+          const bare = word.replace(/[^a-z]/gi, "").toLowerCase();
+          const isAccent = ["trust", "north", "east"].includes(bare);
+          return (
+          <span key={i} className="inline-block overflow-hidden align-top">
+            <span
+              className="kani-word-reveal inline-block whitespace-pre"
+              style={{
+                animationDelay: `${i * 70}ms`,
+                color: isAccent ? "var(--palmyra-gold-soft)" : undefined,
+              }}
+            >
+              {word}
+              {i < words.length - 1 ? " " : ""}
+            </span>
+          </span>
+          );
+        })}
       </h1>
 
       {subtitle && (
