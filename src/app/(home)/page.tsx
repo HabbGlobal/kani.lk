@@ -4,10 +4,10 @@ import { HeroSearch } from "@/components/site/HeroSearch";
 import { HeroSlideshow } from "@/components/site/HeroSlideshow";
 import { HeroWelcomeText } from "@/components/site/HeroWelcomeText";
 import { LandRail } from "@/components/site/LandRail";
+import { ListLandCta } from "@/components/site/ListLandCta";
 import { SectionHeading } from "@/components/ui/Card";
 import { ButtonLink } from "@/components/ui/Button";
 import { Reveal } from "@/components/ui/Reveal";
-import { Logo } from "@/components/site/Logo";
 import {
   getPopularLands,
   getFeaturedLands,
@@ -17,7 +17,6 @@ import {
   getTaxonomies,
   getSettings,
 } from "@/lib/queries";
-import { formatPhoneLocal, toE164 } from "@/lib/utils";
 
 export const revalidate = 300;
 
@@ -42,6 +41,7 @@ export default async function HomePage() {
 
   const totalListings = districts.reduce((sum, d) => sum + d.count, 0);
   const phone = String(settings.contactPhone ?? "");
+  const whatsapp = String(settings.contactWhatsapp ?? "");
 
   return (
     <>
@@ -251,43 +251,10 @@ export default async function HomePage() {
         </ol>
       </section>
 
-      {/* ── Contact strip ────────────────────────────────────────────── */}
-      <section className="container-kani pt-16 md:pt-20">
-        <Reveal>
-          <div className="overflow-hidden rounded-[var(--radius-xl)] bg-[var(--kani-green-deep)] px-6 py-12 text-center on-dark md:px-12 md:py-16">
-            <Logo onDark className="mb-5 justify-center" />
-            <h2 className="mx-auto max-w-2xl text-[27px] text-white md:text-[34px]">
-              Have land to sell or rent out?
-            </h2>
-            <p className="mx-auto mt-3 max-w-xl text-[16px] leading-relaxed text-white/75 md:text-[17px]">
-              Send us the details and photographs and we will put it in front of
-              buyers across the North and East. Listing on kani.lk is simple and
-              we will talk you through it.
-            </p>
-            <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
-              {phone && (
-                <a
-                  href={`tel:${toE164(phone)}`}
-                  className="tabular inline-flex h-14 items-center justify-center gap-2.5 rounded-[var(--radius-pill)]
-                             bg-[var(--palmyra-gold)] px-8 text-[17px] font-semibold text-[var(--kani-green-deep)]
-                             transition-[background-color,transform] duration-200
-                             [transition-timing-function:var(--ease-out)]
-                             hover:bg-[#cfae63] active:scale-[0.97]"
-                >
-                  <svg viewBox="0 0 20 20" className="size-5" fill="none" aria-hidden="true">
-                    <path d="M4.2 3h3l1.4 3.6L6.9 8.2a10 10 0 0 0 4.9 4.9l1.6-1.7L17 12.8v3a1.2 1.2 0 0 1-1.3 1.2A13.5 13.5 0 0 1 3 4.3 1.2 1.2 0 0 1 4.2 3Z"
-                          stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
-                  </svg>
-                  {formatPhoneLocal(phone)}
-                </a>
-              )}
-              <ButtonLink href="/contact" variant="light" size="lg">
-                Send us a message
-              </ButtonLink>
-            </div>
-          </div>
-        </Reveal>
-      </section>
+      {/* ── List-your-land CTA ───────────────────────────────────────── */}
+      <Reveal as="div">
+        <ListLandCta whatsappNumber={whatsapp || phone} />
+      </Reveal>
 
       <OrganizationJsonLd phone={phone} email={String(settings.contactEmail ?? "")} />
     </>
