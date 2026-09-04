@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="No photo yet">
+  <rect width="400" height="300" fill="#EDEBE4"/>
+  <path d="M0 210 C90 180 170 172 400 168 L400 300 L0 300 Z" fill="#DCDAD0"/>
+  <path d="M0 240 C110 215 210 208 400 205 L400 300 L0 300 Z" fill="#CFCCC0"/>
+  <circle cx="322" cy="76" r="26" fill="#DCDAD0"/>
+  <text x="200" y="160" text-anchor="middle" font-family="Georgia, serif"
+        font-size="19" fill="#5F6B63">kani<tspan fill="#BE9B4E">.lk</tspan></text>
+</svg>

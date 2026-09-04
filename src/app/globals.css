@@ -1,0 +1,387 @@
+@import "tailwindcss";
+
+/* ═══════════════════════════════════════════════════════════════════════
+   kani.lk design tokens
+   Palette taken from the logo: deep forest green + palmyra gold, grounded
+   in Vanni landscape colour (red laterite earth, paddy green, bone).
+   ═══════════════════════════════════════════════════════════════════════ */
+:root {
+  /* brand */
+  --kani-green: #12452f;
+  --kani-green-deep: #0a2c1e;
+  --kani-green-soft: #1c5c40;
+  --palmyra-gold: #be9b4e;
+  --palmyra-gold-soft: #d8bd82;
+  --paddy: #4e9a51;
+  --laterite: #a44a2a;
+
+  /* surface + text */
+  --bone: #f6f5f1;
+  --card: #ffffff;
+  --ink: #16201b;
+  --muted: #5f6b63;
+  --hairline: #dcdad0;
+
+  /* semantic */
+  --background: var(--bone);
+  --foreground: var(--ink);
+  --ring: var(--kani-green);
+  /* Heading/link accent — same as the brand green everywhere except admin
+     dark mode, where --kani-green itself stays too dark to read against a
+     dark surface and .admin-dark brightens this alone. */
+  --heading: var(--kani-green);
+  /* "Reserved" status chip text — dark brown on light mode's gold tint. */
+  --reserved-text: #7a6127;
+  /* Neutral hover wash for rows/icon buttons over --card or --bone. */
+  --hover-tint: rgba(0, 0, 0, 0.04);
+
+  /* spacing scale (density 4 — standard) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-24: 6rem;
+
+  /* radii — generous, to echo the oval navbar */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.875rem;
+  --radius-lg: 1.25rem;
+  --radius-xl: 1.75rem;
+  --radius-pill: 999px;
+
+  /* elevation — restrained; shadows are for lift, not decoration */
+  --shadow-sm: 0 1px 2px rgba(10, 44, 30, 0.06);
+  --shadow-md: 0 4px 16px -4px rgba(10, 44, 30, 0.1);
+  --shadow-lg: 0 16px 40px -12px rgba(10, 44, 30, 0.18);
+  --shadow-glass: 0 8px 32px -8px rgba(10, 44, 30, 0.22);
+
+  /* motion */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-fast: 150ms;
+  --dur-base: 250ms;
+  --dur-slow: 420ms;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-kani-green: var(--kani-green);
+  --color-kani-green-deep: var(--kani-green-deep);
+  --color-kani-green-soft: var(--kani-green-soft);
+  --color-palmyra: var(--palmyra-gold);
+  --color-palmyra-soft: var(--palmyra-gold-soft);
+  --color-paddy: var(--paddy);
+  --color-laterite: var(--laterite);
+  --color-bone: var(--bone);
+  --color-card: var(--card);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-hairline: var(--hairline);
+
+  --font-serif: var(--font-newsreader), Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-public-sans), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-tamil: var(--font-noto-tamil), var(--font-public-sans), sans-serif;
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+
+  --shadow-glass: var(--shadow-glass);
+}
+
+/* ─── Base ──────────────────────────────────────────────────────────── */
+* {
+  border-color: var(--hairline);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+html, body {
+  /* Hard guard against horizontal scroll — a 360px viewport is the floor this
+     site is built for. Belt-and-braces: the real fix is never letting a
+     child grow wider than the viewport in the first place (a fixed-position
+     element still needs its own content to fit), but this catches anything
+     that slips through. */
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  background: var(--bone);
+  color: var(--ink);
+  font-family: var(--font-public-sans), system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* Body 17px on mobile — this audience skews older than a typical SaaS
+     audience, and 14px grey-on-white is unreadable in sunlight. */
+  font-size: 17px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4, .font-serif {
+  font-family: var(--font-newsreader), Georgia, serif;
+  font-weight: 550;
+  letter-spacing: -0.015em;
+  line-height: 1.18;
+  text-wrap: balance;
+}
+
+p { text-wrap: pretty; }
+
+/* Prices line up in columns. */
+.tabular {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+.font-tamil { font-family: var(--font-noto-tamil), sans-serif; }
+
+/* ─── Focus: always visible, never removed ──────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--kani-green);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+.on-dark :focus-visible,
+.focus-light:focus-visible {
+  outline-color: var(--palmyra-gold-soft);
+}
+
+::selection {
+  background: var(--palmyra-gold);
+  color: var(--kani-green-deep);
+}
+
+/* ─── Admin dark mode ───────────────────────────────────────────────── *
+ * Scoped to the admin dashboard only — the public site keeps its fixed
+ * light palette. Toggled by adding/removing this class on <html>, applied
+ * before paint (inline script in the admin layout) to avoid a flash. */
+.admin-dark {
+  --bone: #10241a;
+  --card: #16301f;
+  --ink: #eef2ed;
+  --muted: #9db2a5;
+  --hairline: #3a5b47;
+  --background: var(--bone);
+  --foreground: var(--ink);
+  /* --kani-green (#12452f) stays this dark for solid button/badge fills —
+     white text on it still has strong contrast either way. Headings and
+     links, though, use it as a text colour on a now-dark surface, so give
+     them a lighter accent instead. */
+  --heading: var(--palmyra-gold-soft);
+  --reserved-text: var(--palmyra-gold-soft);
+  --hover-tint: rgba(255, 255, 255, 0.06);
+}
+
+/* Primary (green-fill) buttons — e.g. "New listing", "Save changes" — read as
+   text fine on dark green, but the button itself all but disappears against
+   the dark admin surfaces around it. Flip to gold there instead. */
+.admin-dark .btn-primary {
+  background: var(--palmyra-gold);
+  color: var(--kani-green-deep);
+}
+.admin-dark .btn-primary:hover {
+  background: var(--palmyra-gold-soft);
+}
+
+/* ─── Oval glass navbar ─────────────────────────────────────────────── */
+.glass-nav {
+  background: color-mix(in srgb, var(--bone) 62%, transparent);
+  backdrop-filter: blur(18px) saturate(180%);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  border: 1px solid color-mix(in srgb, #ffffff 55%, transparent);
+  box-shadow: var(--shadow-glass),
+              0 0 0 1px color-mix(in srgb, var(--paddy) 35%, transparent),
+              0 0 28px 2px color-mix(in srgb, var(--paddy) 40%, transparent);
+  transition: background var(--dur-base) var(--ease-out),
+              border-color var(--dur-base) var(--ease-out),
+              box-shadow var(--dur-base) var(--ease-out),
+              transform var(--dur-base) var(--ease-out);
+}
+
+/* Slides the whole floating bar off-screen on scroll-down, back on scroll-up. */
+.glass-nav-hidden {
+  transform: translate3d(0, -140%, 0);
+}
+
+/* Over the hero photo the bar is dark glass so white text stays legible. */
+.glass-nav--over-hero {
+  background: color-mix(in srgb, var(--kani-green-deep) 42%, transparent);
+  border-color: color-mix(in srgb, #ffffff 26%, transparent);
+  box-shadow: var(--shadow-glass),
+              0 0 0 1.5px color-mix(in srgb, var(--paddy) 55%, transparent),
+              0 0 40px 4px color-mix(in srgb, var(--paddy) 55%, transparent);
+}
+
+/* Glow on the active nav-link pill — the "current section" indicator inside
+   the oval bar. */
+.nav-pill-glow {
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--paddy) 40%, transparent),
+              0 0 16px 1px color-mix(in srgb, var(--paddy) 65%, transparent);
+}
+.nav-pill-glow--dark {
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--palmyra-gold-soft) 45%, transparent),
+              0 0 16px 1px color-mix(in srgb, var(--palmyra-gold-soft) 60%, transparent);
+}
+
+/* The single oval that holds every nav link as one capsule (rather than one
+   pill per link), with its own soft glowing outline — the active link then
+   gets its own filled, brighter-glowing pill inside this group. */
+.nav-group {
+  border-color: color-mix(in srgb, var(--kani-green) 22%, transparent);
+  box-shadow: 0 0 12px -2px color-mix(in srgb, var(--paddy) 40%, transparent);
+}
+.nav-group--dark {
+  border-color: color-mix(in srgb, var(--palmyra-gold-soft) 28%, transparent);
+  box-shadow: 0 0 14px -2px color-mix(in srgb, var(--paddy) 55%, transparent);
+}
+
+/* Browsers without backdrop-filter get an opaque bar rather than
+   unreadable text sitting over a photograph. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass-nav { background: var(--bone); }
+  .glass-nav--over-hero { background: var(--kani-green-deep); }
+}
+
+/* ─── Motion ────────────────────────────────────────────────────────── */
+@keyframes kani-rise {
+  from { opacity: 0; transform: translate3d(0, 18px, 0); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes kani-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes kani-pop {
+  0%   { transform: scale(0.8); }
+  60%  { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+@keyframes kani-shimmer {
+  from { background-position: -180% 0; }
+  to   { background-position: 180% 0; }
+}
+@keyframes kani-slide-up {
+  from { transform: translate3d(0, 100%, 0); }
+  to   { transform: none; }
+}
+.animate-rise { animation: kani-rise var(--dur-slow) var(--ease-out) both; }
+.animate-fade { animation: kani-fade var(--dur-slow) var(--ease-out) both; }
+.animate-pop  { animation: kani-pop 320ms var(--ease-spring); }
+.animate-slide-up { animation: kani-slide-up var(--dur-base) var(--ease-out); }
+
+/* Scroll-reveal: elements start hidden and are released by IntersectionObserver.
+   Guarded so that if JS never runs, content is still visible. */
+.reveal {
+  opacity: 0;
+  transform: translate3d(0, 22px, 0);
+  transition: opacity 520ms var(--ease-out), transform 520ms var(--ease-out);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+.reveal.is-visible { opacity: 1; transform: none; }
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--hairline) 25%,
+    color-mix(in srgb, var(--hairline) 40%, #fff) 50%,
+    var(--hairline) 75%
+  );
+  background-size: 220% 100%;
+  animation: kani-shimmer 1.4s linear infinite;
+}
+
+/* Lift on hover — transform/opacity only, never width/height. */
+.lift {
+  transition: transform var(--dur-base) var(--ease-out),
+              box-shadow var(--dur-base) var(--ease-out);
+}
+@media (hover: hover) {
+  .lift:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+}
+.lift:active { transform: translateY(-1px); }
+
+/* Photo push-in inside a fixed frame. The frame clips; layout never moves. */
+.zoom-frame { overflow: hidden; }
+.zoom-frame img {
+  transition: transform 700ms var(--ease-out), filter var(--dur-slow) var(--ease-out);
+}
+@media (hover: hover) {
+  .group:hover .zoom-frame img { transform: scale(1.055); }
+}
+
+/* Sold / rented listings read as past-tense from the grid, with no text. */
+.img-sold { filter: saturate(0.4) brightness(0.86); }
+
+/* ─── Reduced motion: honour it completely ──────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal { opacity: 1; transform: none; }
+  .lift:hover { transform: none; }
+  .group:hover .zoom-frame img { transform: none; }
+}
+
+/* ─── Utilities ─────────────────────────────────────────────────────── */
+.container-kani {
+  width: 100%;
+  margin-inline: auto;
+  padding-inline: var(--space-4);
+  max-width: 1240px;
+}
+@media (min-width: 768px) {
+  .container-kani { padding-inline: var(--space-8); }
+}
+
+/* Hide scrollbar on horizontal rails but keep them scrollable/keyboardable. */
+.rail {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  scroll-snap-type: x mandatory;
+}
+.rail::-webkit-scrollbar { display: none; }
+.rail > * { scroll-snap-align: start; }
+
+/* Hide scrollbar anywhere a track shouldn't compete visually — e.g. the
+   admin sidebar nav — while keeping the element scrollable. */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* Prose for admin-authored page bodies. */
+.prose-kani { max-width: 68ch; }
+.prose-kani h2 {
+  font-family: var(--font-newsreader), Georgia, serif;
+  font-size: 1.5rem;
+  margin-top: 2rem;
+  margin-bottom: 0.5rem;
+  color: var(--kani-green);
+}
+.prose-kani h3 {
+  font-family: var(--font-newsreader), Georgia, serif;
+  font-size: 1.2rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.4rem;
+  color: var(--kani-green);
+}
+.prose-kani p { margin-bottom: 1rem; }
+.prose-kani ul { margin: 0 0 1rem 1.25rem; list-style: disc; }
+.prose-kani li { margin-bottom: 0.35rem; }
+.prose-kani a { color: var(--kani-green); text-decoration: underline; }
