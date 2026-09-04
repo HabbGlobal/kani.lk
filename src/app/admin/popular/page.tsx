@@ -38,7 +38,7 @@ export default async function AdminPopularPage() {
   return (
     <div className="max-w-3xl">
       <header className="mb-6">
-        <h1 className="text-[27px] text-[var(--kani-green)] md:text-[34px]">
+        <h1 className="text-[27px] text-[var(--heading)] md:text-[34px]">
           Popular row
         </h1>
         <p className="mt-1 text-[16px] text-[var(--muted)]">
@@ -52,7 +52,7 @@ export default async function AdminPopularPage() {
             The popular row is currently in <strong>automatic</strong> mode —
             it orders by 30-day view count, and this manual order is ignored
             until you switch back. Change the mode in{" "}
-            <Link href="/admin/settings" className="font-medium text-[var(--kani-green)] hover:underline">
+            <Link href="/admin/settings" className="font-medium text-[var(--heading)] hover:underline">
               Settings
             </Link>
             .
@@ -64,7 +64,7 @@ export default async function AdminPopularPage() {
         <p className="mb-6 text-[14px] text-[var(--muted)]">
           Manual mode is on — this order is what visitors see. Switch to
           automatic in{" "}
-          <Link href="/admin/settings" className="font-medium text-[var(--kani-green)] hover:underline">
+          <Link href="/admin/settings" className="font-medium text-[var(--heading)] hover:underline">
             Settings
           </Link>{" "}
           to rank by views instead.

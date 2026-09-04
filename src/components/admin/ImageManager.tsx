@@ -188,7 +188,7 @@ export function ImageManager({
                     <button
                       type="button"
                       onClick={() => setAsCover(img._id)}
-                      className="cursor-pointer rounded-[var(--radius-sm)] px-1.5 py-1 text-[11px] font-medium text-[var(--kani-green)] hover:bg-[var(--kani-green)]/10"
+                      className="cursor-pointer rounded-[var(--radius-sm)] px-1.5 py-1 text-[11px] font-medium text-[var(--heading)] hover:bg-[var(--kani-green)]/10"
                     >
                       Set cover
                     </button>
@@ -229,7 +229,7 @@ function IconButton({
       onClick={onClick}
       className={cn(
         "grid size-7 cursor-pointer place-items-center rounded-[var(--radius-sm)] text-[13px]",
-        "text-[var(--muted)] hover:bg-black/5 hover:text-[var(--ink)]",
+        "text-[var(--muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--ink)]",
         "disabled:pointer-events-none disabled:opacity-30"
       )}
     >

@@ -32,6 +32,8 @@ export type LandRow = {
 
 type ToggleField = "isPublished" | "isFeatured" | "isPopular";
 
+const PAGE_SIZE = 5;
+
 export function LandsTable({
   initialRows,
   districts,
@@ -47,6 +49,7 @@ export function LandsTable({
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [page, setPage] = useState(1);
 
   const filtered = useMemo(() => {
     const rx = q.trim() ? new RegExp(q.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i") : null;
@@ -58,6 +61,18 @@ export function LandsTable({
       return true;
     });
   }, [rows, q, status, district, purpose]);
+
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, pageCount);
+  const paged = useMemo(
+    () => filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE),
+    [filtered, safePage]
+  );
+
+  function updateFilter(setter: (v: string) => void, value: string) {
+    setter(value);
+    setPage(1);
+  }
 
   async function toggle(row: LandRow, field: ToggleField) {
     const prevValue = row[field];
@@ -113,10 +128,10 @@ export function LandsTable({
     <div className="space-y-4">
       <Card className="grid gap-3 p-4 sm:grid-cols-4">
         <Field label="Search" htmlFor="q">
-          <Input id="q" placeholder="Title, ref code…" value={q} onChange={(e) => setQ(e.target.value)} />
+          <Input id="q" placeholder="Title, ref code…" value={q} onChange={(e) => updateFilter(setQ, e.target.value)} />
         </Field>
         <Field label="Status" htmlFor="status">
-          <Select id="status" value={status} onChange={(e) => setStatus(e.target.value)}>
+          <Select id="status" value={status} onChange={(e) => updateFilter(setStatus, e.target.value)}>
             <option value="">All statuses</option>
             {Object.entries(STATUS_LABELS).map(([v, l]) => (
               <option key={v} value={v}>{l}</option>
@@ -124,7 +139,7 @@ export function LandsTable({
           </Select>
         </Field>
         <Field label="District" htmlFor="district">
-          <Select id="district" value={district} onChange={(e) => setDistrict(e.target.value)}>
+          <Select id="district" value={district} onChange={(e) => updateFilter(setDistrict, e.target.value)}>
             <option value="">All districts</option>
             {districts.map((d) => (
               <option key={d._id} value={d._id}>{d.name}</option>
@@ -132,7 +147,7 @@ export function LandsTable({
           </Select>
         </Field>
         <Field label="Purpose" htmlFor="purpose">
-          <Select id="purpose" value={purpose} onChange={(e) => setPurpose(e.target.value)}>
+          <Select id="purpose" value={purpose} onChange={(e) => updateFilter(setPurpose, e.target.value)}>
             <option value="">All purposes</option>
             {Object.entries(PURPOSE_LABELS).map(([v, l]) => (
               <option key={v} value={v}>{l}</option>
@@ -145,7 +160,7 @@ export function LandsTable({
 
       {selected.size > 0 && (
         <div className="flex items-center gap-3 rounded-[var(--radius-md)] bg-[var(--kani-green)]/8 px-4 py-3">
-          <p className="text-[14px] font-medium text-[var(--kani-green)]">{selected.size} selected</p>
+          <p className="text-[14px] font-medium text-[var(--heading)]">{selected.size} selected</p>
           <Button size="sm" onClick={bulkPublish} disabled={busy}>
             {busy ? "Publishing…" : "Publish selected"}
           </Button>
@@ -158,7 +173,7 @@ export function LandsTable({
         <>
           {/* Mobile: card stack */}
           <ul className="space-y-3 lg:hidden">
-            {filtered.map((row) => (
+            {paged.map((row) => (
               <li key={row._id}>
                 <RowCard
                   row={row}
@@ -187,8 +202,8 @@ export function LandsTable({
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--hairline)]">
-                {filtered.map((row) => (
-                  <tr key={row._id} className="hover:bg-black/[0.015]">
+                {paged.map((row) => (
+                  <tr key={row._id} className="transition-colors hover:bg-[var(--hover-tint)]">
                     <td className="px-3 py-3">
                       <Checkbox
                         aria-label={`Select ${row.title}`}
@@ -198,7 +213,7 @@ export function LandsTable({
                       />
                     </td>
                     <td className="px-3 py-3">
-                      <Link href={`/admin/lands/${row._id}/edit`} className="flex items-center gap-3 hover:text-[var(--kani-green)]">
+                      <Link href={`/admin/lands/${row._id}/edit`} className="flex items-center gap-3 hover:text-[var(--heading)]">
                         <span className="relative size-12 shrink-0 overflow-hidden rounded-[var(--radius-sm)] bg-[var(--hairline)]">
                           <Image src={imageUrl(row.coverImageId)} alt="" fill sizes="48px" className="object-cover" />
                         </span>
@@ -235,6 +250,34 @@ export function LandsTable({
               </tbody>
             </table>
           </div>
+
+          {pageCount > 1 && (
+            <div className="flex items-center justify-between gap-3 pt-1">
+              <p className="text-[13px] text-[var(--muted)]">
+                Page {safePage} of {pageCount} · {filtered.length} listings
+              </p>
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={safePage <= 1}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                >
+                  Previous
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={safePage >= pageCount}
+                  onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          )}
         </>
       )}
     </div>
@@ -246,7 +289,7 @@ function StatusChip({ status }: { status: LandStatus }) {
     status === "available"
       ? "bg-[var(--paddy)]/12 text-[var(--paddy)]"
       : status === "reserved"
-      ? "bg-[var(--palmyra-gold)]/18 text-[#7a6127]"
+      ? "bg-[var(--palmyra-gold)]/18 text-[var(--reserved-text)]"
       : "bg-[var(--laterite)]/12 text-[var(--laterite)]";
   return (
     <span className={cn("inline-flex items-center rounded-[var(--radius-pill)] px-2.5 py-1 text-[12px] font-medium", tone)}>
@@ -326,7 +369,7 @@ function ToggleButton({ label, on, onClick }: { label: string; on: boolean; onCl
       className={cn(
         "min-h-11 rounded-[var(--radius-md)] border px-2 py-2 font-medium transition-colors",
         on
-          ? "border-[var(--kani-green)] bg-[var(--kani-green)]/10 text-[var(--kani-green)]"
+          ? "border-[var(--kani-green)] bg-[var(--kani-green)]/10 text-[var(--heading)]"
           : "border-[var(--hairline)] text-[var(--muted)]"
       )}
     >

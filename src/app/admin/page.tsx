@@ -45,7 +45,7 @@ export default async function AdminDashboard() {
   return (
     <div className="max-w-6xl">
       <header className="mb-8">
-        <h1 className="text-[27px] text-[var(--kani-green)] md:text-[34px]">
+        <h1 className="text-[27px] text-[var(--heading)] md:text-[34px]">
           Welcome back, {user?.name?.split(" ")[0]}
         </h1>
         <p className="mt-1 text-[16px] text-[var(--muted)]">
@@ -64,7 +64,7 @@ export default async function AdminDashboard() {
                        hover:-translate-y-0.5 hover:border-[var(--kani-green)]/35"
           >
             <p className="text-[13px] uppercase tracking-wide text-[var(--muted)]">{s.label}</p>
-            <p className={`mt-1 font-serif text-[34px] ${s.accent ? "text-[var(--laterite)]" : "text-[var(--kani-green)]"}`}>
+            <p className={`mt-1 font-serif text-[34px] ${s.accent ? "text-[var(--laterite)]" : "text-[var(--heading)]"}`}>
               {s.value}
             </p>
           </Link>
@@ -74,8 +74,8 @@ export default async function AdminDashboard() {
       <div className="grid gap-6 lg:grid-cols-2">
         <Card className="p-5">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-[19px] text-[var(--kani-green)]">Recent enquiries</h2>
-            <Link href="/admin/inquiries" className="text-[14px] font-medium text-[var(--kani-green)] hover:underline">
+            <h2 className="text-[19px] text-[var(--heading)]">Recent enquiries</h2>
+            <Link href="/admin/inquiries" className="text-[14px] font-medium text-[var(--heading)] hover:underline">
               View all
             </Link>
           </div>
@@ -108,8 +108,8 @@ export default async function AdminDashboard() {
 
         <Card className="p-5">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-[19px] text-[var(--kani-green)]">Recent listings</h2>
-            <Link href="/admin/lands" className="text-[14px] font-medium text-[var(--kani-green)] hover:underline">
+            <h2 className="text-[19px] text-[var(--heading)]">Recent listings</h2>
+            <Link href="/admin/lands" className="text-[14px] font-medium text-[var(--heading)] hover:underline">
               View all
             </Link>
           </div>
@@ -118,7 +118,7 @@ export default async function AdminDashboard() {
               <li key={land._id}>
                 <Link
                   href={`/admin/lands/${land._id}/edit`}
-                  className="flex items-center justify-between gap-3 py-3 transition-colors hover:text-[var(--kani-green)]"
+                  className="flex items-center justify-between gap-3 py-3 transition-colors hover:text-[var(--heading)]"
                 >
                   <div className="min-w-0">
                     <p className="truncate text-[15px] font-medium">{land.title}</p>

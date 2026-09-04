@@ -87,7 +87,7 @@ export function PopularManager({ initial }: { initial: PopularLand[] }) {
         <p className="text-[16px] text-[var(--muted)]">
           Nothing is marked Popular yet. Toggle the Popular column on any
           listing in{" "}
-          <Link href="/admin/lands" className="font-medium text-[var(--kani-green)] hover:underline">
+          <Link href="/admin/lands" className="font-medium text-[var(--heading)] hover:underline">
             the listings table
           </Link>{" "}
           to add it here.
@@ -98,6 +98,14 @@ export function PopularManager({ initial }: { initial: PopularLand[] }) {
 
   return (
     <div>
+      <div className="mb-5 flex items-center gap-3">
+        <Button onClick={save} disabled={saving}>
+          {saving ? "Saving…" : "Save order"}
+        </Button>
+        {saved && <span className="text-[14px] font-medium text-[var(--paddy)]">Order saved.</span>}
+        {error && <span className="text-[14px] font-medium text-[var(--laterite)]">{error}</span>}
+      </div>
+
       <ul className="space-y-2">
         {items.map((land, i) => (
           <li
@@ -107,7 +115,10 @@ export function PopularManager({ initial }: { initial: PopularLand[] }) {
             onDragOver={(e) => e.preventDefault()}
             onDrop={() => onDrop(i)}
             className="flex items-center gap-3 rounded-[var(--radius-lg)] border border-[var(--hairline)]
-                       bg-[var(--card)] p-3 sm:gap-4 sm:p-4"
+                       bg-[var(--card)] p-3 transition-[transform,box-shadow,border-color] duration-200
+                       [transition-timing-function:var(--ease-out)] hover:-translate-y-0.5
+                       hover:border-[var(--kani-green)]/30 hover:shadow-[var(--shadow-md)]
+                       sm:gap-4 sm:p-4"
           >
             <span
               className="hidden shrink-0 cursor-grab text-[var(--muted)] sm:block"
@@ -122,7 +133,7 @@ export function PopularManager({ initial }: { initial: PopularLand[] }) {
             </span>
 
             <span className="tabular grid size-8 shrink-0 place-items-center rounded-full
-                             bg-[var(--kani-green)]/10 text-[14px] font-semibold text-[var(--kani-green)]">
+                             bg-[var(--kani-green)]/10 text-[14px] font-semibold text-[var(--heading)]">
               {i + 1}
             </span>
 
@@ -152,14 +163,6 @@ export function PopularManager({ initial }: { initial: PopularLand[] }) {
           </li>
         ))}
       </ul>
-
-      <div className="mt-5 flex items-center gap-3">
-        <Button onClick={save} disabled={saving}>
-          {saving ? "Saving…" : "Save order"}
-        </Button>
-        {saved && <span className="text-[14px] font-medium text-[var(--paddy)]">Order saved.</span>}
-        {error && <span className="text-[14px] font-medium text-[var(--laterite)]">{error}</span>}
-      </div>
     </div>
   );
 }
@@ -184,8 +187,9 @@ function IconButton({
       title={label}
       className={cn(
         "grid size-9 cursor-pointer place-items-center rounded-full text-[var(--muted)]",
-        "transition-colors hover:bg-black/5 hover:text-[var(--ink)]",
-        "disabled:pointer-events-none disabled:opacity-30"
+        "transition-[background-color,color,transform] duration-150 hover:scale-105",
+        "hover:bg-[var(--kani-green)]/10 hover:text-[var(--heading)]",
+        "disabled:pointer-events-none disabled:opacity-30 disabled:hover:scale-100"
       )}
     >
       <svg viewBox="0 0 16 16" className="size-4" fill="none" stroke="currentColor"

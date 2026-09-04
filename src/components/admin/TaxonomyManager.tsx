@@ -142,7 +142,7 @@ export function TaxonomyManager({
 
       {showForm && (
         <Card className="p-5">
-          <h2 className="mb-4 text-[19px] text-[var(--kani-green)]">
+          <h2 className="mb-4 text-[19px] text-[var(--heading)]">
             {editing ? `Edit ${label}` : `Add ${label}`}
           </h2>
           <form onSubmit={handleSubmit(onSubmit)} noValidate className="grid gap-4 sm:grid-cols-2">

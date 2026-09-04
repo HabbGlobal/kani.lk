@@ -3,13 +3,17 @@
 import { forwardRef, useId } from "react";
 import { cn } from "@/lib/utils";
 
+/* Fields stay on a fixed white surface with fixed dark text by design (they
+   read like the public search bar's white pills) — not on the --ink/--card
+   tokens, which flip in admin dark mode and would otherwise make typed text
+   invisible against this deliberately-light input surface. */
 const CONTROL =
   "w-full rounded-[var(--radius-md)] border border-[var(--hairline)] bg-white px-4 " +
-  "text-[16px] text-[var(--ink)] placeholder:text-[var(--muted)]/70 " +
+  "text-[16px] text-[#16201b] placeholder:text-[#5f6b63]/70 " +
   "transition-[border-color,box-shadow] duration-200 [transition-timing-function:var(--ease-out)] " +
   "hover:border-[var(--kani-green)]/40 " +
   "focus:border-[var(--kani-green)] focus:outline-none focus:ring-2 focus:ring-[var(--kani-green)]/25 " +
-  "disabled:bg-black/[0.03] disabled:text-[var(--muted)] disabled:cursor-not-allowed " +
+  "disabled:bg-black/[0.03] disabled:text-[#5f6b63] disabled:cursor-not-allowed " +
   "aria-[invalid=true]:border-[var(--laterite)] aria-[invalid=true]:ring-[var(--laterite)]/25";
 
 /** Wraps any control with a visible label, helper text and inline error. */

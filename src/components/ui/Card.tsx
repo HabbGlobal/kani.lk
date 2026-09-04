@@ -33,7 +33,7 @@ export function SectionHeading({
   return (
     <div className={cn("mb-6 flex items-end justify-between gap-4", className)}>
       <div className="min-w-0">
-        <h2 className="text-[27px] leading-tight text-[var(--kani-green)] md:text-[34px]">
+        <h2 className="text-[27px] leading-tight text-[var(--heading)] md:text-[34px]">
           {title}
         </h2>
         {subtitle && (
@@ -78,7 +78,7 @@ export function EmptyState({
           strokeLinejoin="round"
         />
       </svg>
-      <h3 className="text-[21px] text-[var(--kani-green)]">{title}</h3>
+      <h3 className="text-[21px] text-[var(--heading)]">{title}</h3>
       {children && (
         <div className="max-w-md text-[15px] text-[var(--muted)]">{children}</div>
       )}

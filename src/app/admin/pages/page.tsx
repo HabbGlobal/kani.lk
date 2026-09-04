@@ -20,13 +20,13 @@ export default async function AdminPagesPage() {
           <Link
             key={p._id}
             href={`/admin/pages/${p.slug}`}
-            className="flex items-center justify-between gap-3 p-4 transition-colors hover:bg-black/[0.02]"
+            className="flex items-center justify-between gap-3 p-4 transition-colors hover:bg-[var(--hover-tint)]"
           >
             <div>
               <p className="text-[15px] font-medium text-[var(--ink)]">{p.title}</p>
               <p className="text-[13px] text-[var(--muted)]">/{p.slug}</p>
             </div>
-            <span className="text-[14px] font-medium text-[var(--kani-green)]">Edit</span>
+            <span className="text-[14px] font-medium text-[var(--heading)]">Edit</span>
           </Link>
         ))}
       </Card>

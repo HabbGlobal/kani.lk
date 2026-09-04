@@ -30,6 +30,7 @@ type Params = { params: Promise<{ slug: string }> };
 /** The full listing document, beyond the card projection. */
 type LandDetail = LandCard & {
   description: string;
+  descriptionTa?: string;
   ownerName: string;
   contactNumbers: string[];
   whatsappNumber?: string;
@@ -224,6 +225,13 @@ export default async function LandDetailPage({ params }: Params) {
                 <p key={i}>{para}</p>
               ))}
             </div>
+            {land.descriptionTa && (
+              <div className="prose-kani mt-4 font-tamil text-[17px] leading-relaxed text-[var(--ink)]">
+                {land.descriptionTa.split(/\n\s*\n/).map((para, i) => (
+                  <p key={i}>{para}</p>
+                ))}
+              </div>
+            )}
           </section>
 
           {/* ── Location ──────────────────────────────────────────────── */}

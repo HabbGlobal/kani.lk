@@ -32,7 +32,7 @@ export default async function NewLandPage() {
   return (
     <div className="max-w-6xl">
       <header className="mb-6">
-        <h1 className="text-[27px] text-[var(--kani-green)] md:text-[34px]">
+        <h1 className="text-[27px] text-[var(--heading)] md:text-[34px]">
           New listing
         </h1>
         <p className="mt-1 text-[16px] text-[var(--muted)]">

@@ -26,6 +26,14 @@
   --background: var(--bone);
   --foreground: var(--ink);
   --ring: var(--kani-green);
+  /* Heading/link accent — same as the brand green everywhere except admin
+     dark mode, where --kani-green itself stays too dark to read against a
+     dark surface and .admin-dark brightens this alone. */
+  --heading: var(--kani-green);
+  /* "Reserved" status chip text — dark brown on light mode's gold tint. */
+  --reserved-text: #7a6127;
+  /* Neutral hover wash for rows/icon buttons over --card or --bone. */
+  --hover-tint: rgba(0, 0, 0, 0.04);
 
   /* spacing scale (density 4 — standard) */
   --space-1: 0.25rem;
@@ -152,6 +160,27 @@ p { text-wrap: pretty; }
 ::selection {
   background: var(--palmyra-gold);
   color: var(--kani-green-deep);
+}
+
+/* ─── Admin dark mode ───────────────────────────────────────────────── *
+ * Scoped to the admin dashboard only — the public site keeps its fixed
+ * light palette. Toggled by adding/removing this class on <html>, applied
+ * before paint (inline script in the admin layout) to avoid a flash. */
+.admin-dark {
+  --bone: #10241a;
+  --card: #16301f;
+  --ink: #eef2ed;
+  --muted: #9db2a5;
+  --hairline: #3a5b47;
+  --background: var(--bone);
+  --foreground: var(--ink);
+  /* --kani-green (#12452f) stays this dark for solid button/badge fills —
+     white text on it still has strong contrast either way. Headings and
+     links, though, use it as a text colour on a now-dark surface, so give
+     them a lighter accent instead. */
+  --heading: var(--palmyra-gold-soft);
+  --reserved-text: var(--palmyra-gold-soft);
+  --hover-tint: rgba(255, 255, 255, 0.06);
 }
 
 /* ─── Oval glass navbar ─────────────────────────────────────────────── */
@@ -294,6 +323,14 @@ p { text-wrap: pretty; }
 }
 .rail::-webkit-scrollbar { display: none; }
 .rail > * { scroll-snap-align: start; }
+
+/* Hide scrollbar anywhere a track shouldn't compete visually — e.g. the
+   admin sidebar nav — while keeping the element scrollable. */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar { display: none; }
 
 /* Prose for admin-authored page bodies. */
 .prose-kani { max-width: 68ch; }

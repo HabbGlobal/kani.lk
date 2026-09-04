@@ -2,10 +2,13 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Logo } from "@/components/site/Logo";
 import { cn } from "@/lib/utils";
 import type { SessionUser } from "@/lib/auth";
+
+const THEME_KEY = "kani.admin-theme";
+const COLLAPSE_KEY = "kani.admin-sidebar-collapsed";
 
 const NAV: { href: string; label: string; icon: React.ReactNode; superadminOnly?: boolean }[] = [
   {
@@ -71,6 +74,35 @@ export function AdminShell({
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [dark, setDark] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
+
+  // Read saved preferences after mount — avoids a hydration mismatch, since
+  // the server has no access to localStorage.
+  useEffect(() => {
+    if (window.localStorage.getItem(THEME_KEY) === "dark") {
+      setDark(true);
+      document.documentElement.classList.add("admin-dark");
+    }
+    if (window.localStorage.getItem(COLLAPSE_KEY) === "1") setCollapsed(true);
+  }, []);
+
+  function toggleDark() {
+    setDark((cur) => {
+      const next = !cur;
+      document.documentElement.classList.toggle("admin-dark", next);
+      window.localStorage.setItem(THEME_KEY, next ? "dark" : "light");
+      return next;
+    });
+  }
+
+  function toggleCollapsed() {
+    setCollapsed((cur) => {
+      const next = !cur;
+      window.localStorage.setItem(COLLAPSE_KEY, next ? "1" : "0");
+      return next;
+    });
+  }
 
   async function signOut() {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -80,57 +112,89 @@ export function AdminShell({
 
   const items = NAV.filter((n) => !n.superadminOnly || user.role === "superadmin");
 
-  const nav = (
-    <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto p-3">
-      {items.map((item) => {
-        const active =
-          pathname === item.href ||
-          (item.href !== "/admin" && pathname.startsWith(`${item.href}/`));
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            onClick={() => setMobileOpen(false)}
-            className={cn(
-              "flex items-center gap-3 rounded-[var(--radius-md)] px-3.5 py-2.5 text-[15px] font-medium",
-              "transition-colors duration-150",
-              active
-                ? "bg-white/12 text-white"
-                : "text-white/65 hover:bg-white/8 hover:text-white"
-            )}
-          >
-            <svg viewBox="0 0 20 20" className="size-[18px] shrink-0" fill="none"
-                 stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"
-                 strokeLinejoin="round" aria-hidden="true">
-              {item.icon}
-            </svg>
-            {item.label}
-          </Link>
-        );
-      })}
-    </nav>
-  );
+  function buildNav(rail: boolean) {
+    return (
+      <nav className="no-scrollbar flex flex-1 flex-col gap-0.5 overflow-y-auto p-3">
+        {items.map((item) => {
+          const active =
+            pathname === item.href ||
+            (item.href !== "/admin" && pathname.startsWith(`${item.href}/`));
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              onClick={() => setMobileOpen(false)}
+              title={rail ? item.label : undefined}
+              aria-label={rail ? item.label : undefined}
+              className={cn(
+                "flex items-center gap-3 rounded-[var(--radius-md)] px-3.5 py-2.5 text-[15px] font-medium",
+                "transition-colors duration-150",
+                rail && "justify-center px-0",
+                active
+                  ? "bg-white/12 text-white"
+                  : "text-white/65 hover:bg-white/8 hover:text-white"
+              )}
+            >
+              <svg viewBox="0 0 20 20" className="size-[18px] shrink-0" fill="none"
+                   stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"
+                   strokeLinejoin="round" aria-hidden="true">
+                {item.icon}
+              </svg>
+              {!rail && item.label}
+            </Link>
+          );
+        })}
+      </nav>
+    );
+  }
+
+  const nav = buildNav(false);
+  const navRail = buildNav(true);
 
   return (
-    <div className="flex min-h-svh bg-[var(--bone)]">
+    <div className="flex h-svh bg-[var(--bone)]">
       {/* Desktop sidebar */}
-      <aside className="hidden w-64 shrink-0 flex-col bg-[var(--kani-green-deep)] lg:flex">
-        <div className="px-5 py-6">
-          <Logo onDark />
+      <aside
+        className={cn(
+          "hidden h-svh shrink-0 flex-col bg-[var(--kani-green-deep)] transition-[width] duration-200 lg:flex",
+          collapsed ? "w-[76px]" : "w-64"
+        )}
+      >
+        <div
+          className={cn(
+            "flex items-center py-6",
+            collapsed ? "flex-col gap-3 px-2" : "justify-between gap-2 px-5"
+          )}
+        >
+          {!collapsed && <Logo onDark />}
+          {collapsed && (
+            <span className="text-[22px] font-serif text-[var(--palmyra-gold)]" aria-hidden="true">
+              k.
+            </span>
+          )}
+          <ThemeToggle dark={dark} onToggle={toggleDark} circle />
         </div>
-        {nav}
-        <UserFooter user={user} onSignOut={signOut} />
+        {collapsed ? navRail : nav}
+        <div className={cn("flex items-center pt-2", collapsed ? "justify-center px-2" : "justify-end px-4")}>
+          <IconOnlyButton
+            label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            onClick={toggleCollapsed}
+          >
+            <path d={collapsed ? "M7 4l6 6-6 6" : "M13 4L7 10l6 6"} />
+          </IconOnlyButton>
+        </div>
+        <UserFooter user={user} onSignOut={signOut} collapsed={collapsed} />
       </aside>
 
       {/* Mobile top bar + drawer */}
-      <div className="flex flex-1 flex-col lg:hidden">
-        <header className="flex h-16 items-center justify-between border-b border-[var(--hairline)]
+      <div className="flex flex-1 flex-col overflow-hidden lg:hidden">
+        <header className="flex h-16 shrink-0 items-center justify-between border-b border-[var(--hairline)]
                            bg-[var(--card)] px-4">
           <button
             type="button"
             onClick={() => setMobileOpen(true)}
             aria-label="Open menu"
-            className="grid size-11 cursor-pointer place-items-center rounded-full hover:bg-black/5"
+            className="grid size-11 cursor-pointer place-items-center rounded-full hover:bg-[var(--hover-tint)]"
           >
             <svg viewBox="0 0 24 24" className="size-6" fill="none" stroke="currentColor"
                  strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
@@ -166,12 +230,15 @@ export function AdminShell({
                 </button>
               </div>
               {nav}
+              <div className="px-4 pt-2">
+                <ThemeToggle dark={dark} onToggle={toggleDark} />
+              </div>
               <UserFooter user={user} onSignOut={signOut} />
             </div>
           </div>
         )}
 
-        <main className="flex-1 p-4 sm:p-6">{children}</main>
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6">{children}</main>
       </div>
 
       {/* Desktop content */}
@@ -180,7 +247,114 @@ export function AdminShell({
   );
 }
 
-function UserFooter({ user, onSignOut }: { user: SessionUser; onSignOut: () => void }) {
+function ThemeToggle({
+  dark,
+  onToggle,
+  compact,
+  circle,
+}: {
+  dark: boolean;
+  onToggle: () => void;
+  compact?: boolean;
+  circle?: boolean;
+}) {
+  const icon = (
+    <svg viewBox="0 0 20 20" className="size-[17px] shrink-0" fill="none"
+         stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"
+         strokeLinejoin="round" aria-hidden="true">
+      {dark ? (
+        <>
+          <path d="M10 4.5v1.5M10 14v1.5M15.5 10H14M6 10H4.5M13.5 6.5l-1 1M7.5 12.5l-1 1M13.5 13.5l-1-1M7.5 7.5l-1-1" />
+          <circle cx="10" cy="10" r="3" />
+        </>
+      ) : (
+        <path d="M17 11.3A6.7 6.7 0 0 1 8.7 3 6.8 6.8 0 1 0 17 11.3Z" />
+      )}
+    </svg>
+  );
+
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-pressed={dark}
+      aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
+      title={dark ? "Switch to light mode" : "Switch to dark mode"}
+      className={cn(
+        "grid shrink-0 cursor-pointer place-items-center text-white/70",
+        "transition-colors hover:bg-white/8 hover:text-white",
+        circle
+          ? "size-9 rounded-full border border-white/15"
+          : cn("rounded-[var(--radius-md)]", compact ? "size-9" : "h-9 flex-1")
+      )}
+    >
+      {icon}
+    </button>
+  );
+}
+
+function IconOnlyButton({
+  label,
+  onClick,
+  children,
+}: {
+  label: string;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      title={label}
+      className="grid size-9 shrink-0 cursor-pointer place-items-center rounded-[var(--radius-md)]
+                 text-white/70 transition-colors hover:bg-white/8 hover:text-white"
+    >
+      <svg viewBox="0 0 20 20" className="size-[17px]" fill="none" stroke="currentColor"
+           strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        {children}
+      </svg>
+    </button>
+  );
+}
+
+function UserFooter({
+  user,
+  onSignOut,
+  collapsed,
+}: {
+  user: SessionUser;
+  onSignOut: () => void;
+  collapsed?: boolean;
+}) {
+  if (collapsed) {
+    return (
+      <div className="flex flex-col items-center gap-2 border-t border-white/10 p-3">
+        <span
+          title={`${user.name} · ${user.role}`}
+          className="grid size-9 shrink-0 place-items-center rounded-full bg-[var(--palmyra-gold)]
+                     text-[14px] font-semibold text-[var(--kani-green-deep)]"
+        >
+          {user.name.slice(0, 1).toUpperCase()}
+        </span>
+        <button
+          type="button"
+          onClick={onSignOut}
+          aria-label="Sign out"
+          title="Sign out"
+          className="grid size-9 cursor-pointer place-items-center rounded-[var(--radius-md)]
+                     text-red-400 transition-colors hover:bg-red-500/12 hover:text-red-300"
+        >
+          <svg viewBox="0 0 20 20" className="size-4" fill="none" stroke="currentColor"
+               strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M7.5 17H4.5A1.5 1.5 0 0 1 3 15.5v-11A1.5 1.5 0 0 1 4.5 3h3M13 14l4-4-4-4M17 10H7.5" />
+          </svg>
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="border-t border-white/10 p-4">
       <div className="mb-2 flex items-center gap-3 px-1">
@@ -197,7 +371,8 @@ function UserFooter({ user, onSignOut }: { user: SessionUser; onSignOut: () => v
         type="button"
         onClick={onSignOut}
         className="flex w-full cursor-pointer items-center gap-2 rounded-[var(--radius-md)]
-                   px-3 py-2 text-[14px] text-white/65 transition-colors hover:bg-white/8 hover:text-white"
+                   px-3 py-2 text-[14px] font-medium text-red-400 transition-colors
+                   hover:bg-red-500/12 hover:text-red-300"
       >
         <svg viewBox="0 0 20 20" className="size-4" fill="none" stroke="currentColor"
              strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

@@ -156,6 +156,26 @@ export function LandEditor({
   return (
     <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-8">
+        {/* ── Publish ────────────────────────────────────────────────── */}
+        <section>
+          <SectionHeading title="Publish" />
+          <Card className="grid gap-4 p-5 sm:grid-cols-3">
+            <Checkbox label="Published" {...register("isPublished")} />
+            <Checkbox label="Featured" {...register("isFeatured")} />
+            <Checkbox label="Popular" {...register("isPopular")} />
+          </Card>
+        </section>
+
+        {serverError && (
+          <p role="alert" className="text-[14px] font-medium text-[var(--laterite)]">{serverError}</p>
+        )}
+
+        <div className="flex gap-3">
+          <Button type="submit" size="lg" disabled={isSubmitting}>
+            {isSubmitting ? "Saving…" : mode === "create" ? "Save draft" : "Save changes"}
+          </Button>
+        </div>
+
         {/* ── Basics ─────────────────────────────────────────────────── */}
         <section>
           <SectionHeading title="Basics" />
@@ -407,25 +427,6 @@ export function LandEditor({
           </Card>
         </section>
 
-        {/* ── Publish ────────────────────────────────────────────────── */}
-        <section>
-          <SectionHeading title="Publish" />
-          <Card className="grid gap-4 p-5 sm:grid-cols-3">
-            <Checkbox label="Published" {...register("isPublished")} />
-            <Checkbox label="Featured" {...register("isFeatured")} />
-            <Checkbox label="Popular" {...register("isPopular")} />
-          </Card>
-        </section>
-
-        {serverError && (
-          <p role="alert" className="text-[14px] font-medium text-[var(--laterite)]">{serverError}</p>
-        )}
-
-        <div className="flex gap-3">
-          <Button type="submit" size="lg" disabled={isSubmitting}>
-            {isSubmitting ? "Saving…" : mode === "create" ? "Save draft" : "Save changes"}
-          </Button>
-        </div>
       </form>
 
       {/* ── Live preview ─────────────────────────────────────────────── */}

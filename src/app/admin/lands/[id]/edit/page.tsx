@@ -77,7 +77,7 @@ export default async function EditLandPage({ params }: Params) {
   return (
     <div className="max-w-6xl">
       <header className="mb-6">
-        <h1 className="text-[27px] text-[var(--kani-green)] md:text-[34px]">
+        <h1 className="text-[27px] text-[var(--heading)] md:text-[34px]">
           {land.title}
         </h1>
         <p className="tabular mt-1 text-[16px] text-[var(--muted)]">
