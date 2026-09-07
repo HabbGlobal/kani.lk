@@ -4,17 +4,20 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Logo } from "./Logo";
+import { LanguageSwitch } from "./LanguageSwitch";
 import { useFavourites } from "@/lib/favourites";
+import { useI18n } from "@/lib/i18n/client";
 import { cn } from "@/lib/utils";
 
+/** Paths are locale-free here; `href()` prefixes them at render time. */
 const LINKS = [
-  { href: "/lands", label: "Browse land" },
-  { href: "/for-sale", label: "For sale" },
-  { href: "/for-rent", label: "For rent" },
-  { href: "/districts", label: "Districts" },
-  { href: "/about", label: "About" },
-  { href: "/contact", label: "Contact" },
-];
+  { href: "/lands", key: "browseLand" },
+  { href: "/for-sale", key: "forSale" },
+  { href: "/for-rent", key: "forRent" },
+  { href: "/districts", key: "districts" },
+  { href: "/about", key: "about" },
+  { href: "/contact", key: "contact" },
+] as const;
 
 /**
  * Floating oval navbar. It sits over the hero as dark glass, and swaps to light
@@ -23,6 +26,7 @@ const LINKS = [
  */
 export function Navbar({ overHero = false }: { overHero?: boolean }) {
   const pathname = usePathname();
+  const { d, href } = useI18n();
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [open, setOpen] = useState(false);
@@ -87,7 +91,7 @@ export function Navbar({ overHero = false }: { overHero?: boolean }) {
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100]
                    focus:rounded-full focus:bg-[var(--kani-green)] focus:px-5 focus:py-3 focus:text-white"
       >
-        Skip to content
+        {d.common.skipToContent}
       </a>
 
       <header
@@ -97,7 +101,7 @@ export function Navbar({ overHero = false }: { overHero?: boolean }) {
         )}
       >
         <nav
-          aria-label="Main"
+          aria-label={d.nav.mainNav}
           className={cn(
             "container-kani flex items-center gap-3 !px-2 md:!px-3",
             // The oval: a fully rounded pill, floating clear of the page edge.
@@ -108,8 +112,8 @@ export function Navbar({ overHero = false }: { overHero?: boolean }) {
           )}
         >
           <Link
-            href="/"
-            aria-label="kani.lk home"
+            href={href("/")}
+            aria-label={d.nav.homeAria}
             className="ml-2 shrink-0 rounded-full md:ml-3"
           >
             <Logo onDark={dark} />
@@ -124,12 +128,12 @@ export function Navbar({ overHero = false }: { overHero?: boolean }) {
             )}
           >
             {LINKS.map((link) => {
-              const active =
-                pathname === link.href || pathname.startsWith(`${link.href}/`);
+              const to = href(link.href);
+              const active = pathname === to || pathname.startsWith(`${to}/`);
               return (
                 <li key={link.href}>
                   <Link
-                    href={link.href}
+                    href={to}
                     aria-current={active ? "page" : undefined}
                     className={cn(
                       "relative rounded-[var(--radius-pill)] px-3.5 py-2 text-[15px] font-medium",
@@ -143,7 +147,7 @@ export function Navbar({ overHero = false }: { overHero?: boolean }) {
                           : "text-[var(--ink)] hover:bg-[var(--kani-green)]/8 hover:text-[var(--kani-green)]"
                     )}
                   >
-                    {link.label}
+                    {d.nav[link.key]}
                   </Link>
                 </li>
               );
@@ -151,9 +155,11 @@ export function Navbar({ overHero = false }: { overHero?: boolean }) {
           </ul>
 
           <div className="ml-auto flex items-center gap-1 lg:ml-1">
+            <LanguageSwitch onDark={dark} />
+
             <Link
-              href="/favourites"
-              aria-label={`Saved lands${ready && ids.length ? ` (${ids.length})` : ""}`}
+              href={href("/favourites")}
+              aria-label={`${d.nav.savedLands}${ready && ids.length ? ` (${ids.length})` : ""}`}
               className={cn(
                 "relative grid size-11 place-items-center rounded-full transition-colors duration-200",
                 dark ? "text-white hover:bg-white/12" : "text-[var(--kani-green)] hover:bg-black/[0.05]"
@@ -178,7 +184,7 @@ export function Navbar({ overHero = false }: { overHero?: boolean }) {
               onClick={() => setOpen((v) => !v)}
               aria-expanded={open}
               aria-controls="mobile-menu"
-              aria-label={open ? "Close menu" : "Open menu"}
+              aria-label={open ? d.nav.closeMenu : d.nav.openMenu}
               className={cn(
                 "grid size-11 cursor-pointer place-items-center rounded-full transition-colors duration-200 lg:hidden",
                 dark ? "text-white hover:bg-white/12" : "text-[var(--kani-green)] hover:bg-black/[0.05]"
@@ -206,7 +212,7 @@ export function Navbar({ overHero = false }: { overHero?: boolean }) {
         <div className="fixed inset-0 z-40 lg:hidden">
           <button
             type="button"
-            aria-label="Close menu"
+            aria-label={d.nav.closeMenu}
             onClick={() => setOpen(false)}
             className="absolute inset-0 w-full cursor-default bg-[var(--kani-green-deep)]/45 animate-fade backdrop-blur-[2px]"
           />
@@ -218,12 +224,12 @@ export function Navbar({ overHero = false }: { overHero?: boolean }) {
           >
             <ul>
               {LINKS.map((link, i) => {
-                const active =
-                  pathname === link.href || pathname.startsWith(`${link.href}/`);
+                const to = href(link.href);
+                const active = pathname === to || pathname.startsWith(`${to}/`);
                 return (
                   <li key={link.href}>
                     <Link
-                      href={link.href}
+                      href={to}
                       aria-current={active ? "page" : undefined}
                       style={{ animationDelay: `${i * 28}ms` }}
                       className={cn(
@@ -234,7 +240,7 @@ export function Navbar({ overHero = false }: { overHero?: boolean }) {
                           : "text-[var(--ink)] hover:bg-black/[0.04]"
                       )}
                     >
-                      {link.label}
+                      {d.nav[link.key]}
                       <svg viewBox="0 0 16 16" className="size-4 text-[var(--muted)]" fill="none"
                            aria-hidden="true">
                         <path d="M6 3l5 5-5 5" stroke="currentColor" strokeWidth="1.6"

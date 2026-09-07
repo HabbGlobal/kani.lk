@@ -4,8 +4,11 @@ import { PurposeBadge, StatusRibbon } from "@/components/ui/Badge";
 import { FavouriteButton } from "./FavouriteButton";
 import { formatLKR, formatSize } from "@/lib/units";
 import { imageUrl } from "@/lib/image-url";
-import { DEED_TYPE_LABELS } from "@/models/types";
 import { cn } from "@/lib/utils";
+import { getDictionary, interpolate } from "@/lib/i18n";
+import { DEFAULT_LOCALE, localeHref, type Locale } from "@/lib/i18n/config";
+import { localizedName } from "@/lib/i18n/localized";
+import * as EnumLabel from "@/lib/i18n/enums";
 import type { LandCard as LandCardType } from "@/lib/queries";
 
 /**
@@ -15,6 +18,7 @@ import type { LandCard as LandCardType } from "@/lib/queries";
  */
 export function LandCard({
   land,
+  locale = DEFAULT_LOCALE,
   priority = false,
   className,
   sizes = "(min-width: 1024px) 380px, (min-width: 640px) 45vw, 92vw",
@@ -23,6 +27,7 @@ export function LandCard({
   showFavourite = true,
 }: {
   land: LandCardType;
+  locale?: Locale;
   /** Set on the first couple of above-the-fold cards only. */
   priority?: boolean;
   className?: string;
@@ -34,7 +39,10 @@ export function LandCard({
   showFavourite?: boolean;
 }) {
   const isGone = land.status === "sold" || land.status === "rented";
-  const place = [land.area, land.city?.name].filter(Boolean).join(" · ");
+  const d = getDictionary(locale);
+  const place = [land.area, localizedName(land.city, locale)]
+    .filter(Boolean)
+    .join(" · ");
 
   return (
     <article
@@ -58,11 +66,11 @@ export function LandCard({
           className={cn("object-cover", isGone && "img-sold")}
         />
 
-        <StatusRibbon status={land.status} />
+        <StatusRibbon status={land.status} locale={locale} />
 
         {/* Purpose must be readable from the image alone, before any text. */}
         <div className="absolute left-3 top-3 z-10">
-          <PurposeBadge purpose={land.purpose} size="sm" />
+          <PurposeBadge purpose={land.purpose} size="sm" locale={locale} />
         </div>
 
         {showFavourite && (
@@ -84,7 +92,7 @@ export function LandCard({
                     stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
             </svg>
             {land.imageCount}
-            <span className="sr-only">photos</span>
+            <span className="sr-only">{d.land.photos}</span>
           </span>
         )}
       </div>
@@ -95,19 +103,21 @@ export function LandCard({
         <div>
           <h3 className="text-[19px] leading-snug text-[var(--kani-green)]">
             <Link
-              href={href ?? `/lands/${land.slug}`}
+              href={href ?? localeHref(`/lands/${land.slug}`, locale)}
               target={newTab ? "_blank" : undefined}
               rel={newTab ? "noopener noreferrer" : undefined}
               className="after:absolute after:inset-0 after:content-['']"
             >
-              {formatSize(land.sizeValue, land.sizeUnit)}
+              {formatSize(land.sizeValue, land.sizeUnit, locale)}
               {place && <span className="text-[var(--ink)]"> · {place}</span>}
             </Link>
           </h3>
-          <p className="text-[14px] text-[var(--muted)]">{land.district?.name}</p>
+          <p className="text-[14px] text-[var(--muted)]">
+            {localizedName(land.district, locale)}
+          </p>
         </div>
 
-        <PriceBlock land={land} />
+        <PriceBlock land={land} locale={locale} />
 
         {/* The two facts that decide interest. */}
         <ul className="mt-auto space-y-1 pt-1 text-[14px] text-[var(--muted)]">
@@ -118,14 +128,18 @@ export function LandCard({
                       strokeWidth="1.3" strokeLinecap="round" />
                 <circle cx="8" cy="5" r="2.2" stroke="currentColor" strokeWidth="1.3" />
               </svg>
-              {land.distanceFromTownKm} km from {land.nearestTown} town
+              {interpolate(d.land.distanceLine, {
+                km: land.distanceFromTownKm,
+                town: land.nearestTown,
+              })}
             </li>
           )}
           {(land.deedType || land.accessRoadWidthFt) && (
             <li className="truncate">
               {[
-                land.deedType && DEED_TYPE_LABELS[land.deedType],
-                land.accessRoadWidthFt && `${land.accessRoadWidthFt}ft road`,
+                land.deedType && EnumLabel.DEED_TYPE[locale][land.deedType],
+                land.accessRoadWidthFt &&
+                  interpolate(d.land.roadWidth, { ft: land.accessRoadWidthFt }),
               ]
                 .filter(Boolean)
                 .join(" · ")}
@@ -145,12 +159,15 @@ export function LandCard({
  * A "both" listing shows the sale price and the rent + deposit stacked — never
  * one price standing in for the other.
  */
-function PriceBlock({ land }: { land: LandCardType }) {
+function PriceBlock({ land, locale }: { land: LandCardType; locale: Locale }) {
   const struck = land.status === "sold" || land.status === "rented";
+  const d = getDictionary(locale);
 
   if (land.priceOnRequest) {
     return (
-      <p className="font-serif text-[21px] text-[var(--kani-green)]">Price on request</p>
+      <p className="font-serif text-[21px] text-[var(--kani-green)]">
+        {d.land.priceOnRequest}
+      </p>
     );
   }
 
@@ -169,7 +186,7 @@ function PriceBlock({ land }: { land: LandCardType }) {
           {formatLKR(land.salePrice!)}
           {land.priceNegotiable && (
             <span className="ml-1.5 font-sans text-[13px] font-medium text-[var(--muted)]">
-              negotiable
+              {d.land.negotiableShort}
             </span>
           )}
         </p>
@@ -178,7 +195,7 @@ function PriceBlock({ land }: { land: LandCardType }) {
       {/* The comparison number. */}
       {showSale && land.pricePerPerch && (
         <p className="tabular text-[14px] text-[var(--muted)]">
-          {formatLKR(land.pricePerPerch)} per perch
+          {formatLKR(land.pricePerPerch)} {d.land.perPerch}
         </p>
       )}
 
@@ -194,11 +211,11 @@ function PriceBlock({ land }: { land: LandCardType }) {
         >
           {formatLKR(land.rentAmount!)}
           <span className="font-sans text-[14px] text-[var(--muted)]">
-            /{land.rentPeriod === "year" ? "year" : "month"}
+            /{EnumLabel.RENT_PERIOD[locale][land.rentPeriod === "year" ? "year" : "month"]}
           </span>
           {land.depositAmount ? (
             <span className="font-sans text-[14px] text-[var(--muted)]">
-              {" "}· deposit {formatLKR(land.depositAmount)}
+              {" "}· {d.land.deposit} {formatLKR(land.depositAmount)}
             </span>
           ) : null}
         </p>

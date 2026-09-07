@@ -18,17 +18,51 @@ import {
   getTaxonomies,
   getSettings,
 } from "@/lib/queries";
+import { getDictionary, interpolate } from "@/lib/i18n";
+import { localeHref, toLocale, type Locale } from "@/lib/i18n/config";
+import { localizedName } from "@/lib/i18n/localized";
 
 export const revalidate = 300;
 
-export const metadata: Metadata = {
-  title: "Land for sale and rent in Northern & Eastern Sri Lanka",
-  description:
-    "Browse land, paddy fields, coconut estates and houses across Vavuniya, Mannar, Jaffna, Mullaitivu, Trincomalee and Batticaloa. Contact owners directly on kani.lk.",
-  alternates: { canonical: "/" },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const locale = toLocale((await params).lang);
 
-export default async function HomePage() {
+  const copy: Record<Locale, { title: string; description: string }> = {
+    en: {
+      title: "Land for sale and rent in Northern & Eastern Sri Lanka",
+      description:
+        "Browse land, paddy fields, coconut estates and houses across Vavuniya, Mannar, Jaffna, Mullaitivu, Trincomalee and Batticaloa. Contact owners directly on kani.lk.",
+    },
+    ta: {
+      title: "இலங்கையின் வட, கிழக்கு மாகாணங்களில் விற்பனைக்கும் வாடகைக்குமான காணிகள்",
+      description:
+        "வவுனியா, மன்னார், யாழ்ப்பாணம், முல்லைத்தீவு, திருகோணமலை, மட்டக்களப்பு ஆகிய மாவட்டங்களில் காணிகள், வயல்கள், தென்னந்தோட்டங்கள், வீடுகள். உரிமையாளர்களை நேரடியாகத் தொடர்பு கொள்ளுங்கள்.",
+    },
+  };
+
+  return {
+    ...copy[locale],
+    alternates: {
+      canonical: `/${locale}`,
+      // Each locale is a real URL, so tell Google about both.
+      languages: { "ta-LK": "/ta", "en-LK": "/en" },
+    },
+  };
+}
+
+export default async function HomePage({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}) {
+  const locale = toLocale((await params).lang);
+  const d = getDictionary(locale);
+  const href = (path: string) => localeHref(path, locale);
+
   const [popular, featured, latest, sold, districts, taxonomies, settings] =
     await Promise.all([
       getPopularLands(8),
@@ -114,7 +148,10 @@ export default async function HomePage() {
             >
               <span className="size-1.5 shrink-0 rounded-full bg-[var(--palmyra-gold)]" aria-hidden="true" />
               <span className="truncate">
-                {totalListings} lands listed across {districts.length} districts
+                {interpolate(d.home.statBar, {
+                  listings: totalListings,
+                  districts: districts.length,
+                })}
               </span>
             </span>
           </p>
@@ -135,16 +172,16 @@ export default async function HomePage() {
         <section className="container-kani pt-16 md:pt-20">
           <Reveal>
             <SectionHeading
-              title={String(settings.popularSectionTitle || "Most popular lands")}
-              subtitle="The blocks people are looking at and calling about right now."
+              title={String(settings.popularSectionTitle || d.home.popularTitle)}
+              subtitle={d.home.popularSub}
               action={
-                <ButtonLink href="/lands" variant="outline" size="sm" className="hidden sm:inline-flex">
-                  View all
+                <ButtonLink href={href("/lands")} variant="outline" size="sm" className="hidden sm:inline-flex">
+                  {d.home.viewAll}
                 </ButtonLink>
               }
             />
           </Reveal>
-          <LandRail lands={popular} priority />
+          <LandRail lands={popular} locale={locale} priority />
         </section>
       )}
 
@@ -156,23 +193,23 @@ export default async function HomePage() {
               <div className="mb-6 flex items-end justify-between gap-4">
                 <div>
                   <h2 className="text-[27px] text-white md:text-[34px]">
-                    Featured this month
+                    {d.home.featuredTitle}
                   </h2>
                   <p className="mt-1.5 max-w-2xl text-[15px] text-white/75 md:text-[16px]">
-                    Hand-picked blocks — premium locations, or owners who need to move quickly.
+                    {d.home.featuredSub}
                   </p>
                 </div>
                 <ButtonLink
-                  href="/lands"
+                  href={href("/lands")}
                   variant="light"
                   size="sm"
                   className="hidden shrink-0 sm:inline-flex"
                 >
-                  Browse all land
+                  {d.home.browseAllLand}
                 </ButtonLink>
               </div>
             </Reveal>
-            <LandRail lands={featured} />
+            <LandRail lands={featured} locale={locale} />
           </div>
         </section>
       )}
@@ -182,16 +219,16 @@ export default async function HomePage() {
         <section className="container-kani pt-16 md:pt-20">
           <Reveal>
             <SectionHeading
-              title="Latest listings"
-              subtitle="Newly published land and property, most recent first."
+              title={d.home.latestTitle}
+              subtitle={d.home.latestSub}
               action={
-                <ButtonLink href="/lands?sort=newest" variant="outline" size="sm" className="hidden sm:inline-flex">
-                  See all
+                <ButtonLink href={href("/lands?sort=newest")} variant="outline" size="sm" className="hidden sm:inline-flex">
+                  {d.home.seeAll}
                 </ButtonLink>
               }
             />
           </Reveal>
-          <LandRail lands={latest} />
+          <LandRail lands={latest} locale={locale} />
         </section>
       )}
 
@@ -199,24 +236,26 @@ export default async function HomePage() {
       <section className="container-kani pt-16 md:pt-20">
         <Reveal>
           <SectionHeading
-            title="Browse by district"
-            subtitle="Six districts across the Northern and Eastern provinces."
+            title={d.home.districtsTitle}
+            subtitle={d.home.districtsSub}
           />
         </Reveal>
         <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {districts.map((d, i) => (
-            <Reveal as="li" key={d._id} delay={Math.min(i * 55, 220)}>
+          {districts.map((district, i) => (
+            <Reveal as="li" key={district._id} delay={Math.min(i * 55, 220)}>
               <Link
-                href={`/districts/${d.slug}`}
+                href={href(`/districts/${district.slug}`)}
                 className="group flex h-full items-center justify-between gap-4 rounded-[var(--radius-lg)]
                            border border-[var(--hairline)] bg-[var(--card)] p-5 lift"
               >
                 <span className="min-w-0">
                   <span className="block font-serif text-[21px] text-[var(--kani-green)]">
-                    {d.name}
+                    {localizedName(district, locale)}
                   </span>
                   <span className="block text-[14px] text-[var(--muted)]">
-                    {d.count} {d.count === 1 ? "listing" : "listings"} · {d.province} Province
+                    {district.count}{" "}
+                    {district.count === 1 ? d.home.listingOne : d.home.listingMany} ·{" "}
+                    {district.province} {d.home.province}
                   </span>
                 </span>
                 <span
@@ -241,11 +280,11 @@ export default async function HomePage() {
         <section className="container-kani pt-16 md:pt-20">
           <Reveal>
             <SectionHeading
-              title="Recently sold and rented"
-              subtitle="Land that moved through kani.lk. Proof the market here is active."
+              title={d.home.soldTitle}
+              subtitle={d.home.soldSub}
             />
           </Reveal>
-          <LandRail lands={sold} />
+          <LandRail lands={sold} locale={locale} />
         </section>
       )}
 
@@ -253,27 +292,15 @@ export default async function HomePage() {
       <section id="how-it-works" className="container-kani scroll-mt-24 pt-16 md:pt-20">
         <Reveal>
           <SectionHeading
-            title="How kani.lk works"
-            subtitle="No account, no commission, no middleman."
+            title={d.home.howTitle}
+            subtitle={d.home.howSub}
           />
         </Reveal>
         <ol className="grid gap-4 md:grid-cols-3">
           {[
-            {
-              n: "1",
-              title: "Search the way you buy",
-              body: "Filter by district, size in perches, price per perch, deed type and road access — the things that actually decide a purchase here.",
-            },
-            {
-              n: "2",
-              title: "See the whole block",
-              body: "Every listing carries full photographs, the deed type, the access road width and the distance from town. Save what you like with the heart.",
-            },
-            {
-              n: "3",
-              title: "Call the owner directly",
-              body: "The owner's own number is on every listing. Call, WhatsApp, or send an enquiry and they will come back to you.",
-            },
+            { n: "1", title: d.home.how1Title, body: d.home.how1Body },
+            { n: "2", title: d.home.how2Title, body: d.home.how2Body },
+            { n: "3", title: d.home.how3Title, body: d.home.how3Body },
           ].map((step, i) => (
             <Reveal as="li" key={step.n} delay={i * 70}>
               <div className="h-full rounded-[var(--radius-lg)] border border-[var(--hairline)] bg-[var(--card)] p-6">

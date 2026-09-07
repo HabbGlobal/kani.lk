@@ -1,4 +1,6 @@
 import { cn } from "@/lib/utils";
+import { getDictionary } from "@/lib/i18n";
+import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
 import type { LandStatus, Purpose } from "@/models/types";
 
 /**
@@ -10,11 +12,14 @@ export function PurposeBadge({
   purpose,
   className,
   size = "md",
+  locale = DEFAULT_LOCALE,
 }: {
   purpose: Purpose;
   className?: string;
   size?: "sm" | "md";
+  locale?: Locale;
 }) {
+  const d = getDictionary(locale);
   const pad = size === "sm" ? "px-2.5 py-1 text-[12px]" : "px-3 py-1.5 text-[13px]";
   const shell =
     "inline-flex items-center rounded-[var(--radius-pill)] font-semibold tracking-tight " +
@@ -23,9 +28,11 @@ export function PurposeBadge({
   if (purpose === "both") {
     return (
       <span className={cn(shell, "overflow-hidden p-0", className)}>
-        <span className={cn("bg-[var(--kani-green)] text-white", pad)}>For sale</span>
+        <span className={cn("bg-[var(--kani-green)] text-white", pad)}>
+          {d.land.forSale}
+        </span>
         <span className={cn("bg-[var(--palmyra-gold)] text-[var(--kani-green-deep)]", pad)}>
-          or rent
+          {d.land.badgeOrRent}
         </span>
       </span>
     );
@@ -34,14 +41,14 @@ export function PurposeBadge({
   if (purpose === "rent") {
     return (
       <span className={cn(shell, "bg-[var(--palmyra-gold)] text-[var(--kani-green-deep)]", pad, className)}>
-        For rent
+        {d.land.forRent}
       </span>
     );
   }
 
   return (
     <span className={cn(shell, "bg-[var(--kani-green)] text-white", pad, className)}>
-      For sale
+      {d.land.forSale}
     </span>
   );
 }
@@ -51,10 +58,18 @@ export function PurposeBadge({
  * terminal states, gold for reserved — which keeps full colour, because it may
  * come back to market.
  */
-export function StatusRibbon({ status }: { status: LandStatus }) {
+export function StatusRibbon({
+  status,
+  locale = DEFAULT_LOCALE,
+}: {
+  status: LandStatus;
+  locale?: Locale;
+}) {
   if (status === "available") return null;
 
-  const label = status === "sold" ? "Sold" : status === "rented" ? "Rented" : "Reserved";
+  const d = getDictionary(locale);
+  const label =
+    status === "sold" ? d.land.sold : status === "rented" ? d.land.rented : d.land.reserved;
   const bg = status === "reserved" ? "var(--palmyra-gold)" : "var(--laterite)";
   const fg = status === "reserved" ? "var(--kani-green-deep)" : "#fff";
 
@@ -102,12 +117,19 @@ export function Chip({
 }
 
 /** Availability dot + label for the detail page. */
-export function StatusPill({ status }: { status: LandStatus }) {
+export function StatusPill({
+  status,
+  locale = DEFAULT_LOCALE,
+}: {
+  status: LandStatus;
+  locale?: Locale;
+}) {
+  const d = getDictionary(locale);
   const map = {
-    available: { label: "Available", color: "var(--paddy)" },
-    reserved: { label: "Reserved", color: "var(--palmyra-gold)" },
-    sold: { label: "Sold", color: "var(--laterite)" },
-    rented: { label: "Rented", color: "var(--laterite)" },
+    available: { label: d.land.available, color: "var(--paddy)" },
+    reserved: { label: d.land.reserved, color: "var(--palmyra-gold)" },
+    sold: { label: d.land.sold, color: "var(--laterite)" },
+    rented: { label: d.land.rented, color: "var(--laterite)" },
   } as const;
   const { label, color } = map[status];
 

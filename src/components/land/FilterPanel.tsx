@@ -5,11 +5,14 @@ import { useCallback, useMemo, useState, useTransition } from "react";
 import { Sheet } from "@/components/ui/Sheet";
 import { Button } from "@/components/ui/Button";
 import { Field, Input, Select, Checkbox } from "@/components/ui/Field";
-import { DEED_TYPE_LABELS } from "@/models/types";
+import { DEED_TYPES, type DeedType } from "@/models/types";
 import { SORT_OPTIONS } from "@/lib/search-params";
+import { useI18n } from "@/lib/i18n/client";
+import { localizedName } from "@/lib/i18n/localized";
+import * as EnumLabel from "@/lib/i18n/enums";
 import { cn } from "@/lib/utils";
 
-type Taxonomy = { _id: string; name: string; slug: string }[];
+type Taxonomy = { _id: string; name: string; nameTa?: string; slug: string }[];
 
 const PERCH_STEPS = [5, 10, 15, 20, 40, 80, 160, 320, 800];
 const PRICE_STEPS = [
@@ -85,6 +88,7 @@ export function FilterPanel({
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
+  const { d, t, locale } = useI18n();
   const [mobileSheetOpen, setMobileSheetOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -136,13 +140,17 @@ export function FilterPanel({
   // in sync rather than two.
   const moreControls = (
     <div className="space-y-5">
-      <Field label="Keyword" htmlFor="f-q" hint="Title, area or reference code">
+      <Field
+        label={d.lands.keyword}
+        htmlFor="f-q"
+        hint={d.lands.keywordHint}
+      >
         <Input
           id="f-q"
           type="search"
           name="q"
           defaultValue={get("q")}
-          placeholder="Omanthai, corner block, KANI-VAV-0001"
+          placeholder={d.lands.keywordPlaceholder}
           onBlur={(e) => setParam({ q: e.target.value })}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
@@ -154,42 +162,48 @@ export function FilterPanel({
       </Field>
 
       {visibleCities.length > 0 && (
-        <Field label="City or town" htmlFor="f-city">
+        <Field label={d.lands.cityOrTown} htmlFor="f-city">
           <Select
             id="f-city"
             value={get("city")}
             onChange={(e) => setParam({ city: e.target.value })}
           >
-            <option value="">Anywhere in the district</option>
+            <option value="">{d.lands.anywhereInDistrict}</option>
             {visibleCities.map((c) => (
-              <option key={c._id} value={c.slug}>{c.name}</option>
+              <option key={c._id} value={c.slug}>
+                {localizedName(c, locale)}
+              </option>
             ))}
           </Select>
         </Field>
       )}
 
-      <Field label="Deed type" htmlFor="f-deed">
+      <Field label={d.lands.deedType} htmlFor="f-deed">
         <Select
           id="f-deed"
           value={get("deedType")}
           onChange={(e) => setParam({ deedType: e.target.value })}
         >
-          <option value="">Any deed type</option>
-          {Object.entries(DEED_TYPE_LABELS).map(([value, label]) => (
-            <option key={value} value={value}>{label}</option>
+          <option value="">{d.lands.anyDeedType}</option>
+          {DEED_TYPES.map((value: DeedType) => (
+            <option key={value} value={value}>
+              {EnumLabel.DEED_TYPE[locale][value]}
+            </option>
           ))}
         </Select>
       </Field>
 
-      <Field label="Access road" htmlFor="f-road">
+      <Field label={d.lands.roadAccess} htmlFor="f-road">
         <Select
           id="f-road"
           value={get("minRoadFt")}
           onChange={(e) => setParam({ minRoadFt: e.target.value })}
         >
-          <option value="">Any road width</option>
+          <option value="">{d.lands.anyRoadWidth}</option>
           {[10, 12, 15, 20, 30].map((ft) => (
-            <option key={ft} value={ft}>{ft}ft or wider</option>
+            <option key={ft} value={ft}>
+              {t(d.lands.roadOrWider, { ft })}
+            </option>
           ))}
         </Select>
       </Field>
@@ -199,12 +213,12 @@ export function FilterPanel({
           Utilities
         </legend>
         <Checkbox
-          label="Electricity at the boundary"
+          label={d.lands.electricityAtBoundary}
           checked={get("electricity") === "1"}
           onChange={(e) => setParam({ electricity: e.target.checked ? "1" : null })}
         />
         <Checkbox
-          label="Water — well, tank or NWSDB line"
+          label={d.lands.waterCheckbox}
           checked={get("water") === "1"}
           onChange={(e) => setParam({ water: e.target.checked ? "1" : null })}
         />
@@ -212,7 +226,7 @@ export function FilterPanel({
 
       <div className="border-t border-[var(--hairline)] pt-4">
         <Checkbox
-          label="Include sold and rented listings"
+          label={d.lands.includeSoldCheckbox}
           checked={get("includeSold") === "1"}
           onChange={(e) => setParam({ includeSold: e.target.checked ? "1" : null })}
         />
@@ -224,48 +238,52 @@ export function FilterPanel({
   // to stack everything vertically, unlike the desktop bar).
   const allControlsForSheet = (
     <div className="space-y-5">
-      <Field label="Purpose" htmlFor="f-purpose-sheet">
+      <Field label={d.lands.purpose} htmlFor="f-purpose-sheet">
         <Select
           id="f-purpose-sheet"
           value={purpose}
           onChange={(e) => setParam({ purpose: e.target.value })}
         >
-          <option value="">For sale or rent</option>
-          <option value="sale">For sale</option>
-          <option value="rent">For rent</option>
+          <option value="">{d.lands.forSaleOrRent}</option>
+          <option value="sale">{d.land.forSale}</option>
+          <option value="rent">{d.land.forRent}</option>
         </Select>
       </Field>
 
-      <Field label="District" htmlFor="f-district-sheet">
+      <Field label={d.lands.district} htmlFor="f-district-sheet">
         <Select
           id="f-district-sheet"
           value={districtSlug}
           onChange={(e) => setParam({ district: e.target.value, city: null })}
         >
-          <option value="">All districts</option>
-          {districts.map((d) => (
-            <option key={d._id} value={d.slug}>{d.name}</option>
+          <option value="">{d.lands.allDistricts}</option>
+          {districts.map((district) => (
+            <option key={district._id} value={district.slug}>
+              {localizedName(district, locale)}
+            </option>
           ))}
         </Select>
       </Field>
 
-      <Field label="Land type" htmlFor="f-type-sheet">
+      <Field label={d.lands.landType} htmlFor="f-type-sheet">
         <Select
           id="f-type-sheet"
           value={get("landType")}
           onChange={(e) => setParam({ landType: e.target.value })}
         >
-          <option value="">All land types</option>
-          {landTypes.map((t) => (
-            <option key={t._id} value={t.slug}>{t.name}</option>
+          <option value="">{d.lands.allLandTypes}</option>
+          {landTypes.map((type) => (
+            <option key={type._id} value={type.slug}>
+              {localizedName(type, locale)}
+            </option>
           ))}
         </Select>
       </Field>
 
-      <Field label="Size (perches)">
+      <Field label={d.lands.sizePerches}>
         <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
           <Select
-            aria-label="Minimum size in perches"
+            aria-label={d.lands.minSizeAria}
             value={get("minPerch")}
             onChange={(e) => setParam({ minPerch: e.target.value })}
           >
@@ -276,7 +294,7 @@ export function FilterPanel({
           </Select>
           <span className="text-[var(--muted)]" aria-hidden="true">–</span>
           <Select
-            aria-label="Maximum size in perches"
+            aria-label={d.lands.maxSizeAria}
             value={get("maxPerch")}
             onChange={(e) => setParam({ maxPerch: e.target.value })}
           >
@@ -288,10 +306,10 @@ export function FilterPanel({
         </div>
       </Field>
 
-      <Field label="Price (LKR)">
+      <Field label={d.lands.priceLKR}>
         <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
           <Select
-            aria-label="Minimum price"
+            aria-label={d.lands.minPriceAria}
             value={get("minPrice")}
             onChange={(e) => setParam({ minPrice: e.target.value })}
           >
@@ -302,7 +320,7 @@ export function FilterPanel({
           </Select>
           <span className="text-[var(--muted)]" aria-hidden="true">–</span>
           <Select
-            aria-label="Maximum price"
+            aria-label={d.lands.maxPriceAria}
             value={get("maxPrice")}
             onChange={(e) => setParam({ maxPrice: e.target.value })}
           >
@@ -333,9 +351,9 @@ export function FilterPanel({
           pending && "opacity-60 transition-opacity duration-200"
         )}
         role="search"
-        aria-label="Filter listings"
+        aria-label={d.lands.filterListings}
       >
-        <BarField label="Sort by" htmlFor="f-sort">
+        <BarField label={d.lands.sortBy} htmlFor="f-sort">
           <select
             id="f-sort"
             value={get("sort") || "newest"}
@@ -347,19 +365,21 @@ export function FilterPanel({
                        focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--kani-green)]"
           >
             {SORT_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>{o.label}</option>
+              <option key={o.value} value={o.value}>
+                {EnumLabel.SORT[locale][o.value]}
+              </option>
             ))}
           </select>
         </BarField>
 
         <div className="border-t border-[var(--hairline)]" />
 
-        <BarField label="Purpose">
+        <BarField label={d.lands.purpose}>
           <div className="flex items-center gap-0.5 rounded-[var(--radius-md)] border border-[var(--hairline)] bg-[var(--bone)] p-1">
             {[
-              { value: "", label: "All" },
-              { value: "sale", label: "For sale" },
-              { value: "rent", label: "For rent" },
+              { value: "", label: d.common.all },
+              { value: "sale", label: d.land.forSale },
+              { value: "rent", label: d.land.forRent },
             ].map((opt) => {
               const active = purpose === opt.value;
               return (
@@ -382,52 +402,56 @@ export function FilterPanel({
           </div>
         </BarField>
 
-        <BarField label="District" htmlFor="f-district">
+        <BarField label={d.lands.district} htmlFor="f-district">
           <BarSelect
             id="f-district"
             value={districtSlug}
             onChange={(e) => setParam({ district: e.target.value, city: null })}
           >
-            <option value="">All districts</option>
-            {districts.map((d) => (
-              <option key={d._id} value={d.slug}>{d.name}</option>
+            <option value="">{d.lands.allDistricts}</option>
+            {districts.map((district) => (
+              <option key={district._id} value={district.slug}>
+                {localizedName(district, locale)}
+              </option>
             ))}
           </BarSelect>
         </BarField>
 
-        <BarField label="Land type" htmlFor="f-land-type">
+        <BarField label={d.lands.landType} htmlFor="f-land-type">
           <BarSelect
             id="f-land-type"
             value={get("landType")}
             onChange={(e) => setParam({ landType: e.target.value })}
           >
-            <option value="">All land types</option>
-            {landTypes.map((t) => (
-              <option key={t._id} value={t.slug}>{t.name}</option>
+            <option value="">{d.lands.allLandTypes}</option>
+            {landTypes.map((type) => (
+              <option key={type._id} value={type.slug}>
+                {localizedName(type, locale)}
+              </option>
             ))}
           </BarSelect>
         </BarField>
 
-        <BarField label="Minimum size" htmlFor="f-min-perch">
+        <BarField label={d.lands.minimumSize} htmlFor="f-min-perch">
           <BarSelect
             id="f-min-perch"
             value={get("minPerch")}
             onChange={(e) => setParam({ minPerch: e.target.value })}
           >
-            <option value="">Any size</option>
+            <option value="">{d.lands.anySize}</option>
             {PERCH_STEPS.map((p) => (
               <option key={p} value={p}>{p}+ perches</option>
             ))}
           </BarSelect>
         </BarField>
 
-        <BarField label="Maximum price" htmlFor="f-max-price">
+        <BarField label={d.lands.maximumPrice} htmlFor="f-max-price">
           <BarSelect
             id="f-max-price"
             value={get("maxPrice")}
             onChange={(e) => setParam({ maxPrice: e.target.value })}
           >
-            <option value="">Any price</option>
+            <option value="">{d.lands.anyPrice}</option>
             {PRICE_STEPS.map((p) => (
               <option key={p} value={p}>Up to {compactLKR(p)}</option>
             ))}
@@ -442,7 +466,7 @@ export function FilterPanel({
             className="flex w-full cursor-pointer items-center justify-between text-[13.5px] font-medium
                        text-[var(--kani-green)] transition-colors duration-200 hover:text-[var(--kani-green-deep)]"
           >
-            More filters
+            {d.lands.moreFilters}
             <svg
               viewBox="0 0 16 16"
               className={cn("size-3.5 transition-transform duration-200", moreOpen && "rotate-180")}
@@ -468,18 +492,20 @@ export function FilterPanel({
           <path d="M2 4h12M4 8h8M6.5 12h3" stroke="currentColor" strokeWidth="1.6"
                 strokeLinecap="round" />
         </svg>
-        Filters
+        {d.lands.filters}
       </Button>
 
       {/* Mobile: every field, since the bar above isn't shown at this width. */}
       <Sheet
         open={mobileSheetOpen}
         onClose={() => setMobileSheetOpen(false)}
-        title="Filter lands"
+        title={d.lands.filterLands}
         footer={
           <Button fullWidth size="lg" onClick={() => setMobileSheetOpen(false)}>
             {/* The live count makes the button an answer, not a guess. */}
-            Show {resultCount} {resultCount === 1 ? "land" : "lands"}
+            {resultCount === 1
+              ? d.lands.showLandsOne
+              : t(d.lands.showLands, { count: resultCount })}
           </Button>
         }
       >

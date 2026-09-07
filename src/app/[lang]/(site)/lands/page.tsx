@@ -8,21 +8,37 @@ import { Pagination } from "@/components/ui/Pagination";
 import { EmptyState } from "@/components/ui/Card";
 import { searchLands, countLands, getTaxonomies } from "@/lib/queries";
 import { parseFilters, buildQuery, type RawParams } from "@/lib/search-params";
+import { getDictionary, interpolate, type Dictionary } from "@/lib/i18n";
+import { localeHref, toLocale, type Locale } from "@/lib/i18n/config";
 
-export const metadata: Metadata = {
-  title: "Browse land for sale and rent",
-  description:
-    "Search land, paddy, coconut estates and houses across the Northern and Eastern provinces by district, size in perches, price and deed type.",
-  alternates: { canonical: "/lands" },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const locale = toLocale((await params).lang);
+  const d = getDictionary(locale);
+
+  return {
+    title: d.lands.metaTitle,
+    description: d.lands.metaDescription,
+    alternates: {
+      canonical: `/${locale}/lands`,
+      languages: { "ta-LK": "/ta/lands", "en-LK": "/en/lands" },
+    },
+  };
+}
 
 export default async function LandsPage({
+  params,
   searchParams,
 }: {
+  params: Promise<{ lang: string }>;
   searchParams: Promise<RawParams>;
 }) {
-  const params = await searchParams;
-  const filters = parseFilters(params);
+  const locale = toLocale((await params).lang);
+  const d = getDictionary(locale);
+  const filters = parseFilters(await searchParams);
 
   const [result, taxonomies] = await Promise.all([
     searchLands(filters),
@@ -31,12 +47,14 @@ export default async function LandsPage({
 
   return (
     <div className="container-kani py-8 md:py-12">
-      <LandsPageHeader title="Land and property" />
+      <LandsPageHeader title={d.lands.pageTitle} />
 
       <div className="mb-4 text-center text-[15px] text-[var(--muted)]">
         {result.total === 0
-          ? "No listings match these filters"
-          : `${result.total} ${result.total === 1 ? "listing" : "listings"} across the North and East`}
+          ? d.lands.noneMatch
+          : result.total === 1
+            ? d.lands.countLineOne
+            : interpolate(d.lands.countLine, { count: result.total })}
       </div>
 
       {/* No lg:items-start here — position: sticky needs its containing block
@@ -47,7 +65,7 @@ export default async function LandsPage({
       <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
         <div>
           <h2 className="mb-3 hidden text-[15px] font-semibold text-[var(--ink)] lg:block">
-            Filters
+            {d.lands.filters}
           </h2>
           <FilterPanel
             districts={taxonomies.districts}
@@ -68,15 +86,17 @@ export default async function LandsPage({
 
           {result.items.length > 0 ? (
             <>
-              <LandGrid lands={result.items} />
+              <LandGrid lands={result.items} locale={locale} />
               <Pagination
                 page={result.page}
                 pages={result.pages}
-                buildHref={(p) => `/lands${buildQuery(filters, { page: p })}`}
+                buildHref={(p) =>
+                  `${localeHref("/lands", locale)}${buildQuery(filters, { page: p })}`
+                }
               />
             </>
           ) : (
-            <RelaxedEmptyState filters={filters} />
+            <RelaxedEmptyState filters={filters} locale={locale} d={d} />
           )}
         </div>
       </div>
@@ -90,33 +110,40 @@ export default async function LandsPage({
  */
 async function RelaxedEmptyState({
   filters,
+  locale,
+  d,
 }: {
   filters: ReturnType<typeof parseFilters>;
+  locale: Locale;
+  d: Dictionary;
 }) {
   // Try dropping the most restrictive filter first, in rough order of how much
   // each one narrows a search here.
   const relaxations: { label: string; drop: Partial<typeof filters> }[] = [];
 
   if (filters.city) {
-    relaxations.push({ label: "anywhere in the district", drop: { city: undefined } });
+    relaxations.push({ label: d.lands.relaxCity, drop: { city: undefined } });
   }
   if (filters.minPerch || filters.maxPerch) {
     relaxations.push({
-      label: "any size",
+      label: d.lands.relaxSize,
       drop: { minPerch: undefined, maxPerch: undefined },
     });
   }
   if (filters.minPrice || filters.maxPrice) {
     relaxations.push({
-      label: "any price",
+      label: d.lands.relaxPrice,
       drop: { minPrice: undefined, maxPrice: undefined },
     });
   }
   if (filters.landType) {
-    relaxations.push({ label: "any land type", drop: { landType: undefined } });
+    relaxations.push({ label: d.lands.relaxLandType, drop: { landType: undefined } });
   }
   if (filters.district) {
-    relaxations.push({ label: "all districts", drop: { district: undefined, city: undefined } });
+    relaxations.push({
+      label: d.lands.relaxDistrict,
+      drop: { district: undefined, city: undefined },
+    });
   }
 
   const suggestions = (
@@ -134,19 +161,22 @@ async function RelaxedEmptyState({
   }[];
 
   return (
-    <EmptyState title="Nothing matches these filters yet">
+    <EmptyState title={d.lands.emptyTitle}>
       {suggestions.length > 0 ? (
         <div className="space-y-3">
-          <p>Try widening the search:</p>
+          <p>{d.lands.tryWidening}</p>
           <ul className="space-y-2">
             {suggestions.map((s) => (
               <li key={s.label}>
                 <Link
-                  href={`/lands${buildQuery(s.relaxed, { page: 1 })}`}
+                  href={`${localeHref("/lands", locale)}${buildQuery(s.relaxed, { page: 1 })}`}
                   className="inline-flex items-center gap-1.5 font-medium text-[var(--kani-green)]
                              underline-offset-4 hover:underline"
                 >
-                  {s.count} {s.count === 1 ? "listing" : "listings"} with {s.label}
+                  {interpolate(
+                    s.count === 1 ? d.lands.suggestionOne : d.lands.suggestion,
+                    { count: s.count, label: s.label }
+                  )}
                   <svg viewBox="0 0 16 16" className="size-3.5" fill="none" aria-hidden="true">
                     <path d="M3 8h9M8 4l4 4-4 4" stroke="currentColor" strokeWidth="1.6"
                           strokeLinecap="round" strokeLinejoin="round" />
@@ -157,11 +187,7 @@ async function RelaxedEmptyState({
           </ul>
         </div>
       ) : (
-        <p>
-          Nothing is listed against these filters right now. New land is added
-          every week — try a wider search, or call us and tell us what you are
-          looking for.
-        </p>
+        <p>{d.lands.emptyFallback}</p>
       )}
     </EmptyState>
   );

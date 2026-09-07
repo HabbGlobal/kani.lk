@@ -1,10 +1,17 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { jwtVerify } from "jose";
+import {
+  DEFAULT_LOCALE,
+  LOCALES,
+  LOCALE_COOKIE,
+  LOCALE_COOKIE_MAX_AGE,
+  isLocale,
+} from "@/lib/i18n/config";
 
 /**
- * Guards every /admin route and every mutating admin API call. Named `proxy`
- * (not `middleware`) per the Next 16 convention — the file itself keeps the
- * same behavior.
+ * Guards every /admin route and every mutating admin API call, and puts a
+ * locale segment on every public URL. Named `proxy` (not `middleware`) per the
+ * Next 16 convention.
  *
  * This runs on the edge, so it cannot import the Node-only auth module or touch
  * Mongo. It verifies the JWT signature and nothing more — the route handlers
@@ -24,6 +31,24 @@ async function isValidAccessToken(token: string | undefined): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+/**
+ * Which locale to send a first-time visitor to. The saved cookie always wins —
+ * an explicit choice outranks the browser. Otherwise Tamil, unless the browser
+ * clearly prefers English: this site's audience reads Tamil by default.
+ */
+function preferredLocale(req: NextRequest) {
+  const saved = req.cookies.get(LOCALE_COOKIE)?.value;
+  if (isLocale(saved)) return saved;
+
+  const header = req.headers.get("accept-language")?.toLowerCase() ?? "";
+  // Only a leading English preference flips it; "en" appearing far down the
+  // list is just a fallback the browser would accept, not a preference.
+  const first = header.split(",")[0]?.trim() ?? "";
+  if (first.startsWith("en")) return "en";
+
+  return DEFAULT_LOCALE;
 }
 
 export async function proxy(req: NextRequest) {
@@ -56,11 +81,42 @@ export async function proxy(req: NextRequest) {
       url.search = "";
       return NextResponse.redirect(url);
     }
+    return NextResponse.next();
   }
 
-  return NextResponse.next();
+  // ---- Public site: every URL carries its locale. ----
+  const hasLocale = LOCALES.some(
+    (l) => pathname === `/${l}` || pathname.startsWith(`/${l}/`)
+  );
+
+  if (!hasLocale) {
+    const locale = preferredLocale(req);
+    const url = req.nextUrl.clone();
+    url.pathname = pathname === "/" ? `/${locale}` : `/${locale}${pathname}`;
+    return NextResponse.redirect(url);
+  }
+
+  // Keep the cookie in step with the URL, so a visitor who lands on an /en link
+  // and then opens the bare domain stays in English.
+  const current = pathname.split("/")[1];
+  const res = NextResponse.next();
+  if (isLocale(current) && req.cookies.get(LOCALE_COOKIE)?.value !== current) {
+    res.cookies.set(LOCALE_COOKIE, current, {
+      path: "/",
+      maxAge: LOCALE_COOKIE_MAX_AGE,
+      sameSite: "lax",
+    });
+  }
+  return res;
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/api/admin/:path*"],
+  matcher: [
+    /*
+     * Everything except Next internals, the image endpoint, and public files.
+     * The public site now needs the proxy on every route (not just /admin) so
+     * a bare URL can be redirected to its locale.
+     */
+    "/((?!_next/static|_next/image|api/images|favicon.ico|favicon.png|logo.png|robots.txt|sitemap.xml|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico)$).*)",
+  ],
 };
