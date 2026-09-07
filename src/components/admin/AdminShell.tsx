@@ -4,61 +4,72 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Logo } from "@/components/site/Logo";
+import { AdminLanguageSwitch } from "./AdminLanguageSwitch";
+import { useI18n } from "@/lib/i18n/client";
+import type { Dictionary } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import type { SessionUser } from "@/lib/auth";
 
 const THEME_KEY = "kani.admin-theme";
 const COLLAPSE_KEY = "kani.admin-sidebar-collapsed";
 
-const NAV: { href: string; label: string; icon: React.ReactNode; superadminOnly?: boolean }[] = [
+type NavItem = {
+  href: string;
+  /** Resolved against `d.admin` at render time so the sidebar translates. */
+  key: keyof Dictionary["admin"];
+  icon: React.ReactNode;
+  superadminOnly?: boolean;
+};
+
+const NAV: NavItem[] = [
   {
     href: "/admin",
-    label: "Dashboard",
+    key: "dashboard",
     icon: <path d="M3 10l7-6 7 6M5 9v8h10V9" />,
   },
   {
     href: "/admin/lands",
-    label: "Listings",
+    key: "listings",
     icon: <><rect x="3" y="4" width="14" height="12" rx="1.5" /><path d="M3 8h14" /></>,
   },
   {
     href: "/admin/popular",
-    label: "Popular row",
+    key: "popularRow",
     icon: <path d="M10 2.5l2.2 4.6 5 .7-3.6 3.5.9 5-4.5-2.4-4.5 2.4.9-5-3.6-3.5 5-.7Z" />,
   },
   {
     href: "/admin/inquiries",
-    label: "Enquiries",
+    key: "enquiries",
     icon: <><rect x="3" y="4.5" width="14" height="11" rx="1.5" /><path d="M3 6l7 5 7-5" /></>,
   },
   {
     href: "/admin/districts",
-    label: "Districts",
+    key: "districts",
     icon: <><circle cx="10" cy="8" r="5.5" /><path d="M10 13.5V17M7 17h6" /></>,
   },
   {
     href: "/admin/cities",
-    label: "Cities & towns",
+    key: "citiesTowns",
     icon: <><rect x="4" y="9" width="4" height="8" /><rect x="12" y="5" width="4" height="12" /></>,
   },
   {
     href: "/admin/land-types",
-    label: "Land types",
+    key: "landTypes",
     icon: <path d="M3 10l7-7 7 7-7 7-7-7Z" />,
   },
   {
     href: "/admin/pages",
-    label: "Pages",
+    key: "pages",
     icon: <><rect x="4" y="3" width="12" height="14" rx="1.2" /><path d="M7 7h6M7 10h6M7 13h4" /></>,
   },
   {
     href: "/admin/settings",
-    label: "Settings",
+    key: "settings",
     icon: <><circle cx="10" cy="10" r="2.6" /><path d="M10 2.5v2M10 15.5v2M17.5 10h-2M4.5 10h-2M15.1 4.9l-1.4 1.4M6.3 13.7l-1.4 1.4M15.1 15.1l-1.4-1.4M6.3 6.3 4.9 4.9" /></>,
   },
   {
     href: "/admin/users",
-    label: "Admin users",
+    key: "adminUsers",
     icon: <><circle cx="10" cy="7" r="3" /><path d="M4 17c0-3 2.7-5 6-5s6 2 6 5" /></>,
     superadminOnly: true,
   },
@@ -73,6 +84,7 @@ export function AdminShell({
 }) {
   const pathname = usePathname();
   const router = useRouter();
+  const { d } = useI18n();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dark, setDark] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
@@ -124,8 +136,8 @@ export function AdminShell({
               key={item.href}
               href={item.href}
               onClick={() => setMobileOpen(false)}
-              title={rail ? item.label : undefined}
-              aria-label={rail ? item.label : undefined}
+              title={rail ? d.admin[item.key] : undefined}
+              aria-label={rail ? d.admin[item.key] : undefined}
               className={cn(
                 "flex items-center gap-3 rounded-[var(--radius-md)] px-3.5 py-2.5 text-[15px] font-medium",
                 "transition-colors duration-150",
@@ -140,7 +152,7 @@ export function AdminShell({
                    strokeLinejoin="round" aria-hidden="true">
                 {item.icon}
               </svg>
-              {!rail && item.label}
+              {!rail && d.admin[item.key]}
             </Link>
           );
         })}
@@ -167,18 +179,21 @@ export function AdminShell({
           )}
         >
           <Logo onDark iconOnly={collapsed} />
-          <ThemeToggle dark={dark} onToggle={toggleDark} circle />
+          <ThemeToggle dark={dark} onToggle={toggleDark} circle d={d} />
         </div>
         {collapsed ? navRail : nav}
         <div className={cn("flex items-center pt-2", collapsed ? "justify-center px-2" : "justify-end px-4")}>
           <IconOnlyButton
-            label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            label={collapsed ? d.admin.expandSidebar : d.admin.collapseSidebar}
             onClick={toggleCollapsed}
           >
             <path d={collapsed ? "M7 4l6 6-6 6" : "M13 4L7 10l6 6"} />
           </IconOnlyButton>
         </div>
-        <UserFooter user={user} onSignOut={signOut} collapsed={collapsed} />
+        <div className={cn("px-3 pb-2", collapsed && "px-2")}>
+          <AdminLanguageSwitch collapsed={collapsed} />
+        </div>
+        <UserFooter user={user} onSignOut={signOut} collapsed={collapsed} d={d} />
       </aside>
 
       {/* Mobile top bar + drawer */}
@@ -188,7 +203,7 @@ export function AdminShell({
           <button
             type="button"
             onClick={() => setMobileOpen(true)}
-            aria-label="Open menu"
+            aria-label={d.admin.openMenu}
             className="grid size-11 cursor-pointer place-items-center rounded-full hover:bg-[var(--hover-tint)]"
           >
             <svg viewBox="0 0 24 24" className="size-6" fill="none" stroke="currentColor"
@@ -204,7 +219,7 @@ export function AdminShell({
           <div className="fixed inset-0 z-50">
             <button
               type="button"
-              aria-label="Close menu"
+              aria-label={d.admin.closeMenu}
               onClick={() => setMobileOpen(false)}
               className="absolute inset-0 w-full cursor-default bg-black/40 animate-fade"
             />
@@ -215,7 +230,7 @@ export function AdminShell({
                 <button
                   type="button"
                   onClick={() => setMobileOpen(false)}
-                  aria-label="Close"
+                  aria-label={d.common.close}
                   className="grid size-10 cursor-pointer place-items-center rounded-full text-white hover:bg-white/10"
                 >
                   <svg viewBox="0 0 20 20" className="size-5" fill="none" stroke="currentColor"
@@ -226,9 +241,12 @@ export function AdminShell({
               </div>
               {nav}
               <div className="px-4 pt-2">
-                <ThemeToggle dark={dark} onToggle={toggleDark} />
+                <ThemeToggle dark={dark} onToggle={toggleDark} d={d} />
               </div>
-              <UserFooter user={user} onSignOut={signOut} />
+              <div className="px-3 pt-1">
+                <AdminLanguageSwitch />
+              </div>
+              <UserFooter user={user} onSignOut={signOut} d={d} />
             </div>
           </div>
         )}
@@ -247,11 +265,13 @@ function ThemeToggle({
   onToggle,
   compact,
   circle,
+  d,
 }: {
   dark: boolean;
   onToggle: () => void;
   compact?: boolean;
   circle?: boolean;
+  d: Dictionary;
 }) {
   const icon = (
     <svg viewBox="0 0 20 20" className="size-[17px] shrink-0" fill="none"
@@ -273,8 +293,8 @@ function ThemeToggle({
       type="button"
       onClick={onToggle}
       aria-pressed={dark}
-      aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
-      title={dark ? "Switch to light mode" : "Switch to dark mode"}
+      aria-label={dark ? d.admin.lightMode : d.admin.darkMode}
+      title={dark ? d.admin.lightMode : d.admin.darkMode}
       className={cn(
         "grid shrink-0 cursor-pointer place-items-center text-white/70",
         "transition-colors hover:bg-white/8 hover:text-white",
@@ -318,10 +338,12 @@ function UserFooter({
   user,
   onSignOut,
   collapsed,
+  d,
 }: {
   user: SessionUser;
   onSignOut: () => void;
   collapsed?: boolean;
+  d: Dictionary;
 }) {
   if (collapsed) {
     return (
@@ -336,8 +358,8 @@ function UserFooter({
         <button
           type="button"
           onClick={onSignOut}
-          aria-label="Sign out"
-          title="Sign out"
+          aria-label={d.admin.signOut}
+          title={d.admin.signOut}
           className="grid size-9 cursor-pointer place-items-center rounded-[var(--radius-md)]
                      text-red-400 transition-colors hover:bg-red-500/12 hover:text-red-300"
         >
@@ -373,7 +395,7 @@ function UserFooter({
              strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="M7.5 17H4.5A1.5 1.5 0 0 1 3 15.5v-11A1.5 1.5 0 0 1 4.5 3h3M13 14l4-4-4-4M17 10H7.5" />
         </svg>
-        Sign out
+        {d.admin.signOut}
       </button>
     </div>
   );

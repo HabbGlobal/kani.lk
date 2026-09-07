@@ -7,9 +7,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Field, Input } from "@/components/ui/Field";
 import { Button } from "@/components/ui/Button";
 import { loginSchema, type LoginInput } from "@/lib/validation";
+import { useI18n } from "@/lib/i18n/client";
 
 export function LoginForm({ next = "/admin" }: { next?: string }) {
   const router = useRouter();
+  const { d } = useI18n();
   const [serverError, setServerError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -29,18 +31,23 @@ export function LoginForm({ next = "/admin" }: { next?: string }) {
         body: JSON.stringify(values),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error ?? "Sign in failed");
+      if (!res.ok) throw new Error(data.error ?? d.admin.signInFailed);
       router.push(next);
       router.refresh();
     } catch (err) {
-      setServerError(err instanceof Error ? err.message : "Sign in failed");
+      setServerError(err instanceof Error ? err.message : d.admin.signInFailed);
       setLoading(false);
     }
   }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
-      <Field label="Email" htmlFor="email" required error={errors.email?.message}>
+      <Field
+        label={d.admin.email}
+        htmlFor="email"
+        required
+        error={errors.email?.message}
+      >
         <Input
           id="email"
           type="email"
@@ -51,7 +58,12 @@ export function LoginForm({ next = "/admin" }: { next?: string }) {
         />
       </Field>
 
-      <Field label="Password" htmlFor="password" required error={errors.password?.message}>
+      <Field
+        label={d.admin.password}
+        htmlFor="password"
+        required
+        error={errors.password?.message}
+      >
         <Input
           id="password"
           type="password"
@@ -68,7 +80,7 @@ export function LoginForm({ next = "/admin" }: { next?: string }) {
       )}
 
       <Button type="submit" size="lg" fullWidth disabled={loading}>
-        {loading ? "Signing in…" : "Sign in"}
+        {loading ? d.admin.signingIn : d.admin.signIn}
       </Button>
     </form>
   );
