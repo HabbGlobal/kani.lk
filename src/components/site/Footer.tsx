@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { Logo } from "./Logo";
 import { AsciiWave } from "./AsciiWave";
-import { getDistrictsWithCounts, getSettings } from "@/lib/queries";
+import { getTaxonomies, getSettings } from "@/lib/queries";
 import { formatPhoneLocal, toE164 } from "@/lib/utils";
 
 export async function Footer() {
-  const [districts, settings] = await Promise.all([
-    getDistrictsWithCounts(),
+  const [taxonomies, settings] = await Promise.all([
+    getTaxonomies(),
     getSettings(),
   ]);
 
@@ -24,7 +24,7 @@ export async function Footer() {
   }[];
 
   return (
-    <footer className="relative mt-16 overflow-hidden bg-[var(--kani-green-deep)] text-white/70 on-dark">
+    <footer className="relative mt-12 overflow-hidden bg-[var(--kani-green-deep)] text-white/70 on-dark">
       <AsciiWave color="#d8bd82" speed={0.6} opacity={0.22} />
       {/* Fades the wave out from the top so the page edge stays clean. */}
       <div
@@ -35,11 +35,11 @@ export async function Footer() {
 
       <div className="relative">
         {/* Masthead — the wordmark and the one line that says what this is. */}
-        <div className="container-kani flex flex-col gap-4 border-b border-white/10 py-8
+        <div className="container-kani flex flex-col gap-3 border-b border-white/10 py-6
                         md:flex-row md:items-end md:justify-between">
           <div>
             <Logo onDark withTagline />
-            <p className="mt-3 max-w-md text-[15px] leading-relaxed text-white/75">
+            <p className="mt-2.5 max-w-md text-[14px] leading-relaxed text-white/75">
               Land and property across the Northern and Eastern provinces of
               Sri Lanka. Every listing carries the owner&rsquo;s own number.
             </p>
@@ -53,8 +53,8 @@ export async function Footer() {
                     href={s.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex h-11 items-center rounded-[var(--radius-pill)]
-                               border border-white/15 px-5 text-[14px] text-white/85
+                    className="inline-flex h-9 items-center rounded-[var(--radius-pill)]
+                               border border-white/15 px-4 text-[13.5px] text-white/85
                                transition-colors duration-200 hover:border-white/40 hover:bg-white/10 hover:text-white"
                   >
                     {s.label}
@@ -65,7 +65,7 @@ export async function Footer() {
           )}
         </div>
 
-        <div className="container-kani grid gap-8 py-9 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="container-kani grid gap-6 py-7 sm:grid-cols-2 lg:grid-cols-4">
           <FooterColumn id="foot-browse" title="Browse">
             <FooterLink href="/lands">All listings</FooterLink>
             <FooterLink href="/for-sale">Land for sale</FooterLink>
@@ -74,10 +74,10 @@ export async function Footer() {
             <FooterLink href="/favourites">Saved lands</FooterLink>
           </FooterColumn>
 
-          <FooterColumn id="foot-districts" title="Districts">
-            {districts.map((d) => (
-              <FooterLink key={d._id} href={`/districts/${d.slug}`}>
-                Land in {d.name}
+          <FooterColumn id="foot-types" title="Popular searches">
+            {taxonomies.landTypes.slice(0, 6).map((t) => (
+              <FooterLink key={t._id} href={`/lands?landType=${t.slug}`}>
+                {t.name}
               </FooterLink>
             ))}
           </FooterColumn>
@@ -98,11 +98,11 @@ export async function Footer() {
             >
               Talk to us
             </h2>
-            <div className="mt-3 space-y-2 text-[15px]">
+            <div className="mt-3 space-y-1.5 text-[14.5px]">
               {phone && (
                 <a
                   href={`tel:${toE164(phone)}`}
-                  className="block tabular text-[22px] font-medium leading-tight text-white
+                  className="block tabular text-[19px] font-medium leading-tight text-white
                              transition-colors duration-200 hover:text-[var(--palmyra-gold-soft)]"
                 >
                   {formatPhoneLocal(phone)}
@@ -127,7 +127,7 @@ export async function Footer() {
         </div>
 
         <div className="border-t border-white/10">
-          <div className="container-kani flex flex-col gap-2 py-4 text-[13px] text-white/50
+          <div className="container-kani flex flex-col gap-1.5 py-3.5 text-[12.5px] text-white/50
                           md:flex-row md:items-center md:justify-between">
             <p>© {new Date().getFullYear()} kani.lk. All rights reserved.</p>
             <p>Verify every deed and survey plan with a lawyer before you pay.</p>
@@ -155,7 +155,7 @@ function FooterColumn({
       >
         {title}
       </h2>
-      <ul className="mt-3 space-y-2 text-[15px]">
+      <ul className="mt-2.5 space-y-1.5 text-[14.5px]">
         {Array.isArray(children)
           ? children.map((child, i) => <li key={i}>{child}</li>)
           : <li>{children}</li>}

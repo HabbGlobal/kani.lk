@@ -111,9 +111,14 @@ html, body {
      site is built for. Belt-and-braces: the real fix is never letting a
      child grow wider than the viewport in the first place (a fixed-position
      element still needs its own content to fit), but this catches anything
-     that slips through. */
+     that slips through. `clip` instead of `hidden`: setting `overflow-x` to
+     anything but `visible` forces the y-axis to compute as `auto` too,
+     which turns <body> into its own scroll container and breaks every
+     `position: sticky` element on the page (they stick to their nearest
+     scrolling ancestor, which then silently becomes <body> instead of the
+     viewport). `clip` still stops horizontal scroll without that side effect. */
   max-width: 100%;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 body {

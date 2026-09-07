@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { SORT_OPTIONS } from "@/lib/search-params";
 import { DEED_TYPE_LABELS } from "@/models/types";
 
 type Named = { name: string; slug: string }[];
@@ -56,13 +55,7 @@ export function FilterChips({
 
   const clearAll = () => router.push(pathname, { scroll: false });
 
-  const setSort = (value: string) => {
-    const sp = new URLSearchParams(params.toString());
-    if (value === "newest") sp.delete("sort");
-    else sp.set("sort", value);
-    sp.delete("page");
-    router.push(`${pathname}${sp.toString() ? `?${sp}` : ""}`, { scroll: false });
-  };
+  if (chips.length === 0) return null;
 
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -85,36 +78,14 @@ export function FilterChips({
         </button>
       ))}
 
-      {chips.length > 0 && (
-        <button
-          type="button"
-          onClick={clearAll}
-          className="h-9 cursor-pointer rounded-[var(--radius-pill)] px-3 text-[14px] font-medium
-                     text-[var(--laterite)] underline-offset-2 transition-colors hover:underline"
-        >
-          Clear all
-        </button>
-      )}
-
-      <div className="ml-auto flex items-center gap-2">
-        <label htmlFor="sort" className="text-[14px] text-[var(--muted)]">
-          Sort
-        </label>
-        <select
-          id="sort"
-          value={params.get("sort") ?? "newest"}
-          onChange={(e) => setSort(e.target.value)}
-          className="h-9 cursor-pointer rounded-[var(--radius-pill)] border border-[var(--hairline)]
-                     bg-[var(--card)] px-3 text-[14px] text-[var(--ink)]
-                     transition-colors hover:border-[var(--kani-green)]/40
-                     focus:border-[var(--kani-green)] focus:outline-none
-                     focus:ring-2 focus:ring-[var(--kani-green)]/25"
-        >
-          {SORT_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>{o.label}</option>
-          ))}
-        </select>
-      </div>
+      <button
+        type="button"
+        onClick={clearAll}
+        className="h-9 cursor-pointer rounded-[var(--radius-pill)] px-3 text-[14px] font-medium
+                   text-[var(--laterite)] underline-offset-2 transition-colors hover:underline"
+      >
+        Clear all
+      </button>
     </div>
   );
 }

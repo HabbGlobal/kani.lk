@@ -3,6 +3,7 @@ import Link from "next/link";
 import { LandGrid } from "@/components/site/LandRail";
 import { FilterPanel } from "@/components/land/FilterPanel";
 import { FilterChips } from "@/components/land/FilterChips";
+import { LandsPageHeader } from "@/components/land/LandsPageHeader";
 import { Pagination } from "@/components/ui/Pagination";
 import { EmptyState } from "@/components/ui/Card";
 import { searchLands, countLands, getTaxonomies } from "@/lib/queries";
@@ -30,26 +31,33 @@ export default async function LandsPage({
 
   return (
     <div className="container-kani py-8 md:py-12">
-      <header className="mb-6">
-        <h1 className="text-[27px] text-[var(--kani-green)] md:text-[34px]">
-          Land and property
-        </h1>
-        <p className="mt-1.5 text-[16px] text-[var(--muted)]">
-          {result.total === 0
-            ? "No listings match these filters"
-            : `${result.total} ${result.total === 1 ? "listing" : "listings"} across the North and East`}
-        </p>
-      </header>
+      <LandsPageHeader title="Land and property" />
 
-      <div className="grid gap-8 lg:grid-cols-[290px_1fr]">
-        <FilterPanel
-          districts={taxonomies.districts}
-          cities={taxonomies.cities}
-          landTypes={taxonomies.landTypes}
-          resultCount={result.total}
-        />
+      <div className="mb-4 text-center text-[15px] text-[var(--muted)]">
+        {result.total === 0
+          ? "No listings match these filters"
+          : `${result.total} ${result.total === 1 ? "listing" : "listings"} across the North and East`}
+      </div>
 
-        <div className="min-w-0">
+      {/* No lg:items-start here — position: sticky needs its containing block
+          (this grid cell) to stay as tall as the results column, or it runs
+          out of room to stick almost immediately. Default stretch keeps
+          both columns full height while the aside itself stays fixed via
+          its own `sticky` + `self-start`. */}
+      <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
+        <div>
+          <h2 className="mb-3 hidden text-[15px] font-semibold text-[var(--ink)] lg:block">
+            Filters
+          </h2>
+          <FilterPanel
+            districts={taxonomies.districts}
+            cities={taxonomies.cities}
+            landTypes={taxonomies.landTypes}
+            resultCount={result.total}
+          />
+        </div>
+
+        <div>
           <div className="mb-5">
             <FilterChips
               districts={taxonomies.districts}
