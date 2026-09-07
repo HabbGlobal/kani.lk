@@ -37,6 +37,31 @@ export function localizedDescription(
   return land.description ?? "";
 }
 
+type PageContent = {
+  title: string;
+  titleTa?: string | null;
+  body: string;
+  bodyTa?: string | null;
+};
+
+/**
+ * Resolves an admin-authored page (about / terms / privacy). Title and body
+ * fall back independently: an admin may well translate the heading before
+ * getting to the body.
+ */
+export function localizedPage(page: PageContent, locale: Locale) {
+  const ta = locale === "ta";
+  const titleTa = page.titleTa?.trim();
+  const bodyTa = page.bodyTa?.trim();
+
+  return {
+    title: ta && titleTa ? titleTa : page.title,
+    body: ta && bodyTa ? bodyTa : page.body,
+    /** True when the body shown is English despite the visitor reading Tamil. */
+    bodyIsFallback: ta && !bodyTa && Boolean(page.body),
+  };
+}
+
 /**
  * True when the visitor is reading Tamil but this listing has no Tamil
  * description, so the UI is showing the English one. Lets a caller mark the

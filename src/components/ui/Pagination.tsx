@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { getDictionary } from "@/lib/i18n";
+import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
 import { cn } from "@/lib/utils";
 
 /**
@@ -9,11 +11,15 @@ export function Pagination({
   page,
   pages,
   buildHref,
+  locale = DEFAULT_LOCALE,
 }: {
   page: number;
   pages: number;
   buildHref: (page: number) => string;
+  locale?: Locale;
 }) {
+  const d = getDictionary(locale);
+
   if (pages <= 1) return null;
 
   // Window of pages around the current one, with first/last always reachable.
@@ -33,7 +39,7 @@ export function Pagination({
       <PageLink
         href={buildHref(page - 1)}
         disabled={page <= 1}
-        aria-label="Previous page"
+        aria-label={d.home.previousPage}
       >
         <svg viewBox="0 0 16 16" className="size-4" fill="none" aria-hidden="true">
           <path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.7"
@@ -62,7 +68,7 @@ export function Pagination({
       <PageLink
         href={buildHref(page + 1)}
         disabled={page >= pages}
-        aria-label="Next page"
+        aria-label={d.home.nextPage}
       >
         <svg viewBox="0 0 16 16" className="size-4" fill="none" aria-hidden="true">
           <path d="M6 3l5 5-5 5" stroke="currentColor" strokeWidth="1.7"

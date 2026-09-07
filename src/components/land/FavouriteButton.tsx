@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useFavourites } from "@/lib/favourites";
+import { useI18n } from "@/lib/i18n/client";
 import { cn } from "@/lib/utils";
 
 /**
@@ -20,6 +21,7 @@ export function FavouriteButton({
   tone?: "glass" | "solid";
 }) {
   const { has, toggle, ready } = useFavourites();
+  const { d, t } = useI18n();
   const [justSaved, setJustSaved] = useState(false);
   const saved = ready && has(landId);
 
@@ -37,8 +39,12 @@ export function FavouriteButton({
         }
       }}
       aria-pressed={saved}
-      aria-label={saved ? `Remove ${title} from saved` : `Save ${title}`}
-      title={saved ? "Saved" : "Save this land"}
+      aria-label={
+        saved
+          ? t(d.favourites.removeFromSaved, { title })
+          : t(d.favourites.saveTitled, { title })
+      }
+      title={saved ? d.land.saved : d.land.saveAria}
       className={cn(
         "relative z-10 grid size-11 cursor-pointer place-items-center rounded-full",
         "transition-[background-color,transform] duration-200 [transition-timing-function:var(--ease-out)]",

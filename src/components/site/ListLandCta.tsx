@@ -1,5 +1,7 @@
 import { LandSaleSign } from "./LandSaleSign";
 import { formatPhoneLocal, toWhatsappNumber } from "@/lib/utils";
+import { getDictionary } from "@/lib/i18n";
+import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
 
 /**
  * Compact horizontal "have land to sell or rent" strip. A Server Component —
@@ -7,17 +9,18 @@ import { formatPhoneLocal, toWhatsappNumber } from "@/lib/utils";
  */
 export function ListLandCta({
   whatsappNumber,
+  locale = DEFAULT_LOCALE,
 }: {
   /** E.164 or local — normalised for the tel:/wa.me hrefs below. Omit or
    * pass an empty string when no contact number is configured yet; the
    * WhatsApp button is skipped rather than linking nowhere. */
   whatsappNumber?: string;
+  locale?: Locale;
 }) {
+  const d = getDictionary(locale);
   const waNumber = whatsappNumber ? toWhatsappNumber(whatsappNumber) : "";
   const waDisplay = whatsappNumber ? formatPhoneLocal(whatsappNumber) : "";
-  const waMessage = encodeURIComponent(
-    "Hello Kani.lk, I would like to list my land for sale or rent."
-  );
+  const waMessage = encodeURIComponent(d.home.ctaWhatsapp);
   const waHref = `https://wa.me/${waNumber}?text=${waMessage}`;
 
   return (
@@ -88,7 +91,7 @@ export function ListLandCta({
           >
             <a
               href="/contact?intent=list-land"
-              aria-label="List your land — start the listing process"
+              aria-label={d.home.ctaAria}
               className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-[var(--radius-pill)] sm:w-auto
                          bg-[var(--palmyra-gold)] px-6 text-[15px] font-semibold text-[var(--kani-green-deep)]
                          shadow-[0_4px_14px_rgba(0,0,0,0.22)]

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useI18n } from "@/lib/i18n/client";
 import { cn } from "@/lib/utils";
 
 /**
@@ -20,6 +21,7 @@ export function Sheet({
   children: React.ReactNode;
   footer?: React.ReactNode;
 }) {
+  const { d } = useI18n();
   const panelRef = useRef<HTMLDivElement>(null);
   const previouslyFocused = useRef<HTMLElement | null>(null);
 
@@ -76,7 +78,7 @@ export function Sheet({
     <div className="fixed inset-0 z-[80] lg:hidden" role="dialog" aria-modal="true" aria-label={title}>
       <button
         type="button"
-        aria-label="Close filters"
+        aria-label={d.home.closeFilters}
         onClick={onClose}
         className="absolute inset-0 w-full cursor-default bg-[var(--kani-green-deep)]/45 animate-fade backdrop-blur-[2px]"
       />
@@ -99,7 +101,7 @@ export function Sheet({
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close"
+            aria-label={d.common.close}
             className="grid size-11 cursor-pointer place-items-center rounded-full
                        text-[var(--muted)] transition-colors hover:bg-black/5 hover:text-[var(--ink)]"
           >

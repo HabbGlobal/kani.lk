@@ -1,5 +1,8 @@
 import Link from "next/link";
 import { Select } from "@/components/ui/Field";
+import { getDictionary, interpolate } from "@/lib/i18n";
+import { DEFAULT_LOCALE, localeHref, type Locale } from "@/lib/i18n/config";
+import { localizedName } from "@/lib/i18n/localized";
 
 /**
  * The hero search. Deliberately a plain GET form to /lands with no JavaScript
@@ -9,10 +12,15 @@ import { Select } from "@/components/ui/Field";
 export function HeroSearch({
   districts,
   landTypes,
+  locale = DEFAULT_LOCALE,
 }: {
-  districts: { _id: string; name: string; slug: string }[];
-  landTypes: { _id: string; name: string; slug: string }[];
+  districts: { _id: string; name: string; nameTa?: string; slug: string }[];
+  landTypes: { _id: string; name: string; nameTa?: string; slug: string }[];
+  locale?: Locale;
 }) {
+  const d = getDictionary(locale);
+  const href = (path: string) => localeHref(path, locale);
+
   return (
     <div className="kani-hero-search-glow relative rounded-[22px] p-[2.5px]">
       {/* Rotating gold beam, CSS-only — a conic-gradient arc masked down to a
@@ -20,19 +28,19 @@ export function HeroSearch({
           in paint order and never intercepts pointer or focus events. */}
       <div aria-hidden="true" className="kani-hero-search-beam absolute inset-0 rounded-[22px]" />
       <form
-        action="/lands"
+        action={href("/lands")}
         method="get"
         className="kani-hero-search-panel relative rounded-[20px] border border-black/[0.06] bg-[var(--card)]
                    p-3 shadow-[0_16px_40px_-16px_rgba(10,44,30,0.35)] sm:p-4"
       >
       {/* Purpose: real radios, styled as compact tabs. */}
       <fieldset className="mb-3 border-b border-black/[0.08] pb-3">
-        <legend className="sr-only">What are you looking for?</legend>
+        <legend className="sr-only">{d.lands.purpose}</legend>
         <div className="flex gap-1">
           {[
-            { value: "", label: "All" },
-            { value: "sale", label: "For sale" },
-            { value: "rent", label: "For rent" },
+            { value: "", label: d.common.all },
+            { value: "sale", label: d.land.forSale },
+            { value: "rent", label: d.land.forRent },
           ].map((opt, i) => (
             <label
               key={opt.label}
@@ -67,9 +75,11 @@ export function HeroSearch({
             Location
           </label>
           <Select id="hero-district" name="district" defaultValue="" className="h-11 text-[15px]">
-            <option value="">Any district</option>
-            {districts.map((d) => (
-              <option key={d._id} value={d.slug}>{d.name}</option>
+            <option value="">{d.home.heroAnyDistrict}</option>
+            {districts.map((district) => (
+              <option key={district._id} value={district.slug}>
+                {localizedName(district, locale)}
+              </option>
             ))}
           </Select>
         </div>
@@ -79,9 +89,11 @@ export function HeroSearch({
             Property type
           </label>
           <Select id="hero-type" name="landType" defaultValue="" className="h-11 text-[15px]">
-            <option value="">Any land type</option>
-            {landTypes.map((t) => (
-              <option key={t._id} value={t.slug}>{t.name}</option>
+            <option value="">{d.home.heroAnyLandType}</option>
+            {landTypes.map((type) => (
+              <option key={type._id} value={type.slug}>
+                {localizedName(type, locale)}
+              </option>
             ))}
           </Select>
         </div>
@@ -91,7 +103,7 @@ export function HeroSearch({
             Minimum land size
           </label>
           <Select id="hero-min" name="minPerch" defaultValue="" className="h-11 text-[15px]">
-            <option value="">Min size</option>
+            <option value="">{d.home.heroMinSize}</option>
             {[5, 10, 15, 20, 40, 80, 160].map((p) => (
               <option key={p} value={p}>{p}+ perches</option>
             ))}
@@ -103,7 +115,7 @@ export function HeroSearch({
             Maximum land size
           </label>
           <Select id="hero-max" name="maxPerch" defaultValue="" className="h-11 text-[15px]">
-            <option value="">Max size</option>
+            <option value="">{d.home.heroMaxSize}</option>
             {[10, 20, 40, 80, 160, 320, 800].map((p) => (
               <option key={p} value={p}>
                 {p >= 160 ? `${p / 160} acres` : `${p} perches`}
@@ -125,17 +137,23 @@ export function HeroSearch({
             <circle cx="8.75" cy="8.75" r="5.75" stroke="currentColor" strokeWidth="1.8" />
             <path d="M13 13l4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
           </svg>
-          Search
+          {d.common.search}
         </button>
       </div>
 
       <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1.5 text-[13px] text-[var(--muted)]">
-        <span>Popular:</span>
+        <span>{d.home.heroPopular}</span>
         {[
-          { label: "Land in Vavuniya", href: "/districts/vavuniya" },
-          { label: "Paddy land", href: "/lands?landType=paddy-land" },
-          { label: "Under 20 perches", href: "/lands?maxPerch=20" },
-          { label: "Houses for rent", href: "/lands?purpose=rent&landType=house-and-land" },
+          {
+            label: interpolate(d.home.heroLandIn, { name: "Vavuniya" }),
+            href: href("/districts/vavuniya"),
+          },
+          { label: d.home.heroPaddy, href: href("/lands?landType=paddy-land") },
+          { label: d.home.heroUnder20, href: href("/lands?maxPerch=20") },
+          {
+            label: d.home.heroHousesForRent,
+            href: href("/lands?purpose=rent&landType=house-and-land"),
+          },
         ].map((chip) => (
           <Link
             key={chip.label}

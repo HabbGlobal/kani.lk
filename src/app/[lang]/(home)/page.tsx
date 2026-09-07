@@ -130,6 +130,7 @@ export default async function HomePage({
                 listings={totalListings}
                 districts={districts.length}
                 categories={taxonomies.landTypes.length}
+                locale={locale}
               />
             </div>
           </div>
@@ -162,6 +163,7 @@ export default async function HomePage({
             <HeroSearch
               districts={taxonomies.districts}
               landTypes={taxonomies.landTypes}
+              locale={locale}
             />
           </div>
         </div>
@@ -321,7 +323,7 @@ export default async function HomePage({
 
       {/* ── List-your-land CTA ───────────────────────────────────────── */}
       <Reveal as="div">
-        <ListLandCta whatsappNumber={whatsapp || phone} />
+        <ListLandCta whatsappNumber={whatsapp || phone} locale={locale} />
       </Reveal>
 
       <OrganizationJsonLd phone={phone} email={String(settings.contactEmail ?? "")} />

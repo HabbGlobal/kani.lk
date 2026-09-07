@@ -328,6 +328,7 @@ export type DistrictSummary = {
   code: string;
   province: string;
   intro: string;
+  introTa?: string;
   count: number;
 };
 
@@ -356,7 +357,7 @@ export async function getDistrictsWithCounts(): Promise<DistrictSummary[]> {
     },
     {
       $project: {
-        name: 1, nameTa: 1, slug: 1, code: 1, province: 1, intro: 1,
+        name: 1, nameTa: 1, slug: 1, code: 1, province: 1, intro: 1, introTa: 1,
         count: { $ifNull: [{ $arrayElemAt: ["$landCount.n", 0] }, 0] },
       },
     },
@@ -397,5 +398,14 @@ export async function getPage(slug: string) {
   await dbConnect();
   const { default: PageModel } = await import("@/models/Page");
   const doc = await PageModel.findOne({ slug }).lean();
-  return doc ? plain<{ title: string; body: string; seoTitle?: string; seoDescription?: string }>(doc) : null;
+  return doc
+    ? plain<{
+        title: string;
+        titleTa?: string;
+        body: string;
+        bodyTa?: string;
+        seoTitle?: string;
+        seoDescription?: string;
+      }>(doc)
+    : null;
 }

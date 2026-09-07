@@ -8,11 +8,14 @@ import { ButtonLink } from "@/components/ui/Button";
 import { getDistrictBySlug, searchLands, getDistrictsWithCounts } from "@/lib/queries";
 import { parseFilters, buildQuery, type RawParams } from "@/lib/search-params";
 import { truncate } from "@/lib/utils";
+import { getDictionary, interpolate } from "@/lib/i18n";
+import { localeHref, toLocale } from "@/lib/i18n/config";
+import { localizedName } from "@/lib/i18n/localized";
 
 export const revalidate = 300;
 
 type Params = {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ slug: string; lang: string }>;
   searchParams: Promise<RawParams>;
 };
 
@@ -20,29 +23,45 @@ type Params = {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ slug: string; lang: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
+  const { slug, lang } = await params;
+  const locale = toLocale(lang);
+  const d = getDictionary(locale);
   const district = await getDistrictBySlug(slug);
-  if (!district) return { title: "District not found" };
+  if (!district) return { title: d.districts.notFound };
+
+  const name = localizedName(district, locale);
+  // The Tamil intro when there is one, so the description matches the page.
+  const intro = locale === "ta" && district.introTa?.trim() ? district.introTa : district.intro;
 
   return {
-    title: `Land for sale and rent in ${district.name}`,
-    description: district.intro
-      ? truncate(district.intro, 155)
-      : `Browse land, paddy, coconut estates and houses for sale or rent in ${district.name} district, Sri Lanka.`,
-    alternates: { canonical: `/districts/${district.slug}` },
+    title: interpolate(d.districts.detailMetaTitle, { name }),
+    description: intro
+      ? truncate(intro, 155)
+      : interpolate(d.districts.detailMetaDescription, { name }),
+    alternates: {
+      canonical: `/${locale}/districts/${district.slug}`,
+      languages: {
+        "ta-LK": `/ta/districts/${district.slug}`,
+        "en-LK": `/en/districts/${district.slug}`,
+      },
+    },
   };
 }
 
-/** Pre-render all districts — there are six, and they change rarely. */
+/** Pre-render all districts in both locales — six each, and they change rarely. */
 export async function generateStaticParams() {
   const districts = await getDistrictsWithCounts();
-  return districts.map((d) => ({ slug: d.slug }));
+  return districts.flatMap((district) =>
+    ["ta", "en"].map((lang) => ({ lang, slug: district.slug }))
+  );
 }
 
 export default async function DistrictPage({ params, searchParams }: Params) {
-  const [{ slug }, rawParams] = await Promise.all([params, searchParams]);
+  const [{ slug, lang }, rawParams] = await Promise.all([params, searchParams]);
+  const locale = toLocale(lang);
+  const d = getDictionary(locale);
 
   const district = await getDistrictBySlug(slug);
   if (!district) notFound();
@@ -51,34 +70,51 @@ export default async function DistrictPage({ params, searchParams }: Params) {
   const filters = { ...parseFilters(rawParams), district: slug };
   const result = await searchLands(filters);
 
+  const name = localizedName(district, locale);
+  const introTa = district.introTa?.trim();
+  const intro = locale === "ta" && introTa ? introTa : district.intro;
+  const introIsFallback = locale === "ta" && !introTa && Boolean(district.intro);
+
   return (
     <div className="container-kani py-8 md:py-12">
-      <nav aria-label="Breadcrumb" className="mb-4">
+      <nav aria-label={d.land.breadcrumb} className="mb-4">
         <ol className="flex items-center gap-1.5 text-[14px] text-[var(--muted)]">
           <li className="flex items-center gap-1.5">
-            <Link href="/" className="hover:text-[var(--kani-green)]">Home</Link>
+            <Link href={localeHref("/", locale)} className="hover:text-[var(--kani-green)]">
+              {d.land.breadcrumbHome}
+            </Link>
             <span aria-hidden="true">/</span>
           </li>
           <li className="flex items-center gap-1.5">
-            <Link href="/districts" className="hover:text-[var(--kani-green)]">Districts</Link>
+            <Link
+              href={localeHref("/districts", locale)}
+              className="hover:text-[var(--kani-green)]"
+            >
+              {d.nav.districts}
+            </Link>
             <span aria-hidden="true">/</span>
           </li>
-          <li className="text-[var(--ink)]" aria-current="page">{district.name}</li>
+          <li className="text-[var(--ink)]" aria-current="page">{name}</li>
         </ol>
       </nav>
 
       <header className="mb-8 max-w-3xl">
         <h1 className="text-[27px] text-[var(--kani-green)] md:text-[34px]">
-          Land for sale and rent in {district.name}
+          {interpolate(d.districts.detailTitle, { name })}
         </h1>
         <p className="mt-1.5 text-[16px] text-[var(--muted)]">
-          {result.total} {result.total === 1 ? "listing" : "listings"} in{" "}
-          {district.name} district, {district.province} Province
+          {interpolate(
+            result.total === 1 ? d.districts.detailCountOne : d.districts.detailCount,
+            { count: result.total, name, province: district.province }
+          )}
         </p>
         {/* Real intro copy — this is what ranks for the searches that matter. */}
-        {district.intro && (
-          <div className="prose-kani mt-4 text-[17px] leading-relaxed text-[var(--ink)]">
-            {district.intro.split(/\n\s*\n/).map((para, i) => (
+        {intro && (
+          <div
+            className="prose-kani mt-4 text-[17px] leading-relaxed text-[var(--ink)]"
+            lang={introIsFallback ? "en" : undefined}
+          >
+            {intro.split(/\n\s*\n/).map((para, i) => (
               <p key={i}>{para}</p>
             ))}
           </div>
@@ -87,26 +123,29 @@ export default async function DistrictPage({ params, searchParams }: Params) {
 
       {result.items.length > 0 ? (
         <>
-          <LandGrid lands={result.items} />
+          <LandGrid lands={result.items} locale={locale} />
           <Pagination
+            locale={locale}
             page={result.page}
             pages={result.pages}
-            buildHref={(p) => `/districts/${slug}${buildQuery({ ...filters, district: undefined }, { page: p })}`}
+            buildHref={(p) =>
+              `${localeHref(`/districts/${slug}`, locale)}${buildQuery(
+                { ...filters, district: undefined },
+                { page: p }
+              )}`
+            }
           />
         </>
       ) : (
         <EmptyState
-          title={`Nothing listed in ${district.name} right now`}
+          title={interpolate(d.districts.emptyTitle, { name })}
           action={
-            <ButtonLink href="/lands" variant="primary">
-              Browse all districts
+            <ButtonLink href={localeHref("/lands", locale)} variant="primary">
+              {d.districts.emptyCta}
             </ButtonLink>
           }
         >
-          <p>
-            New land is added every week. Try another district, or call us and
-            tell us what you are looking for in {district.name}.
-          </p>
+          <p>{interpolate(d.districts.emptyBody, { name })}</p>
         </EmptyState>
       )}
     </div>

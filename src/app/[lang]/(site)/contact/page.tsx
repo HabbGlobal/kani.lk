@@ -3,17 +3,35 @@ import { InquiryForm } from "@/components/land/InquiryForm";
 import { Card } from "@/components/ui/Card";
 import { getSettings } from "@/lib/queries";
 import { formatPhoneLocal, toE164, toWhatsappNumber } from "@/lib/utils";
+import { getDictionary } from "@/lib/i18n";
+import { toLocale } from "@/lib/i18n/config";
 
 export const revalidate = 600;
 
-export const metadata: Metadata = {
-  title: "Contact kani.lk",
-  description:
-    "Call or message kani.lk about a listing, or to put your own land in front of buyers across the Northern and Eastern provinces.",
-  alternates: { canonical: "/contact" },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const locale = toLocale((await params).lang);
+  const d = getDictionary(locale);
 
-export default async function ContactPage() {
+  return {
+    title: d.contact.metaTitle,
+    description: d.contact.metaDescription,
+    alternates: {
+      canonical: `/${locale}/contact`,
+      languages: { "ta-LK": "/ta/contact", "en-LK": "/en/contact" },
+    },
+  };
+}
+
+export default async function ContactPage({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}) {
+  const d = getDictionary(toLocale((await params).lang));
   const settings = await getSettings();
   const phone = String(settings.contactPhone ?? "");
   const phoneAlt = String(settings.contactPhoneAlt ?? "");
@@ -24,18 +42,17 @@ export default async function ContactPage() {
     <div className="container-kani py-8 md:py-12">
       <header className="mb-8 max-w-2xl">
         <h1 className="text-[27px] text-[var(--kani-green)] md:text-[34px]">
-          Talk to us
+          {d.contact.heading}
         </h1>
         <p className="mt-2 text-[17px] leading-relaxed text-[var(--muted)]">
-          Whether you are looking for land or have land to list, call us or send
-          a message. We answer in Tamil, Sinhala and English.
+          {d.contact.intro}
         </p>
       </header>
 
       <div className="grid gap-8 lg:grid-cols-[1fr_380px]">
         <Card className="p-6 md:p-8">
           <h2 className="mb-5 text-[21px] text-[var(--kani-green)]">
-            Send us a message
+            {d.contact.sendMessage}
           </h2>
           <InquiryForm source="contact" />
         </Card>
@@ -43,7 +60,7 @@ export default async function ContactPage() {
         <aside className="space-y-4">
           {phone && (
             <ContactRow
-              label="Call us"
+              label={d.contact.callUs}
               href={`tel:${toE164(phone)}`}
               value={formatPhoneLocal(phone)}
               icon={
@@ -53,7 +70,7 @@ export default async function ContactPage() {
           )}
           {phoneAlt && (
             <ContactRow
-              label="Alternative number"
+              label={d.contact.altNumber}
               href={`tel:${toE164(phoneAlt)}`}
               value={formatPhoneLocal(phoneAlt)}
               icon={
@@ -63,7 +80,7 @@ export default async function ContactPage() {
           )}
           {whatsapp && (
             <ContactRow
-              label="WhatsApp"
+              label={d.contact.whatsapp}
               href={`https://wa.me/${toWhatsappNumber(whatsapp)}`}
               value={formatPhoneLocal(whatsapp)}
               external
@@ -72,7 +89,7 @@ export default async function ContactPage() {
           )}
           {email && (
             <ContactRow
-              label="Email"
+              label={d.contact.email}
               href={`mailto:${email}`}
               value={email}
               icon={
@@ -87,7 +104,7 @@ export default async function ContactPage() {
           {settings.officeAddress && (
             <Card className="p-5">
               <h2 className="mb-1 text-[13px] uppercase tracking-wider text-[var(--muted)]">
-                Office
+                {d.contact.office}
               </h2>
               <address className="not-italic text-[16px] leading-relaxed text-[var(--ink)]">
                 {String(settings.officeAddress)}
@@ -102,12 +119,10 @@ export default async function ContactPage() {
 
           <Card className="border-[var(--palmyra-gold)]/40 bg-[var(--palmyra-gold)]/8 p-5">
             <h2 className="mb-1.5 font-serif text-[19px] text-[var(--kani-green)]">
-              Have land to list?
+              {d.contact.haveLandTitle}
             </h2>
             <p className="text-[15px] leading-relaxed text-[var(--ink)]">
-              Send us the extent, the district, the deed type and a few
-              photographs. We will come back to you with what it needs to sell
-              and get it published.
+              {d.contact.haveLandBody}
             </p>
           </Card>
         </aside>

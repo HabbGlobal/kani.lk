@@ -88,6 +88,7 @@ export default async function LandsPage({
             <>
               <LandGrid lands={result.items} locale={locale} />
               <Pagination
+                locale={locale}
                 page={result.page}
                 pages={result.pages}
                 buildHref={(p) =>

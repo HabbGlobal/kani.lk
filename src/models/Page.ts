@@ -5,8 +5,11 @@ const PageSchema = new Schema(
   {
     slug: { type: String, required: true, unique: true, lowercase: true, trim: true },
     title: { type: String, required: true, trim: true },
+    titleTa: { type: String, trim: true },
     /** Markdown-ish body; rendered as paragraphs and headings. */
     body: { type: String, default: "" },
+    /** Tamil body. Falls back to the English one when the admin leaves it blank. */
+    bodyTa: { type: String, default: "" },
     seoTitle: { type: String, default: "" },
     seoDescription: { type: String, default: "" },
     updatedBy: { type: Schema.Types.ObjectId, ref: "KaniAdminUser" },

@@ -7,9 +7,12 @@ import { LandCard, LandCardSkeleton } from "./LandCard";
 import { EmptyState } from "@/components/ui/Card";
 import { ButtonLink, Button } from "@/components/ui/Button";
 import type { LandCard as LandCardType } from "@/lib/queries";
+import { useI18n } from "@/lib/i18n/client";
+import { type Locale } from "@/lib/i18n/config";
 
-export function FavouritesList() {
+export function FavouritesList({ locale }: { locale: Locale }) {
   const { ids, ready, clear } = useFavourites();
+  const { d, t, href } = useI18n();
   const [items, setItems] = useState<LandCardType[] | null>(null);
 
   useEffect(() => {
@@ -53,13 +56,12 @@ export function FavouritesList() {
   if (items.length === 0) {
     return (
       <EmptyState
-        title="You have not saved anything yet"
-        action={<ButtonLink href="/lands">Browse land</ButtonLink>}
+        title={d.favourites.emptyTitleLong}
+        action={
+          <ButtonLink href={href("/lands")}>{d.favourites.browseCta}</ButtonLink>
+        }
       >
-        <p>
-          Tap the heart on any listing to keep it here. No account needed — the
-          list lives on this device.
-        </p>
+        <p>{d.favourites.emptyBodyLong}</p>
       </EmptyState>
     );
   }
@@ -71,32 +73,37 @@ export function FavouritesList() {
     <>
       <div className="mb-5 flex items-center justify-between gap-4">
         <p className="text-[15px] text-[var(--muted)]">
-          {items.length} saved {items.length === 1 ? "listing" : "listings"}
+          {items.length === 1
+            ? d.favourites.savedCountOne
+            : t(d.favourites.savedCount, { count: items.length })}
           {missing > 0 && (
             <span className="ml-1.5 text-[var(--muted)]/80">
-              ({missing} no longer available)
+              {t(d.favourites.noLongerAvailable, { count: missing })}
             </span>
           )}
         </p>
         <Button variant="ghost" size="sm" onClick={clear}>
-          Clear all
+          {d.common.clearAll}
         </Button>
       </div>
 
       <ul className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
         {items.map((land, i) => (
           <li key={land._id}>
-            <LandCard land={land} priority={i < 2} />
+            <LandCard land={land} locale={locale} priority={i < 2} />
           </li>
         ))}
       </ul>
 
       <p className="mt-8 text-[15px] text-[var(--muted)]">
-        Ready to enquire?{" "}
-        <Link href="/contact" className="font-medium text-[var(--kani-green)] underline-offset-4 hover:underline">
-          Send us your shortlist
+        {d.favourites.readyToEnquire}{" "}
+        <Link
+          href={href("/contact")}
+          className="font-medium text-[var(--kani-green)] underline-offset-4 hover:underline"
+        >
+          {d.favourites.sendShortlist}
         </Link>{" "}
-        and we will help you arrange visits.
+        {d.favourites.andWeWillHelp}
       </p>
     </>
   );

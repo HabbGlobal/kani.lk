@@ -413,6 +413,7 @@ export default async function LandDetailPage({ params, searchParams }: Params) {
             contactNumbers={land.contactNumbers}
             whatsappNumber={land.whatsappNumber}
             status={land.status}
+            locale={locale}
           />
         </aside>
       </div>
