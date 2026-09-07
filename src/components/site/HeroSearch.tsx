@@ -72,7 +72,7 @@ export function HeroSearch({
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1.2fr_1.2fr_1fr_1fr_auto] lg:items-end">
         <div>
           <label htmlFor="hero-district" className="mb-1.5 block text-[12.5px] font-medium text-[var(--muted)]">
-            Location
+            {d.land.location}
           </label>
           <Select id="hero-district" name="district" defaultValue="" className="h-11 text-[15px]">
             <option value="">{d.home.heroAnyDistrict}</option>
@@ -86,7 +86,7 @@ export function HeroSearch({
 
         <div>
           <label htmlFor="hero-type" className="mb-1.5 block text-[12.5px] font-medium text-[var(--muted)]">
-            Property type
+            {d.home.propertyType}
           </label>
           <Select id="hero-type" name="landType" defaultValue="" className="h-11 text-[15px]">
             <option value="">{d.home.heroAnyLandType}</option>
@@ -100,7 +100,7 @@ export function HeroSearch({
 
         <div>
           <label htmlFor="hero-min" className="mb-1.5 block text-[12.5px] font-medium text-[var(--muted)]">
-            Minimum land size
+            {d.home.minimumLandSize}
           </label>
           <Select id="hero-min" name="minPerch" defaultValue="" className="h-11 text-[15px]">
             <option value="">{d.home.heroMinSize}</option>
@@ -112,7 +112,7 @@ export function HeroSearch({
 
         <div>
           <label htmlFor="hero-max" className="mb-1.5 block text-[12.5px] font-medium text-[var(--muted)]">
-            Maximum land size
+            {d.home.maximumLandSize}
           </label>
           <Select id="hero-max" name="maxPerch" defaultValue="" className="h-11 text-[15px]">
             <option value="">{d.home.heroMaxSize}</option>

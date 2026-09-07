@@ -117,7 +117,7 @@ export function InquiriesInbox({
         <Field label={d.admin.from} htmlFor="from">
           <Input id="from" type="date" value={from} onChange={(e) => updateFilter(setFrom, e.target.value)} />
         </Field>
-        <Field label="To" htmlFor="to">
+        <Field label={d.admin.to} htmlFor="to">
           <Input id="to" type="date" value={to} onChange={(e) => updateFilter(setTo, e.target.value)} />
         </Field>
         <Field label={d.admin.status} htmlFor="showHandled">
@@ -168,11 +168,11 @@ export function InquiriesInbox({
                 <div className="mt-3 flex gap-2">
                   {r.isHandled ? (
                     <Button size="sm" variant="outline" onClick={() => markHandled(r, false)}>
-                      Mark as new
+                      {d.admin.markAsNew}
                     </Button>
                   ) : (
                     <Button size="sm" onClick={() => markHandled(r, true)}>
-                      Mark handled
+                      {d.admin.markHandled}
                     </Button>
                   )}
                 </div>

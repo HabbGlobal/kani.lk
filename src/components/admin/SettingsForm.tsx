@@ -101,10 +101,20 @@ export function SettingsForm({ initial }: { initial: SettingsFormValues }) {
           >
             <Input id="contactWhatsapp" {...register("contactWhatsapp")} />
           </Field>
-          <Field label="Office address" htmlFor="officeAddress" className="sm:col-span-2" error={errors.officeAddress?.message}>
+          <Field
+            label={d.admin.officeAddress}
+            htmlFor="officeAddress"
+            className="sm:col-span-2"
+            error={errors.officeAddress?.message}
+          >
             <Input id="officeAddress" {...register("officeAddress")} />
           </Field>
-          <Field label="Office hours" htmlFor="officeHours" className="sm:col-span-2" error={errors.officeHours?.message}>
+          <Field
+            label={d.admin.officeHours}
+            htmlFor="officeHours"
+            className="sm:col-span-2"
+            error={errors.officeHours?.message}
+          >
             <Input id="officeHours" {...register("officeHours")} />
           </Field>
         </Card>
@@ -167,7 +177,12 @@ export function SettingsForm({ initial }: { initial: SettingsFormValues }) {
               ]}
             />
           </Field>
-          <Field label="Section title" htmlFor="popularSectionTitle" className="sm:col-span-2" error={errors.popularSectionTitle?.message}>
+          <Field
+            label={d.admin.sectionTitle}
+            htmlFor="popularSectionTitle"
+            className="sm:col-span-2"
+            error={errors.popularSectionTitle?.message}
+          >
             <Input id="popularSectionTitle" {...register("popularSectionTitle")} />
           </Field>
           <div className="sm:col-span-2">

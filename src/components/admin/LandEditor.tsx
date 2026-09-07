@@ -297,7 +297,12 @@ export function LandEditor({
             >
               <Input id="distanceFromTownKm" type="number" min={0} step="0.1" {...register("distanceFromTownKm")} />
             </Field>
-            <Field label="Google Maps URL" htmlFor="googleMapsUrl" className="sm:col-span-2" error={errors.googleMapsUrl?.message}>
+            <Field
+              label={d.admin.googleMapsUrl}
+              htmlFor="googleMapsUrl"
+              className="sm:col-span-2"
+              error={errors.googleMapsUrl?.message}
+            >
               <Input id="googleMapsUrl" {...register("googleMapsUrl")} />
             </Field>
           </Card>

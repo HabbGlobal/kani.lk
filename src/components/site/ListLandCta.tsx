@@ -111,7 +111,7 @@ export function ListLandCta({
                 />
                 <path d="M8.2 16v-4h3.6v4" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
               </svg>
-              List your land
+              {d.home.listYourLandShort}
             </a>
 
             {waNumber && (

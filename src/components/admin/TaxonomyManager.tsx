@@ -29,7 +29,12 @@ type Row = {
 
 const SCHEMAS = { district: districtSchema, city: citySchema, "land-type": landTypeSchema } as const;
 const API_BASE = { district: "/api/admin/districts", city: "/api/admin/cities", "land-type": "/api/admin/land-types" } as const;
-const LABELS = { district: "district", city: "city or town", "land-type": "land type" } as const;
+/** Dictionary keys for each taxonomy kind, singular and plural. */
+const LABEL_KEYS = {
+  district: ["kindDistrict", "kindDistrictPlural"],
+  city: ["kindCity", "kindCityPlural"],
+  "land-type": ["kindLandType", "kindLandTypePlural"],
+} as const;
 
 type FormValues = z.infer<(typeof SCHEMAS)[Kind]>;
 
@@ -51,7 +56,7 @@ export function TaxonomyManager({
   const [rows, setRows] = useState(initialRows);
   const [editing, setEditing] = useState<Row | null>(null);
   const [showForm, setShowForm] = useState(false);
-  const { d } = useI18n();
+  const { d, t } = useI18n();
   const [error, setError] = useState("");
   const [page, setPage] = useState(1);
 
@@ -64,7 +69,9 @@ export function TaxonomyManager({
 
   const schema = SCHEMAS[kind];
   const apiBase = API_BASE[kind];
-  const label = LABELS[kind];
+  const [singularKey, pluralKey] = LABEL_KEYS[kind];
+  const label = d.admin[singularKey];
+  const labelPlural = d.admin[pluralKey];
 
   const {
     register,
@@ -144,7 +151,7 @@ export function TaxonomyManager({
       <div className="flex items-center justify-between gap-3">
         <p className="text-[14px] text-[var(--muted)]">{rows.length} total</p>
         <Button size="sm" onClick={openCreate}>
-          Add {label}
+          {t(d.admin.addKind, { kind: label })}
         </Button>
       </div>
 
@@ -157,7 +164,7 @@ export function TaxonomyManager({
       {showForm && (
         <Card className="p-5">
           <h2 className="mb-4 text-[19px] text-[var(--heading)]">
-            {editing ? `Edit ${label}` : `Add ${label}`}
+            {t(editing ? d.admin.editKind : d.admin.addKind, { kind: label })}
           </h2>
           <form onSubmit={handleSubmit(onSubmit)} noValidate className="grid gap-4 sm:grid-cols-2">
             <Field
@@ -235,8 +242,8 @@ export function TaxonomyManager({
       )}
 
       {rows.length === 0 ? (
-        <EmptyState title={`No ${label}s yet`}>
-          Add the first one to make it available across the site.
+        <EmptyState title={t(d.admin.noKindYet, { kind: labelPlural })}>
+          {d.admin.addFirstOne}
         </EmptyState>
       ) : (
         <Card className="divide-y divide-[var(--hairline)] overflow-hidden">
@@ -268,7 +275,13 @@ export function TaxonomyManager({
         </Card>
       )}
 
-      <PagerBar page={safePage} pageCount={pageCount} total={rows.length} itemLabel={`${label}s`} onChange={setPage} />
+      <PagerBar
+        page={safePage}
+        pageCount={pageCount}
+        total={rows.length}
+        itemLabel={labelPlural}
+        onChange={setPage}
+      />
     </div>
   );
 }

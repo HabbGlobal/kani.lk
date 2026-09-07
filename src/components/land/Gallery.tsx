@@ -123,7 +123,7 @@ export function Gallery({
               <path d="M6 2H2v4M10 2h4v4M6 14H2v-4M10 14h4v-4" stroke="currentColor"
                     strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-            View full size
+            {d.favourites.viewFullSize}
           </button>
         </div>
 

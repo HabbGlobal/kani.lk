@@ -35,7 +35,10 @@ export function Pagination({
   if (pages > 1) push(pages);
 
   return (
-    <nav aria-label="Pagination" className="mt-10 flex items-center justify-center gap-1.5">
+    <nav
+      aria-label={d.admin.pagination}
+      className="mt-10 flex items-center justify-center gap-1.5"
+    >
       <PageLink
         href={buildHref(page - 1)}
         disabled={page <= 1}

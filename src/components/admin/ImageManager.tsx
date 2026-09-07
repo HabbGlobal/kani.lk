@@ -206,7 +206,7 @@ export function ImageManager({
                       onClick={() => setAsCover(img._id)}
                       className="cursor-pointer rounded-[var(--radius-sm)] px-1.5 py-1 text-[11px] font-medium text-[var(--heading)] hover:bg-[var(--kani-green)]/10"
                     >
-                      Set cover
+                      {d.admin.setCover}
                     </button>
                   )}
                   <button

@@ -90,7 +90,7 @@ export function PageEditor({
       </form>
 
       <div>
-        <SectionHeading title="Live preview" className="mb-3" />
+        <SectionHeading title={d.admin.livePreview} className="mb-3" />
         <Card className="p-6">
           <PageBody body={body || ""} />
         </Card>
