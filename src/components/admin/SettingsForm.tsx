@@ -8,8 +8,10 @@ import { Field, Input, Textarea, Segmented, Checkbox } from "@/components/ui/Fie
 import { Button } from "@/components/ui/Button";
 import { settingsSchema, type SettingsFormValues } from "@/lib/validation";
 import { adminFetch } from "@/lib/admin-fetch";
+import { useI18n } from "@/lib/i18n/client";
 
 export function SettingsForm({ initial }: { initial: SettingsFormValues }) {
+  const { d } = useI18n();
   const [serverError, setServerError] = useState("");
   const [saved, setSaved] = useState(false);
 
@@ -33,40 +35,70 @@ export function SettingsForm({ initial }: { initial: SettingsFormValues }) {
         body: JSON.stringify(values),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error ?? "Could not save settings");
+      if (!res.ok) throw new Error(data.error ?? d.admin.couldNotSaveSettings);
       setSaved(true);
     } catch (err) {
-      setServerError(err instanceof Error ? err.message : "Could not save settings");
+      setServerError(
+        err instanceof Error ? err.message : d.admin.couldNotSaveSettings
+      );
     }
   }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="max-w-3xl space-y-8">
       <section>
-        <SectionHeading title="Homepage hero" />
+        <SectionHeading title={d.admin.homepageHero} />
         <Card className="grid gap-4 p-5 sm:grid-cols-2">
-          <Field label="Hero title" htmlFor="heroTitle" className="sm:col-span-2" error={errors.heroTitle?.message}>
+          <Field
+            label={d.admin.heroTitle}
+            htmlFor="heroTitle"
+            className="sm:col-span-2"
+            error={errors.heroTitle?.message}
+          >
             <Input id="heroTitle" {...register("heroTitle")} />
           </Field>
-          <Field label="Hero subtitle" htmlFor="heroSubtitle" className="sm:col-span-2" error={errors.heroSubtitle?.message}>
+          <Field
+            label={d.admin.heroSubtitle}
+            htmlFor="heroSubtitle"
+            className="sm:col-span-2"
+            error={errors.heroSubtitle?.message}
+          >
             <Textarea id="heroSubtitle" {...register("heroSubtitle")} />
           </Field>
         </Card>
       </section>
 
       <section>
-        <SectionHeading title="Contact details" />
+        <SectionHeading title={d.admin.contactDetails} />
         <Card className="grid gap-4 p-5 sm:grid-cols-2">
-          <Field label="Phone" htmlFor="contactPhone" required error={errors.contactPhone?.message}>
+          <Field
+            label={d.admin.phone}
+            htmlFor="contactPhone"
+            required
+            error={errors.contactPhone?.message}
+          >
             <Input id="contactPhone" {...register("contactPhone")} />
           </Field>
-          <Field label="Alternate phone" htmlFor="contactPhoneAlt" error={errors.contactPhoneAlt?.message}>
+          <Field
+            label={d.admin.alternatePhone}
+            htmlFor="contactPhoneAlt"
+            error={errors.contactPhoneAlt?.message}
+          >
             <Input id="contactPhoneAlt" {...register("contactPhoneAlt")} />
           </Field>
-          <Field label="Email" htmlFor="contactEmail" error={errors.contactEmail?.message}>
+          <Field
+            label={d.admin.email}
+            htmlFor="contactEmail"
+            error={errors.contactEmail?.message}
+          >
             <Input id="contactEmail" type="email" {...register("contactEmail")} />
           </Field>
-          <Field label="WhatsApp number" htmlFor="contactWhatsapp" hint="Used for the wa.me link" error={errors.contactWhatsapp?.message}>
+          <Field
+            label={d.admin.whatsappNumber}
+            htmlFor="contactWhatsapp"
+            hint={d.admin.whatsappHint}
+            error={errors.contactWhatsapp?.message}
+          >
             <Input id="contactWhatsapp" {...register("contactWhatsapp")} />
           </Field>
           <Field label="Office address" htmlFor="officeAddress" className="sm:col-span-2" error={errors.officeAddress?.message}>
@@ -79,7 +111,7 @@ export function SettingsForm({ initial }: { initial: SettingsFormValues }) {
       </section>
 
       <section>
-        <SectionHeading title="Social links" />
+        <SectionHeading title={d.admin.socialLinks} />
         <Card className="grid gap-4 p-5 sm:grid-cols-2">
           <Field label="Facebook" htmlFor="facebookUrl" error={errors.facebookUrl?.message}>
             <Input id="facebookUrl" {...register("facebookUrl")} />
@@ -97,28 +129,41 @@ export function SettingsForm({ initial }: { initial: SettingsFormValues }) {
       </section>
 
       <section>
-        <SectionHeading title="SEO defaults" />
+        <SectionHeading title={d.admin.seoDefaults} />
         <Card className="grid gap-4 p-5 sm:grid-cols-2">
-          <Field label="Default SEO title" htmlFor="seoTitle" className="sm:col-span-2" error={errors.seoTitle?.message}>
+          <Field
+            label={d.admin.defaultSeoTitle}
+            htmlFor="seoTitle"
+            className="sm:col-span-2"
+            error={errors.seoTitle?.message}
+          >
             <Input id="seoTitle" {...register("seoTitle")} />
           </Field>
-          <Field label="Default SEO description" htmlFor="seoDescription" className="sm:col-span-2" error={errors.seoDescription?.message}>
+          <Field
+            label={d.admin.defaultSeoDescription}
+            htmlFor="seoDescription"
+            className="sm:col-span-2"
+            error={errors.seoDescription?.message}
+          >
             <Textarea id="seoDescription" {...register("seoDescription")} />
           </Field>
         </Card>
       </section>
 
       <section>
-        <SectionHeading title="Popular row" subtitle="Also switchable from the Popular row screen — this is the source of truth." />
+        <SectionHeading
+          title={d.admin.popularRow}
+          subtitle={d.admin.popularRowSub}
+        />
         <Card className="grid gap-4 p-5 sm:grid-cols-2">
-          <Field label="Mode" className="sm:col-span-2">
+          <Field label={d.admin.mode} className="sm:col-span-2">
             <Segmented
               name="popularMode"
               value={popularMode}
               onChange={(v) => setValue("popularMode", v as "manual" | "automatic", { shouldDirty: true })}
               options={[
-                { value: "manual", label: "Manual ranking" },
-                { value: "automatic", label: "Automatic (30-day views)" },
+                { value: "manual", label: d.admin.manualRanking },
+                { value: "automatic", label: d.admin.automaticViews },
               ]}
             />
           </Field>
@@ -126,7 +171,10 @@ export function SettingsForm({ initial }: { initial: SettingsFormValues }) {
             <Input id="popularSectionTitle" {...register("popularSectionTitle")} />
           </Field>
           <div className="sm:col-span-2">
-            <Checkbox label="Show the 'Recently sold and rented' row on the homepage" {...register("showSoldRow")} />
+            <Checkbox
+              label={d.admin.showSoldRow}
+              {...register("showSoldRow")}
+            />
           </div>
         </Card>
       </section>
@@ -139,7 +187,7 @@ export function SettingsForm({ initial }: { initial: SettingsFormValues }) {
       )}
 
       <Button type="submit" size="lg" disabled={isSubmitting}>
-        {isSubmitting ? "Saving…" : "Save settings"}
+        {isSubmitting ? d.common.saving : d.admin.saveSettings}
       </Button>
     </form>
   );

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { PageBody } from "@/components/site/PageBody";
 import { adminFetch } from "@/lib/admin-fetch";
 import { pageSchema, type PageInput } from "@/lib/validation";
+import { useI18n } from "@/lib/i18n/client";
 
 export function PageEditor({
   slug,
@@ -17,6 +18,7 @@ export function PageEditor({
   slug: string;
   initial: PageInput;
 }) {
+  const { d } = useI18n();
   const [serverError, setServerError] = useState("");
   const [saved, setSaved] = useState(false);
 
@@ -39,10 +41,10 @@ export function PageEditor({
         body: JSON.stringify(values),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error ?? "Could not save");
+      if (!res.ok) throw new Error(data.error ?? d.admin.couldNotSave);
       setSaved(true);
     } catch (err) {
-      setServerError(err instanceof Error ? err.message : "Could not save");
+      setServerError(err instanceof Error ? err.message : d.admin.couldNotSave);
     }
   }
 
@@ -50,11 +52,16 @@ export function PageEditor({
     <div className="grid gap-6 lg:grid-cols-2">
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
         <Card className="space-y-4 p-5">
-          <Field label="Title" htmlFor="title" required error={errors.title?.message}>
+          <Field
+            label={d.admin.title}
+            htmlFor="title"
+            required
+            error={errors.title?.message}
+          >
             <Input id="title" {...register("title")} />
           </Field>
           <Field
-            label="Body"
+            label={d.admin.body}
             htmlFor="body"
             required
             hint={'"## " for a heading, "- " for a list item, blank lines between paragraphs'}
@@ -77,7 +84,7 @@ export function PageEditor({
           )}
 
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Saving…" : "Save page"}
+            {isSubmitting ? d.common.saving : d.admin.savePage}
           </Button>
         </Card>
       </form>

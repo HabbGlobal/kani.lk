@@ -8,6 +8,9 @@ import { Card, SectionHeading } from "@/components/ui/Card";
 import { Field, Input, Textarea, Select, Checkbox, Segmented } from "@/components/ui/Field";
 import { Button } from "@/components/ui/Button";
 import { LandCard } from "@/components/land/LandCard";
+import { useI18n } from "@/lib/i18n/client";
+import * as EnumLabel from "@/lib/i18n/enums";
+import { localizedName } from "@/lib/i18n/localized";
 import { ImageManager, type LandImage } from "@/components/admin/ImageManager";
 import { landSchema, type LandFormValues } from "@/lib/validation";
 import { adminFetch } from "@/lib/admin-fetch";
@@ -15,11 +18,11 @@ import {
   PURPOSES,
   SIZE_UNITS,
   DEED_TYPES,
-  DEED_TYPE_LABELS,
+
   LAND_STATUSES,
-  STATUS_LABELS,
+
   WATER_SOURCES,
-  WATER_SOURCE_LABELS,
+
 } from "@/models/types";
 import type { LandCard as LandCardType } from "@/lib/queries";
 
@@ -54,6 +57,7 @@ export function LandEditor({
   subtitle?: string;
 }) {
   const router = useRouter();
+  const { d, locale } = useI18n();
   const [serverError, setServerError] = useState("");
   const [images_, setImages] = useState(images);
   const [cover, setCover] = useState(coverImageId);
@@ -102,7 +106,7 @@ export function LandEditor({
         body: JSON.stringify(data),
       });
       const result = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(result.error ?? "Could not save the listing");
+      if (!res.ok) throw new Error(result.error ?? d.admin.couldNotSaveListing);
 
       if (mode === "create") {
         router.push(`/admin/lands/${result.item._id}/edit?created=1`);
@@ -179,72 +183,118 @@ export function LandEditor({
         <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-8">
           {/* ── Publish ────────────────────────────────────────────────── */}
           <section>
-            <SectionHeading title="Publish" />
+            <SectionHeading title={d.admin.publish} />
             <Card className="grid gap-4 p-5 sm:grid-cols-3">
-              <Checkbox label="Published" {...register("isPublished")} />
-              <Checkbox label="Featured" {...register("isFeatured")} />
-              <Checkbox label="Popular" {...register("isPopular")} />
+              <Checkbox label={d.admin.published} {...register("isPublished")} />
+              <Checkbox label={d.admin.featured} {...register("isFeatured")} />
+              <Checkbox label={d.admin.popular} {...register("isPopular")} />
             </Card>
           </section>
 
           {/* ── Basics ─────────────────────────────────────────────────── */}
         <section>
-          <SectionHeading title="Basics" />
+          <SectionHeading title={d.admin.basics} />
           <Card className="grid gap-4 p-5 sm:grid-cols-2">
-            <Field label="Title" htmlFor="title" required className="sm:col-span-2" error={errors.title?.message}>
-              <Input id="title" placeholder="10 perch bare land in Omanthai" {...register("title")} />
+            <Field
+              label={d.admin.title}
+              htmlFor="title"
+              required
+              className="sm:col-span-2"
+              error={errors.title?.message}
+            >
+              <Input
+                id="title"
+                placeholder={d.admin.titlePlaceholder}
+                {...register("title")}
+              />
             </Field>
-            <Field label="Purpose" className="sm:col-span-2">
+            <Field label={d.lands.purpose} className="sm:col-span-2">
               <Segmented
                 name="purpose"
                 value={purpose}
                 onChange={(v) => setValue("purpose", v as LandFormValues["purpose"], { shouldValidate: true })}
-                options={PURPOSES.map((p) => ({ value: p, label: p === "both" ? "Sale or rent" : p === "sale" ? "For sale" : "For rent" }))}
+                options={PURPOSES.map((p) => ({
+                  value: p,
+                  label: EnumLabel.PURPOSE[locale][p],
+                }))}
               />
             </Field>
-            <Field label="Status" htmlFor="status">
+            <Field label={d.admin.status} htmlFor="status">
               <Select id="status" {...register("status")}>
                 {LAND_STATUSES.map((s) => (
-                  <option key={s} value={s}>{STATUS_LABELS[s]}</option>
+                  <option key={s} value={s}>
+                    {EnumLabel.STATUS[locale][s]}
+                  </option>
                 ))}
               </Select>
             </Field>
             <div className="flex items-end">
-              <Checkbox label="Keep visible after sale (Recently sold row)" {...register("showWhenSold")} />
+              <Checkbox label={d.admin.keepVisibleAfterSale} {...register("showWhenSold")} />
             </div>
           </Card>
         </section>
 
         {/* ── Location ───────────────────────────────────────────────── */}
         <section>
-          <SectionHeading title="Location" />
+          <SectionHeading title={d.admin.location} />
           <Card className="grid gap-4 p-5 sm:grid-cols-2">
-            <Field label="District" htmlFor="district" required error={errors.district?.message}>
+            <Field
+              label={d.admin.districts}
+              htmlFor="district"
+              required
+              error={errors.district?.message}
+            >
               <Select id="district" value={selectedDistrict} onChange={(e) => onDistrictChange(e.target.value)}>
-                <option value="">Choose a district</option>
-                {taxonomies.districts.map((d) => (
-                  <option key={d._id} value={d._id}>{d.name}</option>
+                <option value="">{d.admin.chooseDistrict}</option>
+                {taxonomies.districts.map((district) => (
+                  <option key={district._id} value={district._id}>
+                    {localizedName(district, locale)}
+                  </option>
                 ))}
               </Select>
             </Field>
-            <Field label="City / town" htmlFor="city" required error={errors.city?.message}>
+            <Field
+              label={d.admin.cityTown}
+              htmlFor="city"
+              required
+              error={errors.city?.message}
+            >
               <Select id="city" {...register("city")} disabled={!selectedDistrict}>
-                <option value="">Choose a city or town</option>
+                <option value="">{d.admin.chooseCity}</option>
                 {citiesForDistrict.map((c) => (
-                  <option key={c._id} value={c._id}>{c.name}</option>
+                  <option key={c._id} value={c._id}>
+                    {localizedName(c, locale)}
+                  </option>
                 ))}
               </Select>
             </Field>
-            <Field label="Area / locality" htmlFor="area" hint="Free text, e.g. a village or road name" error={errors.area?.message}>
+            <Field
+              label={d.admin.areaLocality}
+              htmlFor="area"
+              hint={d.admin.areaHint}
+              error={errors.area?.message}
+            >
               <Input id="area" {...register("area")} />
             </Field>
-            <Field label="Address line" htmlFor="addressLine" error={errors.addressLine?.message}>
+            <Field
+              label={d.admin.addressLine}
+              htmlFor="addressLine"
+              error={errors.addressLine?.message}
+            >
               <Input id="addressLine" {...register("addressLine")} />
             </Field>
-            <Field label="Nearest town" htmlFor="nearestTown" error={errors.nearestTown?.message}>
+            <Field
+              label={d.admin.nearestTown}
+              htmlFor="nearestTown"
+              error={errors.nearestTown?.message}
+            >
               <Input id="nearestTown" {...register("nearestTown")} />
             </Field>
-            <Field label="Distance from town (km)" htmlFor="distanceFromTownKm" error={errors.distanceFromTownKm?.message}>
+            <Field
+              label={d.admin.distanceFromTownKm}
+              htmlFor="distanceFromTownKm"
+              error={errors.distanceFromTownKm?.message}
+            >
               <Input id="distanceFromTownKm" type="number" min={0} step="0.1" {...register("distanceFromTownKm")} />
             </Field>
             <Field label="Google Maps URL" htmlFor="googleMapsUrl" className="sm:col-span-2" error={errors.googleMapsUrl?.message}>
@@ -255,60 +305,102 @@ export function LandEditor({
 
         {/* ── Land details ───────────────────────────────────────────── */}
         <section>
-          <SectionHeading title="Land details" />
+          <SectionHeading title={d.admin.landDetails} />
           <Card className="grid gap-4 p-5 sm:grid-cols-2">
-            <Field label="Land type" htmlFor="landType" required error={errors.landType?.message}>
+            <Field
+              label={d.lands.landType}
+              htmlFor="landType"
+              required
+              error={errors.landType?.message}
+            >
               <Select id="landType" {...register("landType")}>
-                <option value="">Choose a land type</option>
-                {taxonomies.landTypes.map((t) => (
-                  <option key={t._id} value={t._id}>{t.name}</option>
+                <option value="">{d.admin.chooseLandType}</option>
+                {taxonomies.landTypes.map((type) => (
+                  <option key={type._id} value={type._id}>
+                    {localizedName(type, locale)}
+                  </option>
                 ))}
               </Select>
             </Field>
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Size" htmlFor="sizeValue" required error={errors.sizeValue?.message}>
+              <Field
+                label={d.admin.size}
+                htmlFor="sizeValue"
+                required
+                error={errors.sizeValue?.message}
+              >
                 <Input id="sizeValue" type="number" min={0.01} step="0.01" {...register("sizeValue")} />
               </Field>
-              <Field label="Unit" htmlFor="sizeUnit">
+              <Field label={d.admin.unit} htmlFor="sizeUnit">
                 <Select id="sizeUnit" {...register("sizeUnit")}>
                   {SIZE_UNITS.map((u) => (
-                    <option key={u} value={u}>{u}</option>
+                    <option key={u} value={u}>
+                      {EnumLabel.SIZE_UNIT[locale][u]}
+                    </option>
                   ))}
                 </Select>
               </Field>
             </div>
-            <Field label="Deed type" htmlFor="deedType" error={errors.deedType?.message}>
+            <Field
+              label={d.lands.deedType}
+              htmlFor="deedType"
+              error={errors.deedType?.message}
+            >
               <Select id="deedType" {...register("deedType")}>
-                <option value="">Not specified</option>
-                {DEED_TYPES.map((d) => (
-                  <option key={d} value={d}>{DEED_TYPE_LABELS[d]}</option>
+                <option value="">{d.admin.notSpecified}</option>
+                {DEED_TYPES.map((deed) => (
+                  <option key={deed} value={deed}>
+                    {EnumLabel.DEED_TYPE[locale][deed]}
+                  </option>
                 ))}
               </Select>
             </Field>
-            <Field label="Water source" htmlFor="waterSource">
+            <Field label={d.land.waterSource} htmlFor="waterSource">
               <Select id="waterSource" {...register("waterSource")}>
                 {WATER_SOURCES.map((w) => (
-                  <option key={w} value={w}>{WATER_SOURCE_LABELS[w]}</option>
+                  <option key={w} value={w}>
+                    {EnumLabel.WATER_SOURCE[locale][w]}
+                  </option>
                 ))}
               </Select>
             </Field>
-            <Field label="Access road width (ft)" htmlFor="accessRoadWidthFt" error={errors.accessRoadWidthFt?.message}>
+            <Field
+              label={d.admin.accessRoadWidthFt}
+              htmlFor="accessRoadWidthFt"
+              error={errors.accessRoadWidthFt?.message}
+            >
               <Input id="accessRoadWidthFt" type="number" min={0} {...register("accessRoadWidthFt")} />
             </Field>
-            <Field label="Frontage (ft)" htmlFor="frontageFt" error={errors.frontageFt?.message}>
+            <Field
+              label={d.admin.frontageFt}
+              htmlFor="frontageFt"
+              error={errors.frontageFt?.message}
+            >
               <Input id="frontageFt" type="number" min={0} {...register("frontageFt")} />
             </Field>
 
             {selectedLandType?.hasBuilding && (
               <>
-                <Field label="Building size (sq ft)" htmlFor="buildingSizeSqft" error={errors.buildingSizeSqft?.message}>
+                <Field
+                  label={d.admin.buildingSizeSqft}
+                  htmlFor="buildingSizeSqft"
+                  error={errors.buildingSizeSqft?.message}
+                >
                   <Input id="buildingSizeSqft" type="number" min={0} {...register("buildingSizeSqft")} />
                 </Field>
                 <div className="grid grid-cols-2 gap-3">
-                  <Field label="Bedrooms" htmlFor="bedrooms" error={errors.bedrooms?.message}>
+                  <Field
+                    label={d.land.bedrooms}
+                    htmlFor="bedrooms"
+                    error={errors.bedrooms?.message}
+                  >
                     <Input id="bedrooms" type="number" min={0} {...register("bedrooms")} />
                   </Field>
-                  <Field label="Bathrooms" htmlFor="bathrooms" error={errors.bathrooms?.message}>
+                  <Field
+                    label={d.land.bathrooms}
+                    htmlFor="bathrooms"
+                    error={errors.bathrooms?.message}
+                  >
                     <Input id="bathrooms" type="number" min={0} {...register("bathrooms")} />
                   </Field>
                 </div>
@@ -316,22 +408,22 @@ export function LandEditor({
             )}
 
             <div className="sm:col-span-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
-              <Checkbox label="Electricity" {...register("utilities.electricity")} />
-              <Checkbox label="Water line" {...register("utilities.waterLine")} />
-              <Checkbox label="Well" {...register("utilities.well")} />
-              <Checkbox label="Telecom" {...register("utilities.telecom")} />
+              <Checkbox label={d.land.electricity} {...register("utilities.electricity")} />
+              <Checkbox label={d.land.waterLine} {...register("utilities.waterLine")} />
+              <Checkbox label={d.land.well} {...register("utilities.well")} />
+              <Checkbox label={d.land.telecom} {...register("utilities.telecom")} />
             </div>
 
             <div className="sm:col-span-2 space-y-2">
-              <p className="text-[14px] font-medium text-[var(--ink)]">Features</p>
+              <p className="text-[14px] font-medium text-[var(--ink)]">{d.admin.features}</p>
               {featureFields.map((f, i) => (
                 <div key={f.id} className="flex gap-2">
                   <Input {...register(`features.${i}` as const)} />
-                  <Button type="button" variant="ghost" size="sm" onClick={() => removeFeature(i)}>Remove</Button>
+                  <Button type="button" variant="ghost" size="sm" onClick={() => removeFeature(i)}>{d.admin.remove}</Button>
                 </div>
               ))}
               <Button type="button" variant="outline" size="sm" onClick={() => appendFeature("" as never)}>
-                Add feature
+                {d.admin.addFeature}
               </Button>
             </div>
           </Card>
@@ -339,43 +431,55 @@ export function LandEditor({
 
         {/* ── Pricing ────────────────────────────────────────────────── */}
         <section>
-          <SectionHeading title="Pricing" />
+          <SectionHeading title={d.admin.pricing} />
           <Card className="grid gap-4 p-5 sm:grid-cols-2">
             {purpose !== "rent" && (
-              <Field label="Sale price (LKR)" htmlFor="salePrice" error={errors.salePrice?.message}>
+              <Field
+                label={d.admin.salePriceLKR}
+                htmlFor="salePrice"
+                error={errors.salePrice?.message}
+              >
                 <Input id="salePrice" type="number" min={0} {...register("salePrice")} />
               </Field>
             )}
             {purpose !== "sale" && (
               <>
-                <Field label="Rent amount (LKR)" htmlFor="rentAmount" error={errors.rentAmount?.message}>
+                <Field
+                  label={d.admin.rentAmountLKR}
+                  htmlFor="rentAmount"
+                  error={errors.rentAmount?.message}
+                >
                   <Input id="rentAmount" type="number" min={0} {...register("rentAmount")} />
                 </Field>
-                <Field label="Rent period" htmlFor="rentPeriod">
+                <Field label={d.admin.rentPeriod} htmlFor="rentPeriod">
                   <Select id="rentPeriod" {...register("rentPeriod")}>
-                    <option value="month">Per month</option>
-                    <option value="year">Per year</option>
+                    <option value="month">{d.admin.perMonthOption}</option>
+                    <option value="year">{d.admin.perYearOption}</option>
                   </Select>
                 </Field>
-                <Field label="Deposit amount (LKR)" htmlFor="depositAmount" error={errors.depositAmount?.message}>
+                <Field
+                  label={d.admin.depositAmountLKR}
+                  htmlFor="depositAmount"
+                  error={errors.depositAmount?.message}
+                >
                   <Input id="depositAmount" type="number" min={0} {...register("depositAmount")} />
                 </Field>
               </>
             )}
             <div className="flex items-end gap-4 sm:col-span-2">
-              <Checkbox label="Negotiable" {...register("priceNegotiable")} />
-              <Checkbox label="Price on request" {...register("priceOnRequest")} />
+              <Checkbox label={d.admin.negotiable} {...register("priceNegotiable")} />
+              <Checkbox label={d.admin.priceOnRequest} {...register("priceOnRequest")} />
             </div>
           </Card>
         </section>
 
         {/* ── Photos ─────────────────────────────────────────────────── */}
         <section>
-          <SectionHeading title="Photos" />
+          <SectionHeading title={d.admin.photos} />
           <Card className="p-5">
             {mode === "create" ? (
               <p className="text-[15px] text-[var(--muted)]">
-                Save this listing as a draft first — photo upload becomes available once it exists.
+                {d.admin.saveDraftFirst}
               </p>
             ) : (
               <ImageManager
@@ -393,9 +497,15 @@ export function LandEditor({
 
         {/* ── Contact ────────────────────────────────────────────────── */}
         <section>
-          <SectionHeading title="Contact" />
+          <SectionHeading title={d.admin.contact} />
           <Card className="grid gap-4 p-5 sm:grid-cols-2">
-            <Field label="Owner name" htmlFor="ownerName" required className="sm:col-span-2" error={errors.ownerName?.message}>
+            <Field
+              label={d.admin.ownerName}
+              htmlFor="ownerName"
+              required
+              className="sm:col-span-2"
+              error={errors.ownerName?.message}
+            >
               <Input id="ownerName" {...register("ownerName")} />
             </Field>
             <div className="sm:col-span-2 space-y-2">
@@ -410,7 +520,7 @@ export function LandEditor({
                     <div className="flex gap-2">
                       <Input placeholder="0771234567" {...register(`contactNumbers.${i}` as const)} />
                       {contactFields.length > 1 && (
-                        <Button type="button" variant="ghost" size="sm" onClick={() => removeContact(i)}>Remove</Button>
+                        <Button type="button" variant="ghost" size="sm" onClick={() => removeContact(i)}>{d.admin.remove}</Button>
                       )}
                     </div>
                     {itemError && (
@@ -423,18 +533,18 @@ export function LandEditor({
                 <p className="text-[13px] font-medium text-[var(--laterite)]">{errors.contactNumbers.message}</p>
               )}
               <p className="text-[13px] text-[var(--muted)]">
-                10 digits starting with 0 (0771234567), or the full international format (+94775556667).
+                {d.admin.phoneFormatHint}
               </p>
               {contactFields.length < 4 && (
                 <Button type="button" variant="outline" size="sm" onClick={() => appendContact("" as never)}>
-                  Add number
+                  {d.admin.addNumber}
                 </Button>
               )}
             </div>
             <Field
-              label="WhatsApp number"
+              label={d.admin.whatsappNumber}
               htmlFor="whatsappNumber"
-              hint="10 digits (0771234567) or +94775556667"
+              hint={d.admin.whatsappFormatHint}
               error={errors.whatsappNumber?.message}
             >
               <Input id="whatsappNumber" placeholder="0771234567" {...register("whatsappNumber")} />
@@ -444,12 +554,21 @@ export function LandEditor({
 
         {/* ── Description ────────────────────────────────────────────── */}
         <section>
-          <SectionHeading title="Description" />
+          <SectionHeading title={d.admin.description} />
           <Card className="grid gap-4 p-5">
-            <Field label="Description" htmlFor="description" required error={errors.description?.message}>
+            <Field
+              label={d.admin.descriptionEnglish}
+              htmlFor="description"
+              required
+              error={errors.description?.message}
+            >
               <Textarea id="description" rows={8} {...register("description")} />
             </Field>
-            <Field label="Description (Tamil)" htmlFor="descriptionTa" error={errors.descriptionTa?.message}>
+            <Field
+              label={d.admin.descriptionTamil}
+              htmlFor="descriptionTa"
+              error={errors.descriptionTa?.message}
+            >
               <Textarea id="descriptionTa" rows={6} {...register("descriptionTa")} />
             </Field>
           </Card>
@@ -459,7 +578,7 @@ export function LandEditor({
 
         {/* ── Live preview ─────────────────────────────────────────────── */}
         <div className="xl:sticky xl:top-6 xl:self-start">
-          <SectionHeading title="Preview" className="mb-3" />
+          <SectionHeading title={d.admin.preview} className="mb-3" />
           <div className="max-w-sm">
             <LandCard
               land={previewCard}
@@ -470,7 +589,7 @@ export function LandEditor({
           </div>
           {mode === "edit" && (
             <p className="mt-2 text-[13px] text-[var(--muted)]">
-              Opens the live listing page in a new tab.
+              {d.admin.previewOpensNewTab}
             </p>
           )}
         </div>
@@ -483,7 +602,7 @@ export function LandEditor({
           onClick={handleSubmit(onSubmit)}
           className="fixed bottom-6 right-6 z-40 shadow-[var(--shadow-lg)]"
         >
-          {isSubmitting ? "Saving…" : mode === "create" ? "Save draft" : "Save changes"}
+          {isSubmitting ? d.common.saving : mode === "create" ? d.admin.saveDraft : d.admin.saveChanges}
         </Button>
       </div>
     </div>

@@ -6,6 +6,7 @@ import { imageUrl, MAX_IMAGES_PER_LAND } from "@/lib/image-url";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 import { adminFetchOrThrow, SessionExpiredError } from "@/lib/admin-fetch";
+import { useI18n } from "@/lib/i18n/client";
 
 export type LandImage = { _id: string; alt?: string };
 
@@ -26,6 +27,7 @@ export function ImageManager({
   coverImageId?: string;
   onChange?: (images: LandImage[], coverImageId?: string) => void;
 }) {
+  const { d } = useI18n();
   const [images, setImages] = useState(initialImages);
   const [cover, setCover] = useState(initialCover);
   const [uploading, setUploading] = useState(false);
@@ -55,7 +57,7 @@ export function ImageManager({
       setError(
         err instanceof SessionExpiredError
           ? err.message
-          : "Could not save the new photo order — please try again."
+          : d.admin.photoOrderFailed
       );
     }
   }
@@ -75,17 +77,17 @@ export function ImageManager({
   }
 
   async function removeImage(id: string) {
-    if (!confirm("Remove this photo?")) return;
+    if (!confirm(d.admin.confirmRemovePhoto)) return;
     setError("");
     try {
       const res = await adminFetchOrThrow(`/api/admin/lands/${landId}/images/${id}`, { method: "DELETE" });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error ?? "Could not remove photo");
+      if (!res.ok) throw new Error(data.error ?? d.admin.couldNotRemovePhoto);
       const next = images.filter((i) => i._id !== id);
       const nextCover = id === cover ? next[0]?._id : cover;
       emit(next, nextCover);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not remove photo");
+      setError(err instanceof Error ? err.message : d.admin.couldNotRemovePhoto);
     }
   }
 
@@ -102,14 +104,14 @@ export function ImageManager({
       Array.from(files).forEach((f) => form.append("files", f));
       const res = await adminFetchOrThrow(`/api/admin/lands/${landId}/images`, { method: "POST", body: form });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error ?? "Upload failed");
+      if (!res.ok) throw new Error(data.error ?? d.admin.uploadFailed);
 
       const newImages: LandImage[] = (data.imageIds as string[]).map((id) => ({ _id: id }));
       const next = [...images, ...newImages];
       const nextCover = cover ?? newImages[0]?._id;
       emit(next, nextCover);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Upload failed");
+      setError(err instanceof Error ? err.message : d.admin.uploadFailed);
     } finally {
       setUploading(false);
       if (fileInput.current) fileInput.current.value = "";
@@ -144,7 +146,7 @@ export function ImageManager({
           disabled={uploading}
           onClick={() => fileInput.current?.click()}
         >
-          {uploading ? "Uploading…" : "Add photos"}
+          {uploading ? d.admin.uploading : d.admin.addPhotos}
         </Button>
         <input
           ref={fileInput}
@@ -182,10 +184,18 @@ export function ImageManager({
               </div>
               <div className="flex items-center justify-between gap-1 p-1.5">
                 <div className="flex gap-1">
-                  <IconButton label="Move earlier" disabled={i === 0} onClick={() => move(i, -1)}>
+                  <IconButton
+                    label={d.admin.moveEarlier}
+                    disabled={i === 0}
+                    onClick={() => move(i, -1)}
+                  >
                     ←
                   </IconButton>
-                  <IconButton label="Move later" disabled={i === images.length - 1} onClick={() => move(i, 1)}>
+                  <IconButton
+                    label={d.admin.moveLater}
+                    disabled={i === images.length - 1}
+                    onClick={() => move(i, 1)}
+                  >
                     →
                   </IconButton>
                 </div>

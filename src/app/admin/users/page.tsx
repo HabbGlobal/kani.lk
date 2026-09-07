@@ -5,6 +5,8 @@ import AdminUser from "@/models/AdminUser";
 import { plain } from "@/lib/utils";
 import { SectionHeading, EmptyState } from "@/components/ui/Card";
 import { UsersManager } from "@/components/admin/UsersManager";
+import { getDictionary } from "@/lib/i18n";
+import { adminLocale } from "@/lib/i18n/server";
 
 export const metadata: Metadata = { title: "Admin users", robots: { index: false } };
 export const dynamic = "force-dynamic";
@@ -14,13 +16,14 @@ export const dynamic = "force-dynamic";
  * must still be blocked here — the page itself is the real guard.
  */
 export default async function AdminUsersPage() {
-  const user = await getSession();
+  const [user, locale] = await Promise.all([getSession(), adminLocale()]);
+  const d = getDictionary(locale);
 
   if (!user || user.role !== "superadmin") {
     return (
       <div className="max-w-lg">
-        <EmptyState title="Superadmin access required">
-          Only a superadmin can manage admin users.
+        <EmptyState title={d.admin.superadminRequired}>
+          {d.admin.superadminOnly}
         </EmptyState>
       </div>
     );
@@ -32,7 +35,7 @@ export default async function AdminUsersPage() {
 
   return (
     <div className="max-w-2xl">
-      <SectionHeading title="Admin users" subtitle="Who can sign in to this dashboard." />
+      <SectionHeading title={d.admin.adminUsers} subtitle={d.admin.usersSub} />
       <UsersManager initialRows={plain(users)} selfId={user.id} />
     </div>
   );

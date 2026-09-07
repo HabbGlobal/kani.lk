@@ -5,11 +5,14 @@ import District from "@/models/District";
 import { plain } from "@/lib/utils";
 import { SectionHeading } from "@/components/ui/Card";
 import { TaxonomyManager } from "@/components/admin/TaxonomyManager";
+import { getDictionary } from "@/lib/i18n";
+import { adminLocale } from "@/lib/i18n/server";
 
 export const metadata: Metadata = { title: "Cities & towns", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function AdminCitiesPage() {
+  const d = getDictionary(await adminLocale());
   await dbConnect();
   const [cities, districts] = await Promise.all([
     City.find({}).sort({ order: 1, name: 1 }).populate({ path: "district", select: "name" }).lean(),
@@ -18,10 +21,7 @@ export default async function AdminCitiesPage() {
 
   return (
     <div className="max-w-3xl">
-      <SectionHeading
-        title="Cities & towns"
-        subtitle="Each city belongs to one district and narrows the location filter on the public site."
-      />
+      <SectionHeading title={d.admin.citiesTowns} subtitle={d.admin.citiesSub} />
       <TaxonomyManager kind="city" initialRows={plain(cities)} districts={plain(districts)} />
     </div>
   );

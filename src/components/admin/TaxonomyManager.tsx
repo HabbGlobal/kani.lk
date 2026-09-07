@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/Button";
 import { PagerBar } from "@/components/admin/PagerBar";
 import { adminFetch } from "@/lib/admin-fetch";
 import { districtSchema, citySchema, landTypeSchema } from "@/lib/validation";
+import { useI18n } from "@/lib/i18n/client";
 
 const PAGE_SIZE = 5;
 
@@ -50,6 +51,7 @@ export function TaxonomyManager({
   const [rows, setRows] = useState(initialRows);
   const [editing, setEditing] = useState<Row | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const { d } = useI18n();
   const [error, setError] = useState("");
   const [page, setPage] = useState(1);
 
@@ -106,7 +108,7 @@ export function TaxonomyManager({
         body: JSON.stringify(values),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error ?? "Could not save");
+      if (!res.ok) throw new Error(data.error ?? d.admin.couldNotSave);
 
       setRows((prev) => {
         if (editing) return prev.map((r) => (r._id === editing._id ? { ...r, ...data.item } : r));
@@ -115,7 +117,7 @@ export function TaxonomyManager({
       setShowForm(false);
       setEditing(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not save");
+      setError(err instanceof Error ? err.message : d.admin.couldNotSave);
     }
   }
 
@@ -125,10 +127,10 @@ export function TaxonomyManager({
     try {
       const res = await adminFetch(`${apiBase}/${row._id}`, { method: "DELETE" });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error ?? "Could not delete");
+      if (!res.ok) throw new Error(data.error ?? d.admin.couldNotDelete);
       setRows((prev) => prev.filter((r) => r._id !== row._id));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not delete");
+      setError(err instanceof Error ? err.message : d.admin.couldNotDelete);
     }
   }
 
@@ -158,25 +160,40 @@ export function TaxonomyManager({
             {editing ? `Edit ${label}` : `Add ${label}`}
           </h2>
           <form onSubmit={handleSubmit(onSubmit)} noValidate className="grid gap-4 sm:grid-cols-2">
-            <Field label="Name" htmlFor="name" required error={errors.name?.message as string | undefined}>
+            <Field
+              label={d.admin.name}
+              htmlFor="name"
+              required
+              error={errors.name?.message as string | undefined}
+            >
               <Input id="name" {...register("name")} />
             </Field>
 
             {kind === "district" && (
               <>
-                <Field label="Code (used in ref codes)" htmlFor="code" required error={(errors as never as Record<string, { message?: string }>).code?.message}>
+                <Field
+                  label={d.admin.codeLabel}
+                  htmlFor="code"
+                  required
+                  error={(errors as never as Record<string, { message?: string }>).code?.message}
+                >
                   <Input id="code" placeholder="VAV" maxLength={4} {...register("code" as never)} />
                 </Field>
-                <Field label="Province" htmlFor="province">
+                <Field label={d.admin.province} htmlFor="province">
                   <Input id="province" {...register("province" as never)} />
                 </Field>
               </>
             )}
 
             {kind === "city" && (
-              <Field label="District" htmlFor="district" required error={(errors as never as Record<string, { message?: string }>).district?.message}>
+              <Field
+                label={d.admin.districts}
+                htmlFor="district"
+                required
+                error={(errors as never as Record<string, { message?: string }>).district?.message}
+              >
                 <Select id="district" {...register("district" as never)}>
-                  <option value="">Choose a district</option>
+                  <option value="">{d.admin.chooseDistrict}</option>
                   {districts?.map((d) => (
                     <option key={d._id} value={d._id}>{d.name}</option>
                   ))}
@@ -186,21 +203,28 @@ export function TaxonomyManager({
 
             {kind === "land-type" && (
               <div className="flex items-end">
-                <Checkbox label="Has a building (shows bedrooms/bathrooms in the editor)" {...register("hasBuilding" as never)} />
+                <Checkbox
+                  label={d.admin.hasBuilding}
+                  {...register("hasBuilding" as never)}
+                />
               </div>
             )}
 
-            <Field label="Sort order" htmlFor="order" hint="Lower numbers appear first">
+            <Field
+              label={d.admin.sortOrder}
+              htmlFor="order"
+              hint={d.admin.sortOrderHint}
+            >
               <Input id="order" type="number" {...register("order" as never, { valueAsNumber: true })} />
             </Field>
 
             <div className="flex items-end">
-              <Checkbox label="Active (visible on the public site)" {...register("isActive")} />
+              <Checkbox label={d.admin.activeOnSite} {...register("isActive")} />
             </div>
 
             <div className="flex gap-2 sm:col-span-2">
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Saving…" : "Save"}
+                {isSubmitting ? d.common.saving : d.common.save}
               </Button>
               <Button type="button" variant="outline" onClick={() => setShowForm(false)}>
                 Cancel

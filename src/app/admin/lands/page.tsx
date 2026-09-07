@@ -6,6 +6,8 @@ import { plain } from "@/lib/utils";
 import { SectionHeading } from "@/components/ui/Card";
 import { ButtonLink } from "@/components/ui/Button";
 import { LandsTable } from "@/components/admin/LandsTable";
+import { getDictionary, interpolate } from "@/lib/i18n";
+import { adminLocale } from "@/lib/i18n/server";
 
 export const metadata: Metadata = { title: "Listings", robots: { index: false } };
 export const dynamic = "force-dynamic";
@@ -15,6 +17,7 @@ const ROW_PROJECTION =
   "isPublished isFeatured isPopular coverImageId district createdAt";
 
 export default async function AdminLandsPage() {
+  const d = getDictionary(await adminLocale());
   await dbConnect();
   const [rows, districts] = await Promise.all([
     Land.find({})
@@ -28,9 +31,11 @@ export default async function AdminLandsPage() {
   return (
     <div>
       <SectionHeading
-        title="Listings"
-        subtitle={`${rows.length} total`}
-        action={<ButtonLink href="/admin/lands/new">New listing</ButtonLink>}
+        title={d.admin.listings}
+        subtitle={interpolate(d.admin.totalCount, { count: rows.length })}
+        action={
+          <ButtonLink href="/admin/lands/new">{d.admin.newListing}</ButtonLink>
+        }
       />
       <LandsTable initialRows={plain(rows)} districts={plain(districts)} />
     </div>

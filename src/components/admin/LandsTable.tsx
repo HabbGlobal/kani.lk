@@ -9,7 +9,12 @@ import { Button, ButtonLink } from "@/components/ui/Button";
 import { imageUrl } from "@/lib/image-url";
 import { adminFetch } from "@/lib/admin-fetch";
 import { formatLKR, formatSize } from "@/lib/units";
-import { STATUS_LABELS, PURPOSE_LABELS } from "@/models/types";
+import { LAND_STATUSES, PURPOSES } from "@/models/types";
+import { useI18n } from "@/lib/i18n/client";
+import type { Dictionary } from "@/lib/i18n";
+import { localizedName } from "@/lib/i18n/localized";
+import * as EnumLabel from "@/lib/i18n/enums";
+import type { Locale } from "@/lib/i18n/config";
 import { cn, formatDate } from "@/lib/utils";
 import type { LandStatus, Purpose } from "@/models/types";
 
@@ -47,6 +52,7 @@ export function LandsTable({
   const [status, setStatus] = useState("");
   const [district, setDistrict] = useState("");
   const [purpose, setPurpose] = useState("");
+  const { d, t, locale } = useI18n();
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -88,7 +94,7 @@ export function LandsTable({
       if (!res.ok) throw new Error();
     } catch {
       setRows((cur) => cur.map((r) => (r._id === row._id ? { ...r, [field]: prevValue } : r)));
-      setError("Could not update that listing — please try again.");
+      setError(d.admin.listingUpdateFailed);
     }
   }
 
@@ -119,7 +125,7 @@ export function LandsTable({
       setRows((cur) => cur.map((r) => (selected.has(r._id) ? { ...r, isPublished: true } : r)));
       setSelected(new Set());
     } catch {
-      setError("Some listings could not be published — please check and retry.");
+      setError(d.admin.bulkPublishFailed);
     } finally {
       setBusy(false);
     }
@@ -128,30 +134,41 @@ export function LandsTable({
   return (
     <div className="space-y-4">
       <Card className="grid gap-3 p-4 sm:grid-cols-4">
-        <Field label="Search" htmlFor="q">
-          <Input id="q" placeholder="Title, ref code…" value={q} onChange={(e) => updateFilter(setQ, e.target.value)} />
+        <Field label={d.common.search} htmlFor="q">
+          <Input
+            id="q"
+            placeholder={d.admin.searchPlaceholder}
+            value={q}
+            onChange={(e) => updateFilter(setQ, e.target.value)}
+          />
         </Field>
-        <Field label="Status" htmlFor="status">
+        <Field label={d.admin.status} htmlFor="status">
           <Select id="status" value={status} onChange={(e) => updateFilter(setStatus, e.target.value)}>
-            <option value="">All statuses</option>
-            {Object.entries(STATUS_LABELS).map(([v, l]) => (
-              <option key={v} value={v}>{l}</option>
+            <option value="">{d.admin.allStatuses}</option>
+            {LAND_STATUSES.map((v) => (
+              <option key={v} value={v}>
+                {EnumLabel.STATUS[locale][v]}
+              </option>
             ))}
           </Select>
         </Field>
-        <Field label="District" htmlFor="district">
+        <Field label={d.admin.districts} htmlFor="district">
           <Select id="district" value={district} onChange={(e) => updateFilter(setDistrict, e.target.value)}>
-            <option value="">All districts</option>
-            {districts.map((d) => (
-              <option key={d._id} value={d._id}>{d.name}</option>
+            <option value="">{d.admin.allDistricts}</option>
+            {districts.map((district) => (
+              <option key={district._id} value={district._id}>
+                {localizedName(district, locale)}
+              </option>
             ))}
           </Select>
         </Field>
-        <Field label="Purpose" htmlFor="purpose">
+        <Field label={d.lands.purpose} htmlFor="purpose">
           <Select id="purpose" value={purpose} onChange={(e) => updateFilter(setPurpose, e.target.value)}>
-            <option value="">All purposes</option>
-            {Object.entries(PURPOSE_LABELS).map(([v, l]) => (
-              <option key={v} value={v}>{l}</option>
+            <option value="">{d.admin.allPurposes}</option>
+            {PURPOSES.map((v) => (
+              <option key={v} value={v}>
+                {EnumLabel.PURPOSE[locale][v]}
+              </option>
             ))}
           </Select>
         </Field>
@@ -161,15 +178,17 @@ export function LandsTable({
 
       {selected.size > 0 && (
         <div className="flex items-center gap-3 rounded-[var(--radius-md)] bg-[var(--kani-green)]/8 px-4 py-3">
-          <p className="text-[14px] font-medium text-[var(--heading)]">{selected.size} selected</p>
+          <p className="text-[14px] font-medium text-[var(--heading)]">
+            {t(d.admin.selectedCount, { count: selected.size })}
+          </p>
           <Button size="sm" onClick={bulkPublish} disabled={busy}>
-            {busy ? "Publishing…" : "Publish selected"}
+            {busy ? d.admin.publishing : d.admin.publishSelected}
           </Button>
         </div>
       )}
 
       {filtered.length === 0 ? (
-        <EmptyState title="No listings match these filters" />
+        <EmptyState title={d.admin.noListingsMatch} />
       ) : (
         <>
           {/* Mobile: card stack */}
@@ -181,6 +200,8 @@ export function LandsTable({
                   selected={selected.has(row._id)}
                   onSelect={() => toggleSelected(row._id)}
                   onToggle={(f) => toggle(row, f)}
+                  d={d}
+                  locale={locale}
                 />
               </li>
             ))}
@@ -192,13 +213,13 @@ export function LandsTable({
               <thead className="border-b border-[var(--hairline)] text-[12px] uppercase tracking-wide text-[var(--muted)]">
                 <tr>
                   <th className="w-10 px-3 py-3"></th>
-                  <th className="px-3 py-3">Listing</th>
-                  <th className="px-3 py-3">District</th>
-                  <th className="px-3 py-3">Price</th>
-                  <th className="px-3 py-3">Status</th>
-                  <th className="px-3 py-3">Published</th>
-                  <th className="px-3 py-3">Featured</th>
-                  <th className="px-3 py-3">Popular</th>
+                  <th className="px-3 py-3">{d.admin.listing}</th>
+                  <th className="px-3 py-3">{d.admin.districts}</th>
+                  <th className="px-3 py-3">{d.admin.price}</th>
+                  <th className="px-3 py-3">{d.admin.status}</th>
+                  <th className="px-3 py-3">{d.admin.published}</th>
+                  <th className="px-3 py-3">{d.admin.featured}</th>
+                  <th className="px-3 py-3">{d.admin.popular}</th>
                   <th className="px-3 py-3"></th>
                 </tr>
               </thead>
@@ -230,7 +251,7 @@ export function LandsTable({
                       <span className="block text-[12px]">{formatSize(row.sizeValue, row.sizeUnit)}</span>
                     </td>
                     <td className="px-3 py-3">
-                      <StatusChip status={row.status} />
+                      <StatusChip status={row.status} locale={locale} />
                     </td>
                     <td className="px-3 py-3">
                       <ToggleDot on={row.isPublished} onClick={() => toggle(row, "isPublished")} />
@@ -285,7 +306,13 @@ export function LandsTable({
   );
 }
 
-function StatusChip({ status }: { status: LandStatus }) {
+function StatusChip({
+  status,
+  locale,
+}: {
+  status: LandStatus;
+  locale: Locale;
+}) {
   const tone =
     status === "available"
       ? "bg-[var(--paddy)]/12 text-[var(--paddy)]"
@@ -294,7 +321,7 @@ function StatusChip({ status }: { status: LandStatus }) {
       : "bg-[var(--laterite)]/12 text-[var(--laterite)]";
   return (
     <span className={cn("inline-flex items-center rounded-[var(--radius-pill)] px-2.5 py-1 text-[12px] font-medium", tone)}>
-      {STATUS_LABELS[status]}
+      {EnumLabel.STATUS[locale][status]}
     </span>
   );
 }
@@ -324,11 +351,15 @@ function RowCard({
   selected,
   onSelect,
   onToggle,
+  d,
+  locale,
 }: {
   row: LandRow;
   selected: boolean;
   onSelect: () => void;
   onToggle: (field: ToggleField) => void;
+  d: Dictionary;
+  locale: Locale;
 }) {
   return (
     <Card className="p-4">
@@ -345,17 +376,35 @@ function RowCard({
           </Link>
           <p className="tabular text-[13px] text-[var(--muted)]">{row.refCode} · {row.district?.name}</p>
           <p className="text-[13px] text-[var(--muted)]">
-            {row.salePrice ? formatLKR(row.salePrice) : row.rentAmount ? `${formatLKR(row.rentAmount)}/mo` : "Price on request"}
+            {row.salePrice
+              ? formatLKR(row.salePrice)
+              : row.rentAmount
+                ? `${formatLKR(row.rentAmount)}${d.admin.perMonthShort}`
+                : d.land.priceOnRequest}
             {" · "}{formatSize(row.sizeValue, row.sizeUnit)}
           </p>
-          <p className="mt-1"><StatusChip status={row.status} /></p>
+          <p className="mt-1">
+            <StatusChip status={row.status} locale={locale} />
+          </p>
           <p className="mt-1 text-[12px] text-[var(--muted)]">{formatDate(row.createdAt)}</p>
         </div>
       </div>
       <div className="mt-3 grid grid-cols-3 gap-2 text-center text-[12px]">
-        <ToggleButton label="Published" on={row.isPublished} onClick={() => onToggle("isPublished")} />
-        <ToggleButton label="Featured" on={row.isFeatured} onClick={() => onToggle("isFeatured")} />
-        <ToggleButton label="Popular" on={row.isPopular} onClick={() => onToggle("isPopular")} />
+        <ToggleButton
+          label={d.admin.published}
+          on={row.isPublished}
+          onClick={() => onToggle("isPublished")}
+        />
+        <ToggleButton
+          label={d.admin.featured}
+          on={row.isFeatured}
+          onClick={() => onToggle("isFeatured")}
+        />
+        <ToggleButton
+          label={d.admin.popular}
+          on={row.isPopular}
+          onClick={() => onToggle("isPopular")}
+        />
       </div>
     </Card>
   );

@@ -84,6 +84,10 @@ export async function proxy(req: NextRequest) {
     return NextResponse.next();
   }
 
+  // API routes are not pages: they have no locale segment and must never be
+  // redirected into one, or every fetch to /api/... breaks.
+  if (pathname.startsWith("/api")) return NextResponse.next();
+
   // ---- Public site: every URL carries its locale. ----
   const hasLocale = LOCALES.some(
     (l) => pathname === `/${l}` || pathname.startsWith(`/${l}/`)

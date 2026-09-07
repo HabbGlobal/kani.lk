@@ -8,6 +8,7 @@ import { Field, Input, Select, Checkbox } from "@/components/ui/Field";
 import { Button } from "@/components/ui/Button";
 import { adminUserSchema, type AdminUserFormValues } from "@/lib/validation";
 import { adminFetch } from "@/lib/admin-fetch";
+import { useI18n } from "@/lib/i18n/client";
 
 type UserRow = {
   _id: string;
@@ -27,6 +28,7 @@ export function UsersManager({
   const [rows, setRows] = useState(initialRows);
   const [editing, setEditing] = useState<UserRow | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const { d } = useI18n();
   const [error, setError] = useState("");
 
   const {
@@ -61,7 +63,7 @@ export function UsersManager({
         body: JSON.stringify(values),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error ?? "Could not save");
+      if (!res.ok) throw new Error(data.error ?? d.admin.couldNotSave);
 
       setRows((prev) => {
         if (editing) return prev.map((r) => (r._id === editing._id ? { ...r, ...data.item } : r));
@@ -70,7 +72,7 @@ export function UsersManager({
       setShowForm(false);
       setEditing(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not save");
+      setError(err instanceof Error ? err.message : d.admin.couldNotSave);
     }
   }
 
@@ -84,10 +86,10 @@ export function UsersManager({
         body: JSON.stringify({ name: row.name, email: row.email, role: row.role, isActive: !row.isActive }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error ?? "Could not update");
+      if (!res.ok) throw new Error(data.error ?? d.admin.couldNotUpdate);
       setRows((prev) => prev.map((r) => (r._id === row._id ? { ...r, ...data.item } : r)));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not update");
+      setError(err instanceof Error ? err.message : d.admin.couldNotUpdate);
     }
   }
 
@@ -95,7 +97,9 @@ export function UsersManager({
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3">
         <p className="text-[14px] text-[var(--muted)]">{rows.length} admin user{rows.length === 1 ? "" : "s"}</p>
-        <Button size="sm" onClick={openCreate}>Add admin user</Button>
+        <Button size="sm" onClick={openCreate}>
+          {d.admin.addAdminUser}
+        </Button>
       </div>
 
       {error && (
@@ -105,42 +109,56 @@ export function UsersManager({
       {showForm && (
         <Card className="p-5">
           <h2 className="mb-4 text-[19px] text-[var(--heading)]">
-            {editing ? "Edit admin user" : "Add admin user"}
+            {editing ? d.admin.editAdminUser : d.admin.addAdminUser}
           </h2>
           <form onSubmit={handleSubmit(onSubmit)} noValidate className="grid gap-4 sm:grid-cols-2">
-            <Field label="Name" htmlFor="name" required error={errors.name?.message}>
+            <Field
+              label={d.admin.name}
+              htmlFor="name"
+              required
+              error={errors.name?.message}
+            >
               <Input id="name" {...register("name")} />
             </Field>
-            <Field label="Email" htmlFor="email" required error={errors.email?.message}>
+            <Field
+              label={d.admin.email}
+              htmlFor="email"
+              required
+              error={errors.email?.message}
+            >
               <Input id="email" type="email" {...register("email")} />
             </Field>
-            <Field label="Role" htmlFor="role">
+            <Field label={d.admin.role} htmlFor="role">
               <Select id="role" {...register("role")}>
-                <option value="editor">Editor</option>
-                <option value="superadmin">Superadmin</option>
+                <option value="editor">{d.admin.editor}</option>
+                <option value="superadmin">{d.admin.superadmin}</option>
               </Select>
             </Field>
             <Field
-              label={editing ? "New password" : "Password"}
+              label={editing ? d.admin.newPassword : d.admin.password}
               htmlFor="password"
-              hint={editing ? "Leave blank to keep the current password" : "At least 8 characters"}
+              hint={editing ? d.admin.keepPasswordHint : d.admin.passwordHint}
               error={errors.password?.message}
             >
               <Input id="password" type="password" autoComplete="new-password" {...register("password")} />
             </Field>
             <div className="flex items-end">
-              <Checkbox label="Active" {...register("isActive")} />
+              <Checkbox label={d.admin.active} {...register("isActive")} />
             </div>
             <div className="flex gap-2 sm:col-span-2">
-              <Button type="submit" disabled={isSubmitting}>{isSubmitting ? "Saving…" : "Save"}</Button>
-              <Button type="button" variant="outline" onClick={() => setShowForm(false)}>Cancel</Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? d.common.saving : d.common.save}
+              </Button>
+              <Button type="button" variant="outline" onClick={() => setShowForm(false)}>
+                {d.common.cancel}
+              </Button>
             </div>
           </form>
         </Card>
       )}
 
       {rows.length === 0 ? (
-        <EmptyState title="No admin users yet" />
+        <EmptyState title={d.admin.noAdminUsers} />
       ) : (
         <Card className="divide-y divide-[var(--hairline)] overflow-hidden">
           {rows.map((row) => (
@@ -154,18 +172,20 @@ export function UsersManager({
                 </p>
                 <p className="truncate text-[13px] text-[var(--muted)]">
                   {row.email} · <span className="capitalize">{row.role}</span> ·{" "}
-                  {row.isActive ? "Active" : "Inactive"}
+                  {row.isActive ? d.admin.active : d.admin.inactive}
                 </p>
               </div>
               <div className="flex shrink-0 gap-2">
-                <Button size="sm" variant="outline" onClick={() => openEdit(row)}>Edit</Button>
+                <Button size="sm" variant="outline" onClick={() => openEdit(row)}>
+                  {d.common.edit}
+                </Button>
                 <Button
                   size="sm"
                   variant={row.isActive ? "danger" : "primary"}
                   disabled={row._id === selfId}
                   onClick={() => toggleActive(row)}
                 >
-                  {row.isActive ? "Deactivate" : "Activate"}
+                  {row.isActive ? d.admin.deactivate : d.admin.activate}
                 </Button>
               </div>
             </div>
