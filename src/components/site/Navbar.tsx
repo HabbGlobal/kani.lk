@@ -123,7 +123,7 @@ export function Navbar({ overHero = false }: { overHero?: boolean }) {
               link, echoing a single capsule holding every nav item. */}
           <ul
             className={cn(
-              "ml-auto hidden items-center gap-0.5 rounded-[var(--radius-pill)] border px-1.5 py-1.5 lg:flex",
+              "ml-auto hidden items-center gap-0.5 rounded-[var(--radius-pill)] border px-1.5 py-1.5 xl:flex",
               dark ? "nav-group--dark" : "nav-group"
             )}
           >
@@ -136,7 +136,7 @@ export function Navbar({ overHero = false }: { overHero?: boolean }) {
                     href={to}
                     aria-current={active ? "page" : undefined}
                     className={cn(
-                      "relative rounded-[var(--radius-pill)] px-3.5 py-2 text-[15px] font-medium",
+                      "relative whitespace-nowrap rounded-[var(--radius-pill)] px-3.5 py-2 text-[15px] font-medium",
                       "transition-[background-color,color,box-shadow] duration-200",
                       active
                         ? dark
@@ -154,7 +154,7 @@ export function Navbar({ overHero = false }: { overHero?: boolean }) {
             })}
           </ul>
 
-          <div className="ml-auto flex items-center gap-1 lg:ml-1">
+          <div className="ml-auto flex items-center gap-1 xl:ml-1">
             <LanguageSwitch onDark={dark} />
 
             <Link
@@ -186,7 +186,7 @@ export function Navbar({ overHero = false }: { overHero?: boolean }) {
               aria-controls="mobile-menu"
               aria-label={open ? d.nav.closeMenu : d.nav.openMenu}
               className={cn(
-                "grid size-11 cursor-pointer place-items-center rounded-full transition-colors duration-200 lg:hidden",
+                "grid size-11 cursor-pointer place-items-center rounded-full transition-colors duration-200 xl:hidden",
                 dark ? "text-white hover:bg-white/12" : "text-[var(--kani-green)] hover:bg-black/[0.05]"
               )}
             >
@@ -209,7 +209,7 @@ export function Navbar({ overHero = false }: { overHero?: boolean }) {
 
       {/* Mobile menu */}
       {open && (
-        <div className="fixed inset-0 z-40 lg:hidden">
+        <div className="fixed inset-0 z-40 xl:hidden">
           <button
             type="button"
             aria-label={d.nav.closeMenu}

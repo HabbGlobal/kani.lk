@@ -35,19 +35,14 @@ async function isValidAccessToken(token: string | undefined): Promise<boolean> {
 
 /**
  * Which locale to send a first-time visitor to. The saved cookie always wins —
- * an explicit choice outranks the browser. Otherwise Tamil, unless the browser
- * clearly prefers English: this site's audience reads Tamil by default.
+ * an explicit choice (made with the navbar switch) outranks everything else.
+ * Absent that, every new visitor gets Tamil — never the browser's language —
+ * per an explicit product decision: Tamil is the default, full stop, and only
+ * the switch itself should ever move a visitor to English.
  */
 function preferredLocale(req: NextRequest) {
   const saved = req.cookies.get(LOCALE_COOKIE)?.value;
   if (isLocale(saved)) return saved;
-
-  const header = req.headers.get("accept-language")?.toLowerCase() ?? "";
-  // Only a leading English preference flips it; "en" appearing far down the
-  // list is just a fallback the browser would accept, not a preference.
-  const first = header.split(",")[0]?.trim() ?? "";
-  if (first.startsWith("en")) return "en";
-
   return DEFAULT_LOCALE;
 }
 

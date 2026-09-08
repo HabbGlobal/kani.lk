@@ -58,12 +58,28 @@ export function SettingsForm({ initial }: { initial: SettingsFormValues }) {
             <Input id="heroTitle" {...register("heroTitle")} />
           </Field>
           <Field
+            label={d.admin.heroTitleTa}
+            htmlFor="heroTitleTa"
+            className="sm:col-span-2"
+            error={errors.heroTitleTa?.message}
+          >
+            <Input id="heroTitleTa" {...register("heroTitleTa")} />
+          </Field>
+          <Field
             label={d.admin.heroSubtitle}
             htmlFor="heroSubtitle"
             className="sm:col-span-2"
             error={errors.heroSubtitle?.message}
           >
             <Textarea id="heroSubtitle" {...register("heroSubtitle")} />
+          </Field>
+          <Field
+            label={d.admin.heroSubtitleTa}
+            htmlFor="heroSubtitleTa"
+            className="sm:col-span-2"
+            error={errors.heroSubtitleTa?.message}
+          >
+            <Textarea id="heroSubtitleTa" {...register("heroSubtitleTa")} />
           </Field>
         </Card>
       </section>

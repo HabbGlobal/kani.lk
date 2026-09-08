@@ -7,10 +7,21 @@ const SiteSettingsSchema = new Schema(
 
     // hero
     heroTitle: { type: String, default: "Find land you can trust in the North and East" },
+    /** Tamil hero headline. Falls back to `heroTitle` when the admin leaves it blank. */
+    heroTitleTa: {
+      type: String,
+      default: "KANI.LK-க்கு வரவேற்கிறோம். வடக்கு மற்றும் கிழக்கில் நீங்கள் நம்பக்கூடிய நிலத்தைக் கண்டறியுங்கள்.",
+    },
     heroSubtitle: {
       type: String,
       default:
         "Explore paddy fields, residential plots and properties across Sri Lanka's Northern and Eastern provinces, with direct contact details on every listing.",
+    },
+    /** Tamil hero subtitle. Falls back to `heroSubtitle` when the admin leaves it blank. */
+    heroSubtitleTa: {
+      type: String,
+      default:
+        "வவுனியா, மன்னார், யாழ்ப்பாணம், மட்டக்களப்பு, திருகோணமலை மற்றும் முல்லைத்தீவு முழுவதும் சரிபார்க்கப்பட்ட மனைகள், நெல் வயல்கள் மற்றும் வீடுகள் - ஒவ்வொரு பட்டியலிலும் உரிமையாளரின் எண்ணுடன் கிடைக்கும்.",
     },
     // contact
     contactPhone: { type: String, default: "+94 77 000 0000" },

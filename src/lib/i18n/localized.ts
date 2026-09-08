@@ -62,6 +62,25 @@ export function localizedPage(page: PageContent, locale: Locale) {
   };
 }
 
+type HeroContent = {
+  heroTitle?: string | null;
+  heroTitleTa?: string | null;
+  heroSubtitle?: string | null;
+  heroSubtitleTa?: string | null;
+};
+
+/** Resolves the homepage hero headline and subtitle from SiteSettings. */
+export function localizedHero(settings: HeroContent, locale: Locale) {
+  const ta = locale === "ta";
+  const titleTa = settings.heroTitleTa?.trim();
+  const subtitleTa = settings.heroSubtitleTa?.trim();
+
+  return {
+    title: (ta && titleTa ? titleTa : settings.heroTitle) ?? "",
+    subtitle: (ta && subtitleTa ? subtitleTa : settings.heroSubtitle) ?? "",
+  };
+}
+
 /**
  * True when the visitor is reading Tamil but this listing has no Tamil
  * description, so the UI is showing the English one. Lets a caller mark the

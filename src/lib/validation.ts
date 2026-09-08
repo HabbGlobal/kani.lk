@@ -181,7 +181,9 @@ export type PageInput = z.infer<typeof pageSchema>;
 
 export const settingsSchema = z.object({
   heroTitle: z.string().trim().max(200),
+  heroTitleTa: z.string().trim().max(200).optional(),
   heroSubtitle: z.string().trim().max(600),
+  heroSubtitleTa: z.string().trim().max(600).optional(),
   contactPhone: z.string().trim().max(40),
   contactPhoneAlt: z.string().trim().max(40).optional(),
   contactEmail: z.union([z.string().trim().email(), z.literal("")]),

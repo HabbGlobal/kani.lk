@@ -20,7 +20,7 @@ import {
 } from "@/lib/queries";
 import { getDictionary, interpolate } from "@/lib/i18n";
 import { localeHref, toLocale, type Locale } from "@/lib/i18n/config";
-import { localizedName } from "@/lib/i18n/localized";
+import { localizedName, localizedHero } from "@/lib/i18n/localized";
 
 export const revalidate = 300;
 
@@ -77,6 +77,7 @@ export default async function HomePage({
   const totalListings = districts.reduce((sum, d) => sum + d.count, 0);
   const phone = String(settings.contactPhone ?? "");
   const whatsapp = String(settings.contactWhatsapp ?? "");
+  const hero = localizedHero(settings as Record<string, string>, locale);
 
   return (
     <>
@@ -122,8 +123,9 @@ export default async function HomePage({
           <div className="kani-hero-content container-kani on-dark flex h-full flex-col justify-center pt-28 pb-16 md:pt-32 md:pb-20">
             <div className="max-w-[620px] animate-rise">
               <HeroWelcomeText
-                title={String(settings.heroTitle)}
-                subtitle={String(settings.heroSubtitle)}
+                title={hero.title}
+                subtitle={hero.subtitle}
+                locale={locale}
               />
 
               <HeroStats
