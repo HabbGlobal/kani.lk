@@ -302,6 +302,52 @@ p { text-wrap: pretty; }
   .kani-word-reveal { animation: none; }
 }
 
+/* Tamil hero headline: a line-by-line "typing" sweep with a trailing caret.
+   Deliberately not a per-character typewriter — Tamil composes base letters
+   with vowel signs into single clusters, and revealing one partially shows a
+   broken glyph. Each line instead wipes in left-to-right behind a clip, which
+   reads as typing while every cluster stays whole. Each line carries its own
+   --kani-type-delay / --kani-type-dur set inline by the component. */
+@keyframes kani-type-line {
+  from { clip-path: inset(0 100% 0 0); }
+  to   { clip-path: inset(0 0 0 0); }
+}
+@keyframes kani-type-caret {
+  0%, 100% { opacity: 0; }
+  50%      { opacity: 1; }
+}
+.kani-type-line {
+  display: block;
+  clip-path: inset(0 100% 0 0);
+  animation: kani-type-line var(--kani-type-dur, 900ms) steps(24, end) both;
+  animation-delay: var(--kani-type-delay, 0ms);
+}
+/* The caret rides the end of the line being typed, then disappears so the
+   finished headline is not left with a blinking bar after it. */
+.kani-type-caret::after {
+  content: "";
+  display: inline-block;
+  width: 2px;
+  height: 0.95em;
+  margin-inline-start: 0.06em;
+  vertical-align: -0.12em;
+  background: var(--palmyra-gold);
+  opacity: 0;
+  animation: kani-type-caret 620ms steps(1, end) var(--kani-caret-blinks, 3),
+             kani-type-caret-off 1ms linear forwards;
+  animation-delay: var(--kani-type-delay, 0ms), var(--kani-caret-end, 2s);
+}
+@keyframes kani-type-caret-off {
+  to { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .kani-type-line {
+    animation: none;
+    clip-path: none;
+  }
+  .kani-type-caret::after { display: none; }
+}
+
 /* Hero search panel: a slow gold arc that orbits the panel's edge, plus a
    soft ambient glow behind it — the "border beam" look, done with a single
    rotating conic-gradient layer instead of a JS/canvas effect or a third

@@ -53,17 +53,41 @@ export function HeroWelcomeText({
     const [greeting, ...rest] = title.split(/(?<=\.)\s+/);
     const promise = rest.join(" ").trim();
 
+    // The promise types in line by line. Splitting on spaces would break the
+    // sweep across arbitrary points, so it is chunked into roughly equal
+    // phrases and each chunk animates as one line.
+    const promiseWords = promise ? promise.split(" ") : [];
+    const perLine = Math.ceil(promiseWords.length / 3) || 1;
+    const promiseLines: string[] = [];
+    for (let k = 0; k < promiseWords.length; k += perLine) {
+      promiseLines.push(promiseWords.slice(k, k + perLine).join(" "));
+    }
+
+    const LINE_MS = 780;
+    const GREETING_MS = 620;
+
     return (
       <div style={{ fontFamily: "var(--font-tamil)" }}>
         <p
-          className="text-[22px] font-semibold leading-[1.3] sm:text-[27px] lg:text-[31px]"
+          className="kani-type-line text-[22px] font-semibold leading-[1.3] sm:text-[27px] lg:text-[31px]"
           style={{
             color: "var(--palmyra-gold-soft)",
+            ["--kani-type-dur" as string]: `${GREETING_MS}ms`,
             textShadow:
               "0 1px 3px rgba(10, 44, 30, 0.65), 0 1px 12px rgba(10, 44, 30, 0.35)",
           }}
         >
-          {greeting}
+          {/* "KANI" stays gold with the rest of the greeting; ".LK" picks up
+              the paddy green, mirroring the English hero's "kani.lk" split. */}
+          {greeting.split(/(\.LK)/i).map((part, k) =>
+            /^\.LK$/i.test(part) ? (
+              <span key={k} style={{ color: "var(--paddy)" }}>
+                {part}
+              </span>
+            ) : (
+              part
+            )
+          )}
         </p>
 
         {/* Short gold rule between the greeting and the promise — the Tamil
@@ -83,12 +107,46 @@ export function HeroWelcomeText({
                 "0 1px 3px rgba(10, 44, 30, 0.55), 0 1px 14px rgba(10, 44, 30, 0.3)",
             }}
           >
-            {promise}
+            {promiseLines.map((line, k) => {
+              const delay = GREETING_MS + 140 + k * LINE_MS;
+              const isLast = k === promiseLines.length - 1;
+              return (
+                <span
+                  key={k}
+                  className={`kani-type-line ${isLast ? "kani-type-caret" : ""}`}
+                  style={{
+                    ["--kani-type-dur" as string]: `${LINE_MS}ms`,
+                    ["--kani-type-delay" as string]: `${delay}ms`,
+                    ["--kani-caret-end" as string]: `${delay + LINE_MS + 1900}ms`,
+                  }}
+                >
+                  {/* "நம்பக்கூடிய" ("trustworthy") is the promise's key word —
+                      gold, the same accent role "trust" plays in English. */}
+                  {line.split(/(நம்பக்கூடிய)/).map((part, m) =>
+                    part === "நம்பக்கூடிய" ? (
+                      <span key={m} style={{ color: "var(--palmyra-gold-soft)" }}>
+                        {part}
+                      </span>
+                    ) : (
+                      part
+                    )
+                  )}
+                </span>
+              );
+            })}
           </h1>
         )}
 
         {subtitle && (
-          <p className="mt-4 max-w-[52ch] text-[15px] leading-[1.75] text-white/85 md:text-[17px]">
+          <p
+            className="kani-hero-sub-ta mt-4 max-w-[52ch] text-[15px] font-medium leading-[1.75] text-white md:text-[17px]"
+            style={{
+              // Brighter than the English subtitle's white/85 and lifted off a
+              // busy photograph by a deep scrim shadow plus a faint warm glow.
+              textShadow:
+                "0 1px 2px rgba(4, 12, 9, 0.9), 0 2px 10px rgba(4, 12, 9, 0.65), 0 0 22px rgba(216, 189, 130, 0.28)",
+            }}
+          >
             {subtitle}
           </p>
         )}
