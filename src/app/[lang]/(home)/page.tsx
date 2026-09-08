@@ -78,6 +78,7 @@ export default async function HomePage({
   const phone = String(settings.contactPhone ?? "");
   const whatsapp = String(settings.contactWhatsapp ?? "");
   const hero = localizedHero(settings as Record<string, string>, locale);
+  const isTamil = locale === "ta";
 
   return (
     <>
@@ -89,9 +90,15 @@ export default async function HomePage({
           so it's never inside the clipped layer. ────────────────────── */}
       <section className="kani-hero-shell relative isolate">
         <div
-          className="kani-hero-media relative isolate overflow-hidden rounded-b-[28px]
-                     [height:clamp(620px,78svh,760px)]
-                     md:[height:clamp(560px,66vh,660px)]"
+          className={`kani-hero-media relative isolate overflow-hidden rounded-b-[28px] ${
+            isTamil
+              ? // Tamil copy runs far longer than the English headline and the
+                // Noto Tamil face is tall, so a fixed height clips the first
+                // line up behind the navbar. Tamil gets a min-height that can
+                // grow with the copy; English keeps its exact original height.
+                "[min-height:clamp(660px,82svh,820px)] md:[min-height:clamp(600px,72vh,720px)]"
+              : "[height:clamp(620px,78svh,760px)] md:[height:clamp(560px,66vh,660px)]"
+          }`}
         >
           <HeroSlideshow />
           {/* Directional scrim: solid enough for text on the left, easing off
@@ -120,8 +127,10 @@ export default async function HomePage({
                        bg-gradient-to-t from-[var(--kani-green-deep)]/55 to-transparent"
           />
 
-          <div className="kani-hero-content container-kani on-dark flex h-full flex-col justify-center pt-28 pb-16 md:pt-32 md:pb-20">
-            <div className="max-w-[620px] animate-rise">
+          <div className="kani-hero-content container-kani on-dark flex min-h-full flex-col justify-center pt-28 pb-16 md:pt-32 md:pb-20">
+            {/* Tamil needs a wider measure: the 620px column that holds the
+                English headline on two lines pushes the Tamil one to five. */}
+            <div className={`animate-rise ${isTamil ? "max-w-[760px]" : "max-w-[620px]"}`}>
               <HeroWelcomeText
                 title={hero.title}
                 subtitle={hero.subtitle}

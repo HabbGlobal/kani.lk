@@ -20,13 +20,17 @@ const comfortaa = Comfortaa({
 });
 
 /**
- * The hero's welcome line. On English, a short Comfortaa eyebrow ("Welcome to
- * kani.lk") sits above the admin-editable headline, set in Lobster Two — one
- * pairing, two roles: geometric sans for the greeting, script serif for the
- * promise. Lobster Two and Comfortaa are Latin-only faces, so on Tamil the
- * eyebrow is dropped (the admin's Tamil headline already opens with its own
- * "welcome to kani.lk") and the headline renders in the Tamil face loaded
- * globally in the root layout instead.
+ * The hero's welcome line — two entirely separate treatments, one per locale.
+ *
+ * English keeps its original design untouched: a Comfortaa eyebrow ("Welcome
+ * to kani.lk") over a large Lobster Two headline with a per-word reveal.
+ *
+ * Tamil gets its own layout rather than the English one restyled. Lobster Two
+ * and Comfortaa are Latin-only, and the Tamil copy runs long enough that the
+ * English sizes overflow the hero, so Tamil renders as a gold greeting line, a
+ * short gold rule, and a smaller supporting headline, all in the Noto Tamil
+ * face loaded globally in the root layout. The per-word reveal is dropped
+ * there too: it splits on spaces, which fragments Tamil words mid-phrase.
  */
 export function HeroWelcomeText({
   title,
@@ -39,57 +43,97 @@ export function HeroWelcomeText({
 }) {
   const isTamil = locale === "ta";
 
-  return (
-    <div className={`${lobsterTwo.variable} ${comfortaa.variable}`}>
-      {!isTamil && (
+  if (isTamil) {
+    // The Tamil headline is written as two sentences — a greeting
+    // ("KANI.LK-க்கு வரவேற்கிறோம்.") and the promise that follows. Splitting
+    // on that first full stop lets each play its own role instead of running
+    // together into one oversized five-line block. If an admin writes a
+    // single-sentence Tamil headline, `promise` is empty and the greeting
+    // simply carries the hero on its own.
+    const [greeting, ...rest] = title.split(/(?<=\.)\s+/);
+    const promise = rest.join(" ").trim();
+
+    return (
+      <div style={{ fontFamily: "var(--font-tamil)" }}>
         <p
-          className="text-[15px] font-bold uppercase tracking-[0.16em] text-white sm:text-[16px]"
+          className="text-[22px] font-semibold leading-[1.3] sm:text-[27px] lg:text-[31px]"
           style={{
-            fontFamily: "var(--font-comfortaa), var(--font-sans)",
-            textShadow: "0 1px 3px rgba(10, 44, 30, 0.65), 0 1px 12px rgba(10, 44, 30, 0.35)",
+            color: "var(--palmyra-gold-soft)",
+            textShadow:
+              "0 1px 3px rgba(10, 44, 30, 0.65), 0 1px 12px rgba(10, 44, 30, 0.35)",
           }}
         >
-          Welcome to{" "}
-          <span style={{ color: "var(--palmyra-gold-soft)" }}>kani</span>
-          <span style={{ color: "var(--paddy)" }}>.lk</span>
+          {greeting}
         </p>
-      )}
+
+        {/* Short gold rule between the greeting and the promise — the Tamil
+            hero's own visual signature, standing in for the Latin script
+            face the English hero uses to separate its two tiers. */}
+        <span
+          aria-hidden="true"
+          className="mt-3 block h-[3px] w-14 rounded-full"
+          style={{ background: "var(--palmyra-gold)" }}
+        />
+
+        {promise && (
+          <h1
+            className="mt-3 max-w-[16ch] text-[25px] font-semibold leading-[1.38] text-white sm:max-w-[22ch] sm:text-[31px] lg:text-[37px]"
+            style={{
+              textShadow:
+                "0 1px 3px rgba(10, 44, 30, 0.55), 0 1px 14px rgba(10, 44, 30, 0.3)",
+            }}
+          >
+            {promise}
+          </h1>
+        )}
+
+        {subtitle && (
+          <p className="mt-4 max-w-[52ch] text-[15px] leading-[1.75] text-white/85 md:text-[17px]">
+            {subtitle}
+          </p>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className={`${lobsterTwo.variable} ${comfortaa.variable}`}>
+      <p
+        className="text-[15px] font-bold uppercase tracking-[0.16em] text-white sm:text-[16px]"
+        style={{
+          fontFamily: "var(--font-comfortaa), var(--font-sans)",
+          textShadow: "0 1px 3px rgba(10, 44, 30, 0.65), 0 1px 12px rgba(10, 44, 30, 0.35)",
+        }}
+      >
+        Welcome to{" "}
+        <span style={{ color: "var(--palmyra-gold-soft)" }}>kani</span>
+        <span style={{ color: "var(--paddy)" }}>.lk</span>
+      </p>
 
       <h1
-        className={`leading-[1.15] text-white ${
-          isTamil
-            ? "text-[30px] sm:text-[38px] lg:text-[46px]"
-            : "mt-1 text-[38px] sm:text-[50px] lg:text-[64px]"
-        }`}
-        style={{
-          fontFamily: isTamil
-            ? "var(--font-tamil)"
-            : "var(--font-lobster-two), var(--font-serif)",
-        }}
+        className="mt-1 text-[38px] leading-[1.15] text-white sm:text-[50px] lg:text-[64px]"
+        style={{ fontFamily: "var(--font-lobster-two), var(--font-serif)" }}
       >
         {/* Per-word reveal: each word is masked in its own overflow-hidden
             box and the inner span slides up from below on load — pure CSS
             (kani-word-reveal, globals.css), so this stays a Server Component
-            with no client JS or animation library. The gold-accent word match
-            below is English-only vocabulary ("trust", "north", "east") and
-            simply never matches Tamil text, which reveals in a single color —
-            that is the correct behavior until the accent words are localized. */}
+            with no client JS or animation library. */}
         {title.split(" ").map((word, i, words) => {
           const bare = word.replace(/[^a-z]/gi, "").toLowerCase();
-          const isAccent = !isTamil && ["trust", "north", "east"].includes(bare);
+          const isAccent = ["trust", "north", "east"].includes(bare);
           return (
-          <span key={i} className="inline-block overflow-hidden align-top">
-            <span
-              className="kani-word-reveal inline-block whitespace-pre"
-              style={{
-                animationDelay: `${i * 70}ms`,
-                color: isAccent ? "var(--palmyra-gold-soft)" : undefined,
-              }}
-            >
-              {word}
-              {i < words.length - 1 ? " " : ""}
+            <span key={i} className="inline-block overflow-hidden align-top">
+              <span
+                className="kani-word-reveal inline-block whitespace-pre"
+                style={{
+                  animationDelay: `${i * 70}ms`,
+                  color: isAccent ? "var(--palmyra-gold-soft)" : undefined,
+                }}
+              >
+                {word}
+                {i < words.length - 1 ? " " : ""}
+              </span>
             </span>
-          </span>
           );
         })}
       </h1>
@@ -100,7 +144,7 @@ export function HeroWelcomeText({
           staggerMs={22}
           baseRotation={3}
           className="mt-4 max-w-2xl text-[16px] leading-relaxed text-white/85 md:text-[18px]"
-          style={{ fontFamily: isTamil ? "var(--font-tamil)" : "var(--font-comfortaa), var(--font-sans)" }}
+          style={{ fontFamily: "var(--font-comfortaa), var(--font-sans)" }}
         >
           {subtitle}
         </ScrollReveal>
