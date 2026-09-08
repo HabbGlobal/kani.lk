@@ -70,9 +70,15 @@ export default async function RootLayout({
   const locale = toLocale((await cookies()).get(LOCALE_COOKIE)?.value);
 
   return (
+    // suppressHydrationWarning: some browser extensions (password managers,
+    // form fillers) inject attributes like data-qb-installed onto <html>
+    // before React hydrates. That mismatch is outside our control and not a
+    // real bug — this only silences the warning for this element, it does
+    // not disable hydration mismatch checks anywhere else in the tree.
     <html
       lang={HTML_LANG[locale]}
       className={`${newsreader.variable} ${publicSans.variable} ${notoTamil.variable} h-full`}
+      suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col bg-bone text-ink">{children}</body>
     </html>
