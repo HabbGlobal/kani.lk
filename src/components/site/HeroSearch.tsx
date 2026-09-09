@@ -46,11 +46,11 @@ export function HeroSearch({
   const href = (path: string) => localeHref(path, locale);
 
   return (
-    <div className="relative rounded-[22px]">
-      {/* No animated glow/beam here — a plain, high-contrast card reads more
-          clearly against the hero photo than a pulsing effect, in both
-          locales. A solid border plus a firm shadow does the job of drawing
-          the eye without the motion. */}
+    <div className="kani-hero-search-glow relative rounded-[22px] p-[2.5px]">
+      {/* Rotating gold beam kept, but the ambient pulsing glow behind it was
+          removed — it hurt legibility against the hero photo. A firmer
+          border + shadow on the panel itself carries the contrast now. */}
+      <div aria-hidden="true" className="kani-hero-search-beam absolute inset-0 rounded-[22px]" />
       <form
         action={href("/lands")}
         method="get"
@@ -95,8 +95,13 @@ export function HeroSearch({
         </div>
 
         {statLine && (
-          <span className="flex items-center gap-1.5 truncate text-[13px] font-medium text-[var(--muted)]">
-            <span className="size-1.5 shrink-0 rounded-full bg-[var(--palmyra-gold)]" aria-hidden="true" />
+          <span
+            className="inline-flex max-w-full items-center gap-2 rounded-[var(--radius-pill)]
+                       bg-[var(--palmyra-gold)] px-4 py-1.5 text-[13px] font-semibold
+                       text-[var(--kani-green-deep)] shadow-[0_4px_14px_-4px_rgba(190,155,78,0.55)]
+                       sm:text-[14px]"
+          >
+            <span className="size-1.5 shrink-0 rounded-full bg-[var(--kani-green-deep)]" aria-hidden="true" />
             <span className="truncate">{statLine}</span>
           </span>
         )}
