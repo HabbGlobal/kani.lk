@@ -410,53 +410,10 @@ p { text-wrap: pretty; }
   .kani-type-caret::after { display: none; }
 }
 
-/* Hero search panel: a slow gold arc that orbits the panel's edge, plus a
-   soft ambient glow behind it — the "border beam" look, done with a single
-   rotating conic-gradient layer instead of a JS/canvas effect or a third
-   library. The glow wrapper supplies the ring's 1.5px inset via padding;
-   the beam sits behind the form (paint order) and never intercepts input. */
-@keyframes kani-beam-spin {
-  to { transform: rotate(360deg); }
-}
-@keyframes kani-glow-pulse {
-  0%, 100% { opacity: 0.75; }
-  50%      { opacity: 1; }
-}
-.kani-hero-search-glow {
-  isolation: isolate;
-  box-shadow: 0 0 90px -8px color-mix(in srgb, var(--palmyra-gold) 75%, transparent),
-              0 0 34px -4px color-mix(in srgb, var(--palmyra-gold-soft) 65%, transparent);
-  animation: kani-glow-pulse 3.2s ease-in-out infinite;
-}
-.kani-hero-search-beam {
-  z-index: -1;
-  overflow: hidden;
-}
-.kani-hero-search-beam::before {
-  content: "";
-  position: absolute;
-  inset: -85%;
-  background: conic-gradient(
-    from 0deg,
-    transparent 0deg,
-    transparent 220deg,
-    var(--palmyra-gold-soft) 285deg,
-    var(--palmyra-gold) 320deg,
-    var(--palmyra-gold) 340deg,
-    var(--palmyra-gold-soft) 358deg,
-    transparent 360deg
-  );
-  animation: kani-beam-spin 3s linear infinite;
-}
-/* Hovering the panel pauses the orbiting beam — a deliberate "settle" cue
-   rather than a distraction while someone's actually using the fields. */
-.kani-hero-search-glow:hover .kani-hero-search-beam::before {
-  animation-play-state: paused;
-}
-@media (prefers-reduced-motion: reduce) {
-  .kani-hero-search-beam::before { animation: none; }
-  .kani-hero-search-glow { animation: none; opacity: 1; }
-}
+/* The hero search panel previously had an animated gold "border beam" glow
+   here (a pulsing box-shadow plus an orbiting conic-gradient ring). Removed
+   in favour of a plain high-contrast card — see HeroSearch.tsx — since the
+   animation reduced legibility against the hero photo in both locales. */
 
 /* Scroll-reveal: elements start hidden and are released by IntersectionObserver.
    Guarded so that if JS never runs, content is still visible. */

@@ -151,32 +151,20 @@ export default async function HomePage({
 
         {/* Search panel: normal document flow on mobile (overlap causes
             cramped stacking below ~640px), pulled up to overlap the media
-            layer's bottom edge from sm upward. */}
-        <div className="container-kani relative z-10 -mt-6 pb-10 sm:-mt-16 md:pb-4">
-          <p className="mb-3 flex justify-center animate-rise">
-            <span
-              className="inline-flex max-w-full items-center gap-2 rounded-[var(--radius-pill)]
-                         border border-[var(--palmyra-gold)]/40 bg-[var(--kani-green-deep)] px-4 py-1.5
-                         text-[13px] font-medium text-white shadow-[0_6px_18px_-6px_rgba(10,44,30,0.45)]
-                         sm:text-[14px]"
-            >
-              <span className="size-1.5 shrink-0 rounded-full bg-[var(--palmyra-gold)]" aria-hidden="true" />
-              <span className="truncate">
-                {interpolate(d.home.statBar, {
-                  listings: totalListings,
-                  districts: districts.length,
-                })}
-              </span>
-            </span>
-          </p>
-          <div
-            className="mt-8 animate-rise sm:mt-0"
-            style={{ animationDelay: "160ms" }}
-          >
+            layer's bottom edge from sm upward. The stat line now renders
+            inside the card itself, inline with the purpose tabs — it used to
+            float above the card as its own pill and overlapped the hero's
+            bottom edge. */}
+        <div className="container-kani relative z-10 -mt-6 pb-10 sm:-mt-10 md:pb-4">
+          <div className="animate-rise" style={{ animationDelay: "160ms" }}>
             <HeroSearch
               districts={taxonomies.districts}
               landTypes={taxonomies.landTypes}
               locale={locale}
+              statLine={interpolate(d.home.statBar, {
+                listings: totalListings,
+                districts: districts.length,
+              })}
             />
           </div>
         </div>
