@@ -8,6 +8,7 @@
  */
 export const en = {
   common: {
+    tagline: "Find. Invest. Own.",
     skipToContent: "Skip to content",
     loading: "Loading…",
     save: "Save",
@@ -116,6 +117,10 @@ export const en = {
     listYourLand: "List your land on kani.lk",
     listYourLandCta: "Message us on WhatsApp",
     listYourLandShort: "List your land",
+    ctaTitle: "Have land to sell or rent out?",
+    ctaBody:
+      "Reach genuine buyers and tenants across the North and East. Share your land details and photos, and we’ll guide you through the listing process.",
+    ctaWhatsappAria: "Message us on WhatsApp at {phone} about listing your land",
     propertyType: "Property type",
     minimumLandSize: "Minimum land size",
     maximumLandSize: "Maximum land size",

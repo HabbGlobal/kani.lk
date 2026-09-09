@@ -3,6 +3,7 @@ import Link from "next/link";
 import { LandGrid } from "@/components/site/LandRail";
 import { FilterPanel } from "@/components/land/FilterPanel";
 import { FilterChips } from "@/components/land/FilterChips";
+import { SortSelect } from "@/components/land/SortSelect";
 import { LandsPageHeader } from "@/components/land/LandsPageHeader";
 import { Pagination } from "@/components/ui/Pagination";
 import { EmptyState } from "@/components/ui/Card";
@@ -46,7 +47,7 @@ export default async function LandsPage({
   ]);
 
   return (
-    <div className="container-kani py-8 md:py-12">
+    <div className="container-kani py-8 pb-24 md:py-12 lg:pb-12">
       <LandsPageHeader title={d.lands.pageTitle} />
 
       <div className="mb-4 text-center text-[15px] text-[var(--muted)]">
@@ -62,7 +63,7 @@ export default async function LandsPage({
           out of room to stick almost immediately. Default stretch keeps
           both columns full height while the aside itself stays fixed via
           its own `sticky` + `self-start`. */}
-      <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
+      <div className="grid gap-6 lg:grid-cols-[minmax(260px,300px)_1fr]">
         <div>
           <h2 className="mb-3 hidden text-[15px] font-semibold text-[var(--ink)] lg:block">
             {d.lands.filters}
@@ -76,12 +77,17 @@ export default async function LandsPage({
         </div>
 
         <div>
-          <div className="mb-5">
+          {/* Results toolbar: sort now lives here, visible at every
+              breakpoint — it used to render only inside the desktop filter
+              sidebar, so it was unreachable once the layout switched to the
+              mobile sheet. */}
+          <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <FilterChips
               districts={taxonomies.districts}
               cities={taxonomies.cities}
               landTypes={taxonomies.landTypes}
             />
+            <SortSelect className="w-full shrink-0 sm:w-auto sm:min-w-[200px]" />
           </div>
 
           {result.items.length > 0 ? (

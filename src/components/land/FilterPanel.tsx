@@ -6,7 +6,6 @@ import { Sheet } from "@/components/ui/Sheet";
 import { Button } from "@/components/ui/Button";
 import { Field, Input, Select, Checkbox } from "@/components/ui/Field";
 import { DEED_TYPES, type DeedType } from "@/models/types";
-import { SORT_OPTIONS } from "@/lib/search-params";
 import { useI18n } from "@/lib/i18n/client";
 import { localizedName } from "@/lib/i18n/localized";
 import * as EnumLabel from "@/lib/i18n/enums";
@@ -105,20 +104,6 @@ export function FilterPanel({
       // Any filter change returns to page one; page 3 of the old result set is
       // meaningless against a new one.
       sp.delete("page");
-      startTransition(() => {
-        router.push(`${pathname}${sp.toString() ? `?${sp}` : ""}`, { scroll: false });
-      });
-    },
-    [params, pathname, router]
-  );
-
-  // Sort doesn't reset pagination the way a filter change does — it's a
-  // view of the same result set, not a narrower query.
-  const setSort = useCallback(
-    (value: string) => {
-      const sp = new URLSearchParams(params.toString());
-      if (value === "newest") sp.delete("sort");
-      else sp.set("sort", value);
       startTransition(() => {
         router.push(`${pathname}${sp.toString() ? `?${sp}` : ""}`, { scroll: false });
       });
@@ -287,9 +272,9 @@ export function FilterPanel({
             value={get("minPerch")}
             onChange={(e) => setParam({ minPerch: e.target.value })}
           >
-            <option value="">No min</option>
+            <option value="">{d.lands.noMin}</option>
             {PERCH_STEPS.map((p) => (
-              <option key={p} value={p}>{p}</option>
+              <option key={p} value={p}>{t(d.land.perchesValue, { n: p })}</option>
             ))}
           </Select>
           <span className="text-[var(--muted)]" aria-hidden="true">–</span>
@@ -298,9 +283,9 @@ export function FilterPanel({
             value={get("maxPerch")}
             onChange={(e) => setParam({ maxPerch: e.target.value })}
           >
-            <option value="">No max</option>
+            <option value="">{d.lands.noMax}</option>
             {PERCH_STEPS.map((p) => (
-              <option key={p} value={p}>{p}</option>
+              <option key={p} value={p}>{t(d.land.perchesValue, { n: p })}</option>
             ))}
           </Select>
         </div>
@@ -313,7 +298,7 @@ export function FilterPanel({
             value={get("minPrice")}
             onChange={(e) => setParam({ minPrice: e.target.value })}
           >
-            <option value="">No min</option>
+            <option value="">{d.lands.noMin}</option>
             {PRICE_STEPS.map((p) => (
               <option key={p} value={p}>{compactLKR(p)}</option>
             ))}
@@ -324,7 +309,7 @@ export function FilterPanel({
             value={get("maxPrice")}
             onChange={(e) => setParam({ maxPrice: e.target.value })}
           >
-            <option value="">No max</option>
+            <option value="">{d.lands.noMax}</option>
             {PRICE_STEPS.map((p) => (
               <option key={p} value={p}>{compactLKR(p)}</option>
             ))}
@@ -347,33 +332,12 @@ export function FilterPanel({
           truly fixed while scrolling. */}
       <aside
         className={cn(
-          "sticky top-24 hidden flex-col gap-5 rounded-[var(--radius-lg)] border border-[var(--hairline)] bg-[var(--card)] p-5 shadow-[var(--shadow-md)] lg:flex",
+          "hidden flex-col gap-5 rounded-[var(--radius-lg)] border border-[var(--hairline)] bg-[var(--card)] p-5 shadow-[var(--shadow-md)] lg:sticky lg:flex lg:[top:calc(var(--nav-h)+28px)]",
           pending && "opacity-60 transition-opacity duration-200"
         )}
         role="search"
         aria-label={d.lands.filterListings}
       >
-        <BarField label={d.lands.sortBy} htmlFor="f-sort">
-          <select
-            id="f-sort"
-            value={get("sort") || "newest"}
-            onChange={(e) => setSort(e.target.value)}
-            className="h-10 w-full cursor-pointer appearance-none rounded-[var(--radius-md)] border border-[var(--hairline)]
-                       bg-[var(--bone)] pl-3.5 pr-8 text-[13.5px] font-medium text-[var(--ink)]
-                       bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22 fill=%22none%22><path d=%22M4 6l4 4 4-4%22 stroke=%22%23566a5f%22 stroke-width=%221.6%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/></svg>')] bg-[length:14px] bg-[right_10px_center] bg-no-repeat
-                       transition-colors duration-200 hover:border-[var(--kani-green)]/40
-                       focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--kani-green)]"
-          >
-            {SORT_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {EnumLabel.SORT[locale][o.value]}
-              </option>
-            ))}
-          </select>
-        </BarField>
-
-        <div className="border-t border-[var(--hairline)]" />
-
         <BarField label={d.lands.purpose}>
           <div className="flex items-center gap-0.5 rounded-[var(--radius-md)] border border-[var(--hairline)] bg-[var(--bone)] p-1">
             {[
@@ -432,30 +396,60 @@ export function FilterPanel({
           </BarSelect>
         </BarField>
 
-        <BarField label={d.lands.minimumSize} htmlFor="f-min-perch">
-          <BarSelect
-            id="f-min-perch"
-            value={get("minPerch")}
-            onChange={(e) => setParam({ minPerch: e.target.value })}
-          >
-            <option value="">{d.lands.anySize}</option>
-            {PERCH_STEPS.map((p) => (
-              <option key={p} value={p}>{p}+ perches</option>
-            ))}
-          </BarSelect>
+        {/* Full min/max on both size and price — matching the mobile sheet's
+            field set exactly. Desktop used to offer only a size minimum and a
+            price maximum, so the same visitor got two different result sets
+            depending on which UI they were filtering from. */}
+        <BarField label={d.lands.sizePerches}>
+          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+            <BarSelect
+              aria-label={d.lands.minSizeAria}
+              value={get("minPerch")}
+              onChange={(e) => setParam({ minPerch: e.target.value })}
+            >
+              <option value="">{d.lands.anySize}</option>
+              {PERCH_STEPS.map((p) => (
+                <option key={p} value={p}>{t(d.land.perchesValue, { n: p })}</option>
+              ))}
+            </BarSelect>
+            <span className="text-[var(--muted)]" aria-hidden="true">–</span>
+            <BarSelect
+              aria-label={d.lands.maxSizeAria}
+              value={get("maxPerch")}
+              onChange={(e) => setParam({ maxPerch: e.target.value })}
+            >
+              <option value="">{d.lands.anySize}</option>
+              {PERCH_STEPS.map((p) => (
+                <option key={p} value={p}>{t(d.land.perchesValue, { n: p })}</option>
+              ))}
+            </BarSelect>
+          </div>
         </BarField>
 
-        <BarField label={d.lands.maximumPrice} htmlFor="f-max-price">
-          <BarSelect
-            id="f-max-price"
-            value={get("maxPrice")}
-            onChange={(e) => setParam({ maxPrice: e.target.value })}
-          >
-            <option value="">{d.lands.anyPrice}</option>
-            {PRICE_STEPS.map((p) => (
-              <option key={p} value={p}>Up to {compactLKR(p)}</option>
-            ))}
-          </BarSelect>
+        <BarField label={d.lands.priceLKR}>
+          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+            <BarSelect
+              aria-label={d.lands.minPriceAria}
+              value={get("minPrice")}
+              onChange={(e) => setParam({ minPrice: e.target.value })}
+            >
+              <option value="">{d.lands.anyPrice}</option>
+              {PRICE_STEPS.map((p) => (
+                <option key={p} value={p}>{compactLKR(p)}</option>
+              ))}
+            </BarSelect>
+            <span className="text-[var(--muted)]" aria-hidden="true">–</span>
+            <BarSelect
+              aria-label={d.lands.maxPriceAria}
+              value={get("maxPrice")}
+              onChange={(e) => setParam({ maxPrice: e.target.value })}
+            >
+              <option value="">{d.lands.anyPrice}</option>
+              {PRICE_STEPS.map((p) => (
+                <option key={p} value={p}>{compactLKR(p)}</option>
+              ))}
+            </BarSelect>
+          </div>
         </BarField>
 
         <div className="border-t border-[var(--hairline)] pt-4">
@@ -481,19 +475,25 @@ export function FilterPanel({
         </div>
       </aside>
 
-      {/* Mobile trigger */}
-      <Button
-        variant="outline"
-        size="sm"
-        className="lg:hidden"
-        onClick={() => setMobileSheetOpen(true)}
+      {/* Mobile trigger — fixed at the bottom of the viewport rather than
+          inline above the grid, so it stays reachable while scrolling through
+          a long results list instead of requiring a trip back to the top. */}
+      <div
+        className="fixed inset-x-0 bottom-0 z-30 flex justify-center p-4 lg:hidden"
+        style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 1rem)" }}
       >
-        <svg viewBox="0 0 16 16" className="size-4" fill="none" aria-hidden="true">
-          <path d="M2 4h12M4 8h8M6.5 12h3" stroke="currentColor" strokeWidth="1.6"
-                strokeLinecap="round" />
-        </svg>
-        {d.lands.filters}
-      </Button>
+        <Button
+          size="lg"
+          className="shadow-[0_8px_28px_-6px_rgba(10,44,30,0.4)]"
+          onClick={() => setMobileSheetOpen(true)}
+        >
+          <svg viewBox="0 0 16 16" className="size-4" fill="none" aria-hidden="true">
+            <path d="M2 4h12M4 8h8M6.5 12h3" stroke="currentColor" strokeWidth="1.6"
+                  strokeLinecap="round" />
+          </svg>
+          {d.lands.filters}
+        </Button>
+      </div>
 
       {/* Mobile: every field, since the bar above isn't shown at this width. */}
       <Sheet

@@ -3,6 +3,7 @@ import { LandGrid } from "./LandRail";
 import { Pagination } from "@/components/ui/Pagination";
 import { EmptyState } from "@/components/ui/Card";
 import { ButtonLink } from "@/components/ui/Button";
+import { SortSelect } from "@/components/land/SortSelect";
 import { searchLands, getDistrictsWithCounts } from "@/lib/queries";
 import { parseFilters, buildQuery, type RawParams } from "@/lib/search-params";
 import type { Purpose } from "@/models/types";
@@ -59,7 +60,7 @@ export async function PurposeLanding({
               <li key={district._id}>
                 <Link
                   href={`${path}?district=${district.slug}`}
-                  className="inline-flex h-10 items-center gap-1.5 rounded-[var(--radius-pill)]
+                  className="inline-flex h-11 items-center gap-1.5 rounded-[var(--radius-pill)]
                              border border-[var(--hairline)] bg-[var(--card)] px-4 text-[15px]
                              text-[var(--ink)] transition-colors duration-200
                              hover:border-[var(--kani-green)]/40 hover:text-[var(--kani-green)]"
@@ -74,6 +75,9 @@ export async function PurposeLanding({
 
       {result.items.length > 0 ? (
         <>
+          <div className="mb-5 flex justify-end">
+            <SortSelect className="w-full sm:w-auto sm:min-w-[200px]" />
+          </div>
           <LandGrid lands={result.items} locale={locale} />
           <Pagination
             locale={locale}

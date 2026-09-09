@@ -86,24 +86,27 @@ export function FilterChips({
           key={chip.key}
           type="button"
           onClick={() => remove(chip.key)}
-          className="group inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-[var(--radius-pill)]
-                     bg-[var(--kani-green)]/10 pl-3 pr-2 text-[14px] font-medium text-[var(--kani-green)]
+          className="group inline-flex h-11 cursor-pointer items-center gap-1.5 rounded-[var(--radius-pill)]
+                     bg-[var(--kani-green)]/10 pl-3.5 pr-2.5 text-sm font-medium text-[var(--kani-green)]
                      transition-colors duration-200 hover:bg-[var(--kani-green)]/18"
         >
           {chip.label}
-          <span className="sr-only">{d.lands.removeFilter}</span>
-          <svg viewBox="0 0 16 16" className="size-3.5 opacity-60 transition-opacity group-hover:opacity-100"
-               fill="none" aria-hidden="true">
-            <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.8"
-                  strokeLinecap="round" />
-          </svg>
+          {/* A visible-sized hit area around the ✕, not just the glyph itself —
+              the icon alone was ~14px, well under a usable touch target. */}
+          <span className="grid size-6 place-items-center rounded-full opacity-70 transition-opacity group-hover:opacity-100">
+            <span className="sr-only">{d.lands.removeFilter}</span>
+            <svg viewBox="0 0 16 16" className="size-3.5" fill="none" aria-hidden="true">
+              <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.8"
+                    strokeLinecap="round" />
+            </svg>
+          </span>
         </button>
       ))}
 
       <button
         type="button"
         onClick={clearAll}
-        className="h-9 cursor-pointer rounded-[var(--radius-pill)] px-3 text-[14px] font-medium
+        className="grid h-11 cursor-pointer place-items-center rounded-[var(--radius-pill)] px-3.5 text-sm font-medium
                    text-[var(--laterite)] underline-offset-2 transition-colors hover:underline"
       >
         {d.common.clearAll}

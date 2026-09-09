@@ -75,7 +75,7 @@ export function LandGrid({
   priorityCount?: number;
 }) {
   return (
-    <ul className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+    <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
       {lands.map((land, i) => (
         <Reveal as="li" key={land._id} delay={Math.min((i % 6) * 50, 200)}>
           <LandCard

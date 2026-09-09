@@ -3,6 +3,25 @@ import { Select } from "@/components/ui/Field";
 import { getDictionary, interpolate } from "@/lib/i18n";
 import { DEFAULT_LOCALE, localeHref, type Locale } from "@/lib/i18n/config";
 import { localizedName } from "@/lib/i18n/localized";
+import { formatSize, PERCHES_PER_ACRE } from "@/lib/units";
+
+const PRICE_STEPS = [
+  500_000, 1_000_000, 2_000_000, 3_000_000, 5_000_000,
+  10_000_000, 20_000_000, 50_000_000,
+];
+
+function compactLKR(n: number): string {
+  if (n >= 1_000_000) return `${n / 1_000_000}M`;
+  return `${n / 1_000}K`;
+}
+
+/** Perch step options read as acres past a full acre — "320 perches" is a
+ * much harder number to picture than "2 acres". */
+function sizeOptionLabel(perches: number, locale: Locale): string {
+  return perches >= PERCHES_PER_ACRE
+    ? formatSize(perches / PERCHES_PER_ACRE, "acre", locale)
+    : formatSize(perches, "perch", locale);
+}
 
 /**
  * The hero search. Deliberately a plain GET form to /lands with no JavaScript
@@ -69,7 +88,12 @@ export function HeroSearch({
         </div>
       </fieldset>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1.2fr_1.2fr_1fr_1fr_auto] lg:items-end">
+      {/* Three fields up front — district, type, price — instead of four. Size
+          moves behind "More filters": asking for four decisions before a
+          visitor has expressed any intent was the friction here, and size is
+          the one buyers are least sure of before they've seen what's on
+          offer. */}
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1.2fr_1.2fr_1fr_auto] lg:items-end">
         <div>
           <label htmlFor="hero-district" className="mb-1.5 block text-[12.5px] font-medium text-[var(--muted)]">
             {d.land.location}
@@ -99,27 +123,13 @@ export function HeroSearch({
         </div>
 
         <div>
-          <label htmlFor="hero-min" className="mb-1.5 block text-[12.5px] font-medium text-[var(--muted)]">
-            {d.home.minimumLandSize}
+          <label htmlFor="hero-max-price" className="mb-1.5 block text-[12.5px] font-medium text-[var(--muted)]">
+            {d.lands.priceLKR}
           </label>
-          <Select id="hero-min" name="minPerch" defaultValue="" className="h-11 text-[15px]">
-            <option value="">{d.home.heroMinSize}</option>
-            {[5, 10, 15, 20, 40, 80, 160].map((p) => (
-              <option key={p} value={p}>{p}+ perches</option>
-            ))}
-          </Select>
-        </div>
-
-        <div>
-          <label htmlFor="hero-max" className="mb-1.5 block text-[12.5px] font-medium text-[var(--muted)]">
-            {d.home.maximumLandSize}
-          </label>
-          <Select id="hero-max" name="maxPerch" defaultValue="" className="h-11 text-[15px]">
-            <option value="">{d.home.heroMaxSize}</option>
-            {[10, 20, 40, 80, 160, 320, 800].map((p) => (
-              <option key={p} value={p}>
-                {p >= 160 ? `${p / 160} acres` : `${p} perches`}
-              </option>
+          <Select id="hero-max-price" name="maxPrice" defaultValue="" className="h-11 text-[15px]">
+            <option value="">{d.lands.anyPrice}</option>
+            {PRICE_STEPS.map((p) => (
+              <option key={p} value={p}>{compactLKR(p)}</option>
             ))}
           </Select>
         </div>
@@ -140,6 +150,44 @@ export function HeroSearch({
           {d.common.search}
         </button>
       </div>
+
+      {/* Size, behind a native <details> disclosure — no JS needed to keep
+          this a zero-JS form. */}
+      <details className="mt-3 group">
+        <summary className="flex w-fit cursor-pointer list-none items-center gap-1 text-[13px] font-medium
+                             text-[var(--kani-green)] transition-colors hover:text-[var(--kani-green-deep)]">
+          {d.lands.moreFilters}
+          <svg viewBox="0 0 16 16" className="size-3.5 transition-transform duration-200 group-open:rotate-180"
+               fill="none" aria-hidden="true">
+            <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </summary>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          <div>
+            <label htmlFor="hero-min" className="mb-1.5 block text-[12.5px] font-medium text-[var(--muted)]">
+              {d.home.minimumLandSize}
+            </label>
+            <Select id="hero-min" name="minPerch" defaultValue="" className="h-11 text-[15px]">
+              <option value="">{d.lands.noMin}</option>
+              {[5, 10, 15, 20, 40, 80, 160].map((p) => (
+                <option key={p} value={p}>{sizeOptionLabel(p, locale)}</option>
+              ))}
+            </Select>
+          </div>
+
+          <div>
+            <label htmlFor="hero-max" className="mb-1.5 block text-[12.5px] font-medium text-[var(--muted)]">
+              {d.home.maximumLandSize}
+            </label>
+            <Select id="hero-max" name="maxPerch" defaultValue="" className="h-11 text-[15px]">
+              <option value="">{d.lands.noMax}</option>
+              {[10, 20, 40, 80, 160, 320, 800].map((p) => (
+                <option key={p} value={p}>{sizeOptionLabel(p, locale)}</option>
+              ))}
+            </Select>
+          </div>
+        </div>
+      </details>
 
       <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1.5 text-[13px] text-[var(--muted)]">
         <span>{d.home.heroPopular}</span>

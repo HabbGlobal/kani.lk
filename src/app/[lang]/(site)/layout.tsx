@@ -18,7 +18,10 @@ export default async function SiteLayout({
   return (
     <>
       <Navbar />
-      <main id="main" className="flex-1 pt-24 md:pt-28">
+      {/* Top padding derives from --nav-h (the floating navbar's own height)
+          plus a fixed clearance, so it can never drift out of sync with the
+          bar the way separate `pt-24 md:pt-28` guesses could. */}
+      <main id="main" className="flex-1 [padding-top:calc(var(--nav-h)+28px)]">
         {children}
       </main>
       <Footer locale={locale} />

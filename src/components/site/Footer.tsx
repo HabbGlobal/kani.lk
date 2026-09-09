@@ -1,3 +1,4 @@
+import { Children } from "react";
 import Link from "next/link";
 import { Logo } from "./Logo";
 import { AsciiWave } from "./AsciiWave";
@@ -45,7 +46,7 @@ export async function Footer({ locale }: { locale: Locale }) {
         <div className="container-kani flex flex-col gap-3 border-b border-white/10 py-6
                         md:flex-row md:items-end md:justify-between">
           <div>
-            <Logo onDark withTagline />
+            <Logo onDark withTagline tagline={d.common.tagline} />
             <p className="mt-2.5 max-w-md text-[14px] leading-relaxed text-white/75">
               {d.footer.blurb}
             </p>
@@ -59,8 +60,8 @@ export async function Footer({ locale }: { locale: Locale }) {
                     href={s.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex h-9 items-center rounded-[var(--radius-pill)]
-                               border border-white/15 px-4 text-[13.5px] text-white/85
+                    className="inline-flex h-11 items-center rounded-[var(--radius-pill)]
+                               border border-white/15 px-4 text-sm text-white/85
                                transition-colors duration-200 hover:border-white/40 hover:bg-white/10 hover:text-white"
                   >
                     {s.label}
@@ -162,9 +163,12 @@ function FooterColumn({
         {title}
       </h2>
       <ul className="mt-2.5 space-y-1.5 text-[14.5px]">
-        {Array.isArray(children)
-          ? children.map((child, i) => <li key={i}>{child}</li>)
-          : <li>{children}</li>}
+        {/* Children.map (not Array.isArray) — a column with exactly one
+            static child (rather than one produced by .map) arrives as a bare
+            element, not an array, so the old isArray check silently dropped
+            the <li> wrapper for that case. Children.map handles a single
+            child, multiple children, and an array of children uniformly. */}
+        {Children.map(children, (child, i) => <li key={i}>{child}</li>)}
       </ul>
     </nav>
   );

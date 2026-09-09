@@ -96,8 +96,10 @@ export default async function HomePage({
                 // Noto Tamil face is tall, so a fixed height clips the first
                 // line up behind the navbar. Tamil gets a min-height that can
                 // grow with the copy; English keeps its exact original height.
-                "[min-height:clamp(660px,82svh,820px)] md:[min-height:clamp(600px,72vh,720px)]"
-              : "[height:clamp(620px,78svh,760px)] md:[height:clamp(560px,66vh,660px)]"
+                // Both were trimmed from their original clamps so the search
+                // panel and first row of listings sit closer to the fold.
+                "[min-height:clamp(560px,70svh,700px)] md:[min-height:clamp(520px,60vh,620px)]"
+              : "[height:clamp(520px,64svh,640px)] md:[height:clamp(480px,56vh,560px)]"
           }`}
         >
           <HeroSlideshow />
@@ -288,20 +290,10 @@ export default async function HomePage({
         </ul>
       </section>
 
-      {/* ── Recently sold ────────────────────────────────────────────── */}
-      {settings.showSoldRow && sold.length > 0 && (
-        <section className="container-kani pt-16 md:pt-20">
-          <Reveal>
-            <SectionHeading
-              title={d.home.soldTitle}
-              subtitle={d.home.soldSub}
-            />
-          </Reveal>
-          <LandRail lands={sold} locale={locale} />
-        </section>
-      )}
-
       {/* ── How it works ─────────────────────────────────────────────── */}
+      {/* Moved ahead of "Recently sold" — this answers the first-time
+          visitor's question, and used to sit near the footer where it was
+          rarely reached. */}
       <section id="how-it-works" className="container-kani scroll-mt-24 pt-16 md:pt-20">
         <Reveal>
           <SectionHeading
@@ -331,6 +323,19 @@ export default async function HomePage({
           ))}
         </ol>
       </section>
+
+      {/* ── Recently sold ────────────────────────────────────────────── */}
+      {settings.showSoldRow && sold.length > 0 && (
+        <section className="container-kani pt-16 md:pt-20">
+          <Reveal>
+            <SectionHeading
+              title={d.home.soldTitle}
+              subtitle={d.home.soldSub}
+            />
+          </Reveal>
+          <LandRail lands={sold} locale={locale} />
+        </section>
+      )}
 
       {/* ── List-your-land CTA ───────────────────────────────────────── */}
       <Reveal as="div">

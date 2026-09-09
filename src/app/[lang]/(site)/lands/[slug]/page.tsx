@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Gallery } from "@/components/land/Gallery";
 import { ViewTracker } from "@/components/land/ViewTracker";
 import { ContactPanel } from "@/components/land/ContactPanel";
+import { MobileContactBar } from "@/components/land/MobileContactBar";
 import { LandGrid } from "@/components/site/LandRail";
 import { StatusPill, Chip } from "@/components/ui/Badge";
 import { SectionHeading } from "@/components/ui/Card";
@@ -146,12 +147,12 @@ export default async function LandDetailPage({ params, searchParams }: Params) {
     (mapQuery ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQuery)}` : null);
 
   return (
-    <article className="container-kani py-6 md:py-10">
+    <article className="container-kani py-6 pb-24 md:py-10 lg:pb-10">
       {preview === "1" && <PreviewBar landId={land._id} d={d} />}
 
       <Breadcrumbs land={land} locale={locale} d={d} />
 
-      <div className="mt-5 grid gap-8 lg:grid-cols-[1fr_400px] lg:gap-10">
+      <div className="mt-5 grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(340px,400px)] lg:gap-10">
         <div className="min-w-0">
           <Gallery
             images={images}
@@ -404,7 +405,7 @@ export default async function LandDetailPage({ params, searchParams }: Params) {
         </div>
 
         {/* ── Contact ─────────────────────────────────────────────────── */}
-        <aside className="lg:sticky lg:top-28 lg:self-start">
+        <aside className="lg:sticky lg:self-start lg:[top:calc(var(--nav-h)+28px)]">
           <ContactPanel
             landId={land._id}
             landTitle={land.title}
@@ -433,6 +434,15 @@ export default async function LandDetailPage({ params, searchParams }: Params) {
 
       <JsonLd land={land} images={images} locale={locale} d={d} />
       <ViewTracker landId={land._id} />
+
+      <MobileContactBar
+        landTitle={land.title}
+        refCode={land.refCode}
+        contactNumbers={land.contactNumbers}
+        whatsappNumber={land.whatsappNumber}
+        status={land.status}
+        locale={locale}
+      />
     </article>
   );
 }

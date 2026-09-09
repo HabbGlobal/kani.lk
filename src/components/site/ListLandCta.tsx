@@ -1,7 +1,7 @@
 import { LandSaleSign } from "./LandSaleSign";
 import { formatPhoneLocal, toWhatsappNumber } from "@/lib/utils";
-import { getDictionary } from "@/lib/i18n";
-import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
+import { getDictionary, interpolate } from "@/lib/i18n";
+import { DEFAULT_LOCALE, localeHref, type Locale } from "@/lib/i18n/config";
 
 /**
  * Compact horizontal "have land to sell or rent" strip. A Server Component —
@@ -77,12 +77,10 @@ export function ListLandCta({
 
           <div className="w-full min-w-0 md:flex-1">
             <h2 className="text-balance text-[26px] text-white sm:text-[30px] md:text-[32px]">
-              Have land to sell or rent out?
+              {d.home.ctaTitle}
             </h2>
             <p className="mx-auto mt-2.5 max-w-xl text-pretty text-[15px] leading-relaxed text-white/75 sm:text-[16px] md:mx-0">
-              Reach genuine buyers and tenants across the North and East. Share
-              your land details and photos, and we&rsquo;ll guide you through
-              the listing process.
+              {d.home.ctaBody}
             </p>
           </div>
 
@@ -90,7 +88,7 @@ export function ListLandCta({
             className="flex w-full min-w-0 flex-col gap-3 sm:w-auto sm:flex-row md:shrink-0"
           >
             <a
-              href="/contact?intent=list-land"
+              href={`${localeHref("/contact", locale)}?intent=list-land`}
               aria-label={d.home.ctaAria}
               className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-[var(--radius-pill)] sm:w-auto
                          bg-[var(--palmyra-gold)] px-6 text-[15px] font-semibold text-[var(--kani-green-deep)]
@@ -119,7 +117,7 @@ export function ListLandCta({
                 href={waHref}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label={`Message us on WhatsApp at ${waDisplay} about listing your land`}
+                aria-label={interpolate(d.home.ctaWhatsappAria, { phone: waDisplay })}
                 className="inline-flex h-12 w-full items-center justify-center gap-2.5 rounded-[var(--radius-pill)] sm:w-auto
                            border border-white/25 bg-transparent px-6 text-[15px] font-medium text-white
                            tabular

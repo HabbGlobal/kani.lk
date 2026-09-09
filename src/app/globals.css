@@ -58,6 +58,10 @@
   --shadow-md: 0 4px 16px -4px rgba(10, 44, 30, 0.1);
   --shadow-lg: 0 16px 40px -12px rgba(10, 44, 30, 0.18);
   --shadow-glass: 0 8px 32px -8px rgba(10, 44, 30, 0.22);
+  /* Card-specific lift, split from --shadow-sm/-md so cards stop hand-rolling
+     one-off shadow strings; used by .lift and the card component directly. */
+  --shadow-card: 0 1px 2px rgba(10, 44, 30, 0.05), 0 6px 16px -8px rgba(10, 44, 30, 0.14);
+  --shadow-card-hover: 0 2px 4px rgba(10, 44, 30, 0.06), 0 14px 28px -10px rgba(10, 44, 30, 0.22);
 
   /* motion */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
@@ -65,6 +69,42 @@
   --dur-fast: 150ms;
   --dur-base: 250ms;
   --dur-slow: 420ms;
+
+  /* type scale — replaces the arbitrary text-[Npx] values scattered across
+     the public components. Body stays 17px (see the .body-17 comment below);
+     everything else is named by role, not by pixel count, so a component
+     picks a step instead of inventing one. */
+  --text-xs: 13px;
+  --text-xs--line-height: 1.4;
+  --text-sm: 14px;
+  --text-sm--line-height: 1.5;
+  --text-base: 16px;
+  --text-base--line-height: 1.6;
+  --text-md: 17px;
+  --text-md--line-height: 1.6;
+  --text-lg: 19px;
+  --text-lg--line-height: 1.4;
+  --text-xl: 22px;
+  --text-xl--line-height: 1.3;
+  --text-2xl: 27px;
+  --text-2xl--line-height: 1.2;
+  --text-3xl: 34px;
+  --text-3xl--line-height: 1.15;
+  --text-4xl: 44px;
+  --text-4xl--line-height: 1.1;
+
+  /* Height of the floating navbar pill at each breakpoint/scroll state, kept
+     here so the mobile menu offset and every `sticky top-*` in the site
+     derive from one number instead of drifting out of sync with Navbar.tsx. */
+  --nav-h: 68px;
+  --nav-h-scrolled: 68px;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --nav-h: 76px;
+    --nav-h-scrolled: 70px;
+  }
 }
 
 @theme inline {
@@ -94,6 +134,28 @@
   --radius-xl: var(--radius-xl);
 
   --shadow-glass: var(--shadow-glass);
+  --shadow-card: var(--shadow-card);
+  --shadow-card-hover: var(--shadow-card-hover);
+
+  /* text-xs … text-4xl utilities, each carrying its paired line-height. */
+  --text-xs: var(--text-xs);
+  --text-xs--line-height: var(--text-xs--line-height);
+  --text-sm: var(--text-sm);
+  --text-sm--line-height: var(--text-sm--line-height);
+  --text-base: var(--text-base);
+  --text-base--line-height: var(--text-base--line-height);
+  --text-md: var(--text-md);
+  --text-md--line-height: var(--text-md--line-height);
+  --text-lg: var(--text-lg);
+  --text-lg--line-height: var(--text-lg--line-height);
+  --text-xl: var(--text-xl);
+  --text-xl--line-height: var(--text-xl--line-height);
+  --text-2xl: var(--text-2xl);
+  --text-2xl--line-height: var(--text-2xl--line-height);
+  --text-3xl: var(--text-3xl);
+  --text-3xl--line-height: var(--text-3xl--line-height);
+  --text-4xl: var(--text-4xl);
+  --text-4xl--line-height: var(--text-4xl--line-height);
 }
 
 /* ─── Base ──────────────────────────────────────────────────────────── */
@@ -423,7 +485,7 @@ p { text-wrap: pretty; }
               box-shadow var(--dur-base) var(--ease-out);
 }
 @media (hover: hover) {
-  .lift:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+  .lift:hover { transform: translateY(-4px); box-shadow: var(--shadow-card-hover); }
 }
 .lift:active { transform: translateY(-1px); }
 

@@ -7,6 +7,7 @@ import { Logo } from "./Logo";
 import { LanguageSwitch } from "./LanguageSwitch";
 import { useFavourites } from "@/lib/favourites";
 import { useI18n } from "@/lib/i18n/client";
+import { useFocusTrap } from "@/lib/useFocusTrap";
 import { cn } from "@/lib/utils";
 
 /** Paths are locale-free here; `href()` prefixes them at render time. */
@@ -32,6 +33,7 @@ export function Navbar({ overHero = false }: { overHero?: boolean }) {
   const [open, setOpen] = useState(false);
   const { ids, ready } = useFavourites();
   const lastY = useRef(0);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // The hero is ~72vh; switch the treatment a little before its bottom edge.
@@ -66,22 +68,14 @@ export function Navbar({ overHero = false }: { overHero?: boolean }) {
     if (open) setHidden(false);
   }, [open]);
 
-  useEffect(() => {
-    if (!open) return;
-    const { overflow } = document.body.style;
-    document.body.style.overflow = "hidden";
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.body.style.overflow = overflow;
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [open]);
+  const closeMenu = () => setOpen(false);
+  useFocusTrap(open, menuRef, closeMenu);
 
-  // The bar is solid black in every state now, so its text/icon colors stay
-  // on the light (on-dark) branch throughout — only the glow/border variant
-  // still shifts with scroll position.
-  const dark = true;
+  // The bar is solid black in every state, so its text/icon colors are the
+  // on-dark treatment throughout — only the glow/border variant still shifts
+  // with scroll position. (There used to be a light-glass branch selected by
+  // a `dark` flag; it was never reachable, since the flag was always true, so
+  // it's been removed rather than kept as dead conditionals.)
   const overHeroGlow = overHero && !scrolled;
 
   return (
@@ -94,12 +88,7 @@ export function Navbar({ overHero = false }: { overHero?: boolean }) {
         {d.common.skipToContent}
       </a>
 
-      <header
-        className={cn(
-          "fixed inset-x-0 top-0 z-50 px-3 pt-3 md:px-6 md:pt-5",
-          dark && "on-dark"
-        )}
-      >
+      <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3 on-dark md:px-6 md:pt-5">
         <nav
           aria-label={d.nav.mainNav}
           className={cn(
@@ -116,16 +105,20 @@ export function Navbar({ overHero = false }: { overHero?: boolean }) {
             aria-label={d.nav.homeAria}
             className="ml-2 shrink-0 rounded-full md:ml-3"
           >
-            <Logo onDark={dark} />
+            <Logo onDark />
           </Link>
 
           {/* Desktop links — one glowing oval group, not a separate pill per
-              link, echoing a single capsule holding every nav item. */}
+              link, echoing a single capsule holding every nav item. Shown
+              from `lg` (not `xl`): `/lands` already switches to its desktop
+              two-column layout at `lg`, so a tablet was getting a hamburger
+              while the rest of the site assumed it had a desktop nav. The
+              Tamil labels are what forced the wider breakpoint originally —
+              handled here with a tighter type step and padding at `lg` that
+              relaxes back to the original sizing from `xl` up. */}
           <ul
-            className={cn(
-              "ml-auto hidden items-center gap-0.5 rounded-[var(--radius-pill)] border px-1.5 py-1.5 xl:flex",
-              dark ? "nav-group--dark" : "nav-group"
-            )}
+            className="ml-auto hidden items-center gap-0.5 rounded-[var(--radius-pill)]
+                       border px-1 py-1 nav-group--dark lg:flex xl:px-1.5 xl:py-1.5"
           >
             {LINKS.map((link) => {
               const to = href(link.href);
@@ -136,15 +129,12 @@ export function Navbar({ overHero = false }: { overHero?: boolean }) {
                     href={to}
                     aria-current={active ? "page" : undefined}
                     className={cn(
-                      "relative whitespace-nowrap rounded-[var(--radius-pill)] px-3.5 py-2 text-[15px] font-medium",
+                      "relative whitespace-nowrap rounded-[var(--radius-pill)] px-2.5 py-1.5 text-sm font-medium",
                       "transition-[background-color,color,box-shadow] duration-200",
+                      "xl:px-3.5 xl:py-2 xl:text-[15px]",
                       active
-                        ? dark
-                          ? "bg-[var(--palmyra-gold)] text-[var(--kani-green-deep)] nav-pill-glow--dark"
-                          : "bg-[var(--kani-green)] text-white nav-pill-glow"
-                        : dark
-                          ? "text-white/85 hover:bg-white/12 hover:text-white"
-                          : "text-[var(--ink)] hover:bg-[var(--kani-green)]/8 hover:text-[var(--kani-green)]"
+                        ? "bg-[var(--palmyra-gold)] text-[var(--kani-green-deep)] nav-pill-glow--dark"
+                        : "text-white/85 hover:bg-white/12 hover:text-white"
                     )}
                   >
                     {d.nav[link.key]}
@@ -154,16 +144,14 @@ export function Navbar({ overHero = false }: { overHero?: boolean }) {
             })}
           </ul>
 
-          <div className="ml-auto flex items-center gap-1 xl:ml-1">
-            <LanguageSwitch onDark={dark} />
+          <div className="ml-auto flex items-center gap-1 lg:ml-1">
+            <LanguageSwitch onDark />
 
             <Link
               href={href("/favourites")}
               aria-label={`${d.nav.savedLands}${ready && ids.length ? ` (${ids.length})` : ""}`}
-              className={cn(
-                "relative grid size-11 place-items-center rounded-full transition-colors duration-200",
-                dark ? "text-white hover:bg-white/12" : "text-[var(--kani-green)] hover:bg-black/[0.05]"
-              )}
+              className="relative grid size-11 place-items-center rounded-full text-white
+                         transition-colors duration-200 hover:bg-white/12"
             >
               <svg viewBox="0 0 24 24" className="size-5" fill="none" strokeWidth="1.9"
                    stroke="currentColor" strokeLinejoin="round" aria-hidden="true">
@@ -185,10 +173,8 @@ export function Navbar({ overHero = false }: { overHero?: boolean }) {
               aria-expanded={open}
               aria-controls="mobile-menu"
               aria-label={open ? d.nav.closeMenu : d.nav.openMenu}
-              className={cn(
-                "grid size-11 cursor-pointer place-items-center rounded-full transition-colors duration-200 xl:hidden",
-                dark ? "text-white hover:bg-white/12" : "text-[var(--kani-green)] hover:bg-black/[0.05]"
-              )}
+              className="grid size-11 cursor-pointer place-items-center rounded-full text-white
+                         transition-colors duration-200 hover:bg-white/12 lg:hidden"
             >
               <svg viewBox="0 0 24 24" className="size-6" fill="none" stroke="currentColor"
                    strokeWidth="1.9" strokeLinecap="round" aria-hidden="true">
@@ -209,7 +195,7 @@ export function Navbar({ overHero = false }: { overHero?: boolean }) {
 
       {/* Mobile menu */}
       {open && (
-        <div className="fixed inset-0 z-40 xl:hidden">
+        <div className="fixed inset-0 z-40 lg:hidden">
           <button
             type="button"
             aria-label={d.nav.closeMenu}
@@ -218,9 +204,14 @@ export function Navbar({ overHero = false }: { overHero?: boolean }) {
           />
           <div
             id="mobile-menu"
-            className="absolute inset-x-3 top-[84px] overflow-hidden rounded-[var(--radius-xl)]
+            ref={menuRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label={d.nav.mainNav}
+            className="absolute inset-x-3 overflow-hidden rounded-[var(--radius-xl)]
                        border border-[var(--hairline)] bg-[var(--bone)] p-2 shadow-[var(--shadow-lg)]
                        animate-rise"
+            style={{ top: "calc(var(--nav-h) + 16px)" }}
           >
             <ul>
               {LINKS.map((link, i) => {

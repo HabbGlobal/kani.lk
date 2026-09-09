@@ -51,7 +51,7 @@ export function LanguageSwitch({ onDark = false }: { onDark?: boolean }) {
       aria-label={d.language.ariaLabel}
       title={d.language.ariaLabel}
       className={cn(
-        "relative flex h-9 shrink-0 items-center rounded-[var(--radius-pill)] border p-0.5",
+        "relative flex h-11 shrink-0 items-center rounded-[var(--radius-pill)] border p-0.5",
         "text-[13px] font-semibold transition-colors duration-200",
         pending && "opacity-60",
         onDark
@@ -83,7 +83,7 @@ function Segment({
   return (
     <span
       className={cn(
-        "grid h-8 place-items-center rounded-[var(--radius-pill)] px-2.5 leading-none transition-colors duration-200",
+        "grid h-10 place-items-center rounded-[var(--radius-pill)] px-2.5 leading-none transition-colors duration-200",
         active
           ? onDark
             ? "bg-[var(--palmyra-gold)] text-[var(--kani-green-deep)]"

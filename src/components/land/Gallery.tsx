@@ -128,33 +128,43 @@ export function Gallery({
         </div>
 
         {count > 1 && (
-          <ul className="rail flex gap-2.5 overflow-x-auto pb-1">
-            {images.map((img, i) => (
-              <li key={img._id} className="shrink-0">
-                <button
-                  type="button"
-                  onClick={() => setIndex(i)}
-                  aria-label={`Show photo ${i + 1} of ${count}`}
-                  aria-current={i === index}
-                  className={cn(
-                    "relative block size-20 cursor-pointer overflow-hidden rounded-[var(--radius-md)]",
-                    "transition-[opacity,box-shadow] duration-200 sm:size-24",
-                    i === index
-                      ? "opacity-100 ring-2 ring-[var(--kani-green)] ring-offset-2 ring-offset-[var(--bone)]"
-                      : "opacity-65 hover:opacity-100"
-                  )}
-                >
-                  <Image
-                    src={imageUrl(img._id)}
-                    alt=""
-                    fill
-                    sizes="96px"
-                    className="object-cover"
-                  />
-                </button>
-              </li>
-            ))}
-          </ul>
+          // The scrollbar is hidden by `.rail`, so without this fade there's
+          // no signal more thumbnails exist once the strip overflows.
+          <div
+            className="relative"
+            style={{
+              maskImage: "linear-gradient(to right, black calc(100% - 28px), transparent)",
+              WebkitMaskImage: "linear-gradient(to right, black calc(100% - 28px), transparent)",
+            }}
+          >
+            <ul className="rail flex gap-2.5 overflow-x-auto pb-1 pr-6">
+              {images.map((img, i) => (
+                <li key={img._id} className="shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setIndex(i)}
+                    aria-label={`Show photo ${i + 1} of ${count}`}
+                    aria-current={i === index}
+                    className={cn(
+                      "relative block size-20 cursor-pointer overflow-hidden rounded-[var(--radius-md)]",
+                      "transition-[opacity,box-shadow] duration-200 sm:size-24",
+                      i === index
+                        ? "opacity-100 ring-2 ring-[var(--kani-green)] ring-offset-2 ring-offset-[var(--bone)]"
+                        : "opacity-65 hover:opacity-100"
+                    )}
+                  >
+                    <Image
+                      src={imageUrl(img._id)}
+                      alt=""
+                      fill
+                      sizes="96px"
+                      className="object-cover"
+                    />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
       </div>
 

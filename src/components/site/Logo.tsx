@@ -18,6 +18,10 @@ export function Logo({
   className,
   onDark = false,
   withTagline = false,
+  /** Text shown when `withTagline` is set. Passed in rather than looked up
+   * here, since `Logo` also renders in the admin login screen with no
+   * locale context — callers on the public site pass `d.common.tagline`. */
+  tagline = "Find. Invest. Own.",
   /** Mark only, no wordmark — for tight spaces like a collapsed sidebar rail. */
   iconOnly = false,
   /** Wordmark only, no mark image — used in the landing-page navbar. */
@@ -26,6 +30,7 @@ export function Logo({
   className?: string;
   onDark?: boolean;
   withTagline?: boolean;
+  tagline?: string;
   iconOnly?: boolean;
   hideMark?: boolean;
 }) {
@@ -68,7 +73,7 @@ export function Logo({
                 onDark ? "text-white/70" : "text-[var(--muted)]"
               )}
             >
-              Find. Invest. Own.
+              {tagline}
             </span>
           )}
         </span>
