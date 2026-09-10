@@ -52,8 +52,27 @@ const UNIT_LABEL: Record<SizeUnit, [string, string]> = {
   sqft: ["sq ft", "sq ft"],
 };
 
-/** "20 perches", "1 acre", "2.5 acres" — display in the unit the admin entered. */
-export function formatSize(value: number, unit: SizeUnit): string {
+/**
+ * Tamil has no singular/plural split for these units, so one label each.
+ * Kept here rather than in the dictionaries because it belongs with the
+ * English table it mirrors.
+ */
+const UNIT_LABEL_TA: Record<SizeUnit, string> = {
+  perch: "பரப்பு",
+  acre: "ஏக்கர்",
+  rood: "ரூட்",
+  sqft: "சதுர அடி",
+};
+
+/**
+ * "20 perches", "1 acre", "2.5 acres" — display in the unit the admin entered.
+ * `locale` defaults to English so existing callers (admin, emails, exports)
+ * keep their current output without change.
+ */
+export function formatSize(value: number, unit: SizeUnit, locale: "en" | "ta" = "en"): string {
+  if (locale === "ta") {
+    return `${trimNumber(value)} ${UNIT_LABEL_TA[unit]}`;
+  }
   const [singular, plural] = UNIT_LABEL[unit];
   const label = Math.abs(value - 1) < 1e-9 ? singular : plural;
   return `${trimNumber(value)} ${label}`;

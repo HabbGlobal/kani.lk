@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { adminFetch } from "@/lib/admin-fetch";
 import { formatSize, formatLKR } from "@/lib/units";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n/client";
 
 export type PopularLand = {
   _id: string;
@@ -29,6 +30,7 @@ export type PopularLand = {
  * toggled from the listings table's quick toggles, not here.
  */
 export function PopularManager({ initial }: { initial: PopularLand[] }) {
+  const { d } = useI18n();
   const [items, setItems] = useState(initial);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -73,10 +75,10 @@ export function PopularManager({ initial }: { initial: PopularLand[] }) {
         body: JSON.stringify({ landIds: items.map((i) => i._id) }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error ?? "Could not save the order");
+      if (!res.ok) throw new Error(data.error ?? d.admin.couldNotSaveOrder);
       setSaved(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not save the order");
+      setError(err instanceof Error ? err.message : d.admin.couldNotSaveOrder);
     } finally {
       setSaving(false);
     }
@@ -101,7 +103,7 @@ export function PopularManager({ initial }: { initial: PopularLand[] }) {
     <div>
       <div className="mb-5 flex items-center gap-3">
         <Button onClick={save} disabled={saving}>
-          {saving ? "Saving…" : "Save order"}
+          {saving ? d.common.saving : d.admin.saveOrder}
         </Button>
         {saved && <span className="text-[14px] font-medium text-[var(--paddy)]">Order saved.</span>}
         {error && <span className="text-[14px] font-medium text-[var(--laterite)]">{error}</span>}
@@ -124,7 +126,7 @@ export function PopularManager({ initial }: { initial: PopularLand[] }) {
             <span
               className="hidden shrink-0 cursor-grab text-[var(--muted)] sm:block"
               aria-hidden="true"
-              title="Drag to reorder"
+              title={d.admin.dragToReorder}
             >
               <svg viewBox="0 0 16 16" className="size-4" fill="currentColor">
                 <circle cx="5" cy="4" r="1.3" /><circle cx="11" cy="4" r="1.3" />
@@ -151,13 +153,24 @@ export function PopularManager({ initial }: { initial: PopularLand[] }) {
             </div>
 
             <div className="flex shrink-0 items-center gap-1">
-              <IconButton label="Move up" disabled={i === 0} onClick={() => move(i, -1)}>
+              <IconButton
+                label={d.admin.moveUp}
+                disabled={i === 0}
+                onClick={() => move(i, -1)}
+              >
                 <path d="M4 10l4-4 4 4" />
               </IconButton>
-              <IconButton label="Move down" disabled={i === items.length - 1} onClick={() => move(i, 1)}>
+              <IconButton
+                label={d.admin.moveDown}
+                disabled={i === items.length - 1}
+                onClick={() => move(i, 1)}
+              >
                 <path d="M4 6l4 4 4-4" />
               </IconButton>
-              <IconButton label="Remove from this order" onClick={() => remove(land._id)}>
+              <IconButton
+                label={d.admin.removeFromOrder}
+                onClick={() => remove(land._id)}
+              >
                 <path d="M4 4l8 8M12 4l-8 8" />
               </IconButton>
             </div>

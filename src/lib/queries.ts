@@ -47,17 +47,17 @@ export type LandCard = {
   coverThumb?: string;
   imageCount: number;
   status: LandStatus;
-  district: { _id: string; name: string; slug: string };
-  city: { _id: string; name: string; slug: string };
-  landType: { _id: string; name: string; slug: string };
+  district: { _id: string; name: string; nameTa?: string; slug: string };
+  city: { _id: string; name: string; nameTa?: string; slug: string };
+  landType: { _id: string; name: string; nameTa?: string; slug: string };
   soldAt?: string;
   createdAt: string;
 };
 
 const CARD_POPULATE = [
-  { path: "district", select: "name slug code" },
-  { path: "city", select: "name slug" },
-  { path: "landType", select: "name slug hasBuilding" },
+  { path: "district", select: "name nameTa slug code" },
+  { path: "city", select: "name nameTa slug" },
+  { path: "landType", select: "name nameTa slug hasBuilding" },
 ];
 
 export type LandFilters = {
@@ -323,10 +323,12 @@ export async function getSimilarLands(
 export type DistrictSummary = {
   _id: string;
   name: string;
+  nameTa?: string;
   slug: string;
   code: string;
   province: string;
   intro: string;
+  introTa?: string;
   count: number;
 };
 
@@ -355,7 +357,7 @@ export async function getDistrictsWithCounts(): Promise<DistrictSummary[]> {
     },
     {
       $project: {
-        name: 1, slug: 1, code: 1, province: 1, intro: 1,
+        name: 1, nameTa: 1, slug: 1, code: 1, province: 1, intro: 1, introTa: 1,
         count: { $ifNull: [{ $arrayElemAt: ["$landCount.n", 0] }, 0] },
       },
     },
@@ -373,14 +375,14 @@ export async function getDistrictBySlug(slug: string) {
 export async function getTaxonomies() {
   await dbConnect();
   const [districts, cities, landTypes] = await Promise.all([
-    District.find({ isActive: true }).sort({ order: 1 }).select("name slug code").lean(),
-    City.find({ isActive: true }).sort({ order: 1 }).select("name slug district").lean(),
-    LandType.find({ isActive: true }).sort({ order: 1 }).select("name slug hasBuilding").lean(),
+    District.find({ isActive: true }).sort({ order: 1 }).select("name nameTa slug code").lean(),
+    City.find({ isActive: true }).sort({ order: 1 }).select("name nameTa slug district").lean(),
+    LandType.find({ isActive: true }).sort({ order: 1 }).select("name nameTa slug hasBuilding").lean(),
   ]);
   return {
-    districts: plain<{ _id: string; name: string; slug: string; code: string }[]>(districts),
-    cities: plain<{ _id: string; name: string; slug: string; district: string }[]>(cities),
-    landTypes: plain<{ _id: string; name: string; slug: string; hasBuilding: boolean }[]>(landTypes),
+    districts: plain<{ _id: string; name: string; nameTa?: string; slug: string; code: string }[]>(districts),
+    cities: plain<{ _id: string; name: string; nameTa?: string; slug: string; district: string }[]>(cities),
+    landTypes: plain<{ _id: string; name: string; nameTa?: string; slug: string; hasBuilding: boolean }[]>(landTypes),
   };
 }
 
@@ -396,5 +398,14 @@ export async function getPage(slug: string) {
   await dbConnect();
   const { default: PageModel } = await import("@/models/Page");
   const doc = await PageModel.findOne({ slug }).lean();
-  return doc ? plain<{ title: string; body: string; seoTitle?: string; seoDescription?: string }>(doc) : null;
+  return doc
+    ? plain<{
+        title: string;
+        titleTa?: string;
+        body: string;
+        bodyTa?: string;
+        seoTitle?: string;
+        seoDescription?: string;
+      }>(doc)
+    : null;
 }

@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { LandEditor } from "@/components/admin/LandEditor";
 import { getAdminTaxonomies } from "@/lib/admin-queries";
 import type { LandFormValues } from "@/lib/validation";
+import { getDictionary } from "@/lib/i18n";
+import { adminLocale } from "@/lib/i18n/server";
 
 export const metadata: Metadata = { title: "New listing", robots: { index: false } };
 export const dynamic = "force-dynamic";
@@ -27,7 +29,11 @@ const EMPTY: LandFormValues = {
 };
 
 export default async function NewLandPage() {
-  const taxonomies = await getAdminTaxonomies();
+  const [taxonomies, locale] = await Promise.all([
+    getAdminTaxonomies(),
+    adminLocale(),
+  ]);
+  const d = getDictionary(locale);
 
   return (
     <div className="max-w-6xl">
@@ -36,8 +42,8 @@ export default async function NewLandPage() {
         taxonomies={taxonomies}
         initial={EMPTY}
         images={[]}
-        title="New listing"
-        subtitle="The reference code and URL are generated automatically when you save."
+        title={d.admin.newListing}
+        subtitle={d.admin.newListingSub}
       />
     </div>
   );

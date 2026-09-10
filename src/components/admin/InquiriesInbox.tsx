@@ -7,6 +7,7 @@ import { Button, ButtonAnchor } from "@/components/ui/Button";
 import { PagerBar } from "@/components/admin/PagerBar";
 import { adminFetch } from "@/lib/admin-fetch";
 import { timeAgo, formatDate, cn } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n/client";
 
 const PAGE_SIZE = 5;
 
@@ -31,6 +32,7 @@ export function InquiriesInbox({
   initialRows: InquiryRow[];
   landOptions: { _id: string; title: string; refCode: string }[];
 }) {
+  const { d } = useI18n();
   const [rows, setRows] = useState(initialRows);
   const [landFilter, setLandFilter] = useState("");
   const [from, setFrom] = useState("");
@@ -75,7 +77,7 @@ export function InquiriesInbox({
       if (!res.ok) throw new Error();
     } catch {
       setRows(prev);
-      setError("Could not update that enquiry — please try again.");
+      setError(d.admin.inquiryUpdateFailed);
     }
   }
 
@@ -104,28 +106,28 @@ export function InquiriesInbox({
       </div>
 
       <Card className="grid gap-3 p-4 sm:grid-cols-4">
-        <Field label="Listing" htmlFor="landFilter">
+        <Field label={d.admin.listing} htmlFor="landFilter">
           <Select id="landFilter" value={landFilter} onChange={(e) => updateFilter(setLandFilter, e.target.value)}>
-            <option value="">All listings</option>
+            <option value="">{d.admin.allListings}</option>
             {landOptions.map((l) => (
               <option key={l._id} value={l._id}>{l.refCode} — {l.title}</option>
             ))}
           </Select>
         </Field>
-        <Field label="From" htmlFor="from">
+        <Field label={d.admin.from} htmlFor="from">
           <Input id="from" type="date" value={from} onChange={(e) => updateFilter(setFrom, e.target.value)} />
         </Field>
-        <Field label="To" htmlFor="to">
+        <Field label={d.admin.to} htmlFor="to">
           <Input id="to" type="date" value={to} onChange={(e) => updateFilter(setTo, e.target.value)} />
         </Field>
-        <Field label="Status" htmlFor="showHandled">
+        <Field label={d.admin.status} htmlFor="showHandled">
           <Select
             id="showHandled"
             value={showHandled ? "all" : "new"}
             onChange={(e) => updateFilter(setShowHandled, e.target.value === "all")}
           >
             <option value="all">All</option>
-            <option value="new">New only</option>
+            <option value="new">{d.admin.newOnly}</option>
           </Select>
         </Field>
       </Card>
@@ -133,7 +135,7 @@ export function InquiriesInbox({
       {error && <p role="alert" className="text-[14px] font-medium text-[var(--laterite)]">{error}</p>}
 
       {filtered.length === 0 ? (
-        <EmptyState title="No enquiries match these filters" />
+        <EmptyState title={d.admin.noInquiriesMatch} />
       ) : (
         <ul className="space-y-3">
           {paged.map((r) => (
@@ -153,7 +155,9 @@ export function InquiriesInbox({
                       {r.phone}{r.email ? ` · ${r.email}` : ""}
                     </p>
                     <p className="mt-1 text-[13px] text-[var(--muted)]">
-                      {r.landTitle ? `${r.landRefCode} — ${r.landTitle}` : "General enquiry"}
+                      {r.landTitle
+                        ? `${r.landRefCode} — ${r.landTitle}`
+                        : d.admin.generalEnquiry}
                     </p>
                   </div>
                   <div className="shrink-0 text-right text-[13px] text-[var(--muted)]">
@@ -164,11 +168,11 @@ export function InquiriesInbox({
                 <div className="mt-3 flex gap-2">
                   {r.isHandled ? (
                     <Button size="sm" variant="outline" onClick={() => markHandled(r, false)}>
-                      Mark as new
+                      {d.admin.markAsNew}
                     </Button>
                   ) : (
                     <Button size="sm" onClick={() => markHandled(r, true)}>
-                      Mark handled
+                      {d.admin.markHandled}
                     </Button>
                   )}
                 </div>

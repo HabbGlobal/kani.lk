@@ -10,6 +10,8 @@ const DistrictSchema = new Schema(
     province: { type: String, trim: true, default: "" },
     /** Intro copy for the district landing page — this is what ranks. */
     intro: { type: String, default: "" },
+    /** Tamil intro. Falls back to the English one when blank. */
+    introTa: { type: String, default: "" },
     imageId: { type: Schema.Types.ObjectId, ref: "KaniImage" },
     order: { type: Number, default: 0 },
     isActive: { type: Boolean, default: true },

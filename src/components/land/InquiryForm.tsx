@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Field, Input, Textarea } from "@/components/ui/Field";
 import { Button } from "@/components/ui/Button";
 import { inquirySchema, type InquiryFormValues } from "@/lib/validation";
+import { useI18n } from "@/lib/i18n/client";
 
 /**
  * Enquiry form. Validation is the same Zod schema the API route runs, so the
@@ -22,6 +23,7 @@ export function InquiryForm({
   source?: "listing" | "contact";
   compact?: boolean;
 }) {
+  const { d, t } = useI18n();
   const [state, setState] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -36,7 +38,7 @@ export function InquiryForm({
     defaultValues: {
       landId,
       source,
-      message: landTitle ? `I am interested in "${landTitle}". Please contact me.` : "",
+      message: landTitle ? t(d.enquiry.prefillWithTitle, { title: landTitle }) : "",
       website: "",
     },
   });
@@ -51,12 +53,12 @@ export function InquiryForm({
         body: JSON.stringify(values),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error ?? "Something went wrong");
+      if (!res.ok) throw new Error(data.error ?? d.enquiry.genericError);
       setState("sent");
       reset();
     } catch (err) {
       setState("error");
-      setErrorMessage(err instanceof Error ? err.message : "Something went wrong");
+      setErrorMessage(err instanceof Error ? err.message : d.enquiry.genericError);
     }
   }
 
@@ -72,18 +74,17 @@ export function InquiryForm({
             <path d="M5 12.5l4.5 4.5L19 7.5" />
           </svg>
         </span>
-        <h3 className="mb-1.5 text-[21px] text-[var(--kani-green)]">Message sent</h3>
-        <p className="text-[15px] text-[var(--muted)]">
-          We have passed your message on. The owner will usually call you back
-          within a day. Check your email for a copy.
-        </p>
+        <h3 className="mb-1.5 text-[21px] text-[var(--kani-green)]">
+          {d.enquiry.messageSent}
+        </h3>
+        <p className="text-[15px] text-[var(--muted)]">{d.enquiry.sentBody}</p>
         <Button
           variant="outline"
           size="sm"
           className="mt-4"
           onClick={() => setState("idle")}
         >
-          Send another message
+          {d.enquiry.sendAnother}
         </Button>
       </div>
     );
@@ -96,12 +97,17 @@ export function InquiryForm({
 
       {/* Honeypot: hidden from people, irresistible to bots. */}
       <div aria-hidden="true" className="absolute left-[-9999px] h-0 w-0 overflow-hidden">
-        <label htmlFor="website">Leave this field empty</label>
+        <label htmlFor="website">{d.enquiry.honeypot}</label>
         <input id="website" tabIndex={-1} autoComplete="off" {...register("website")} />
       </div>
 
       <div className={compact ? "space-y-4" : "grid gap-4 sm:grid-cols-2"}>
-        <Field label="Your name" htmlFor="iq-name" required error={errors.name?.message}>
+        <Field
+          label={d.enquiry.name}
+          htmlFor="iq-name"
+          required
+          error={errors.name?.message}
+        >
           <Input
             id="iq-name"
             autoComplete="name"
@@ -111,10 +117,10 @@ export function InquiryForm({
         </Field>
 
         <Field
-          label="Phone number"
+          label={d.enquiry.phone}
           htmlFor="iq-phone"
           required
-          hint="So the owner can call you back"
+          hint={d.enquiry.phoneHint}
           error={errors.phone?.message}
         >
           <Input
@@ -130,9 +136,9 @@ export function InquiryForm({
       </div>
 
       <Field
-        label="Email"
+        label={d.enquiry.email}
         htmlFor="iq-email"
-        hint="Optional — we send you a copy of your message"
+        hint={d.enquiry.emailHint}
         error={errors.email?.message}
       >
         <Input
@@ -144,7 +150,12 @@ export function InquiryForm({
         />
       </Field>
 
-      <Field label="Message" htmlFor="iq-message" required error={errors.message?.message}>
+      <Field
+        label={d.enquiry.message}
+        htmlFor="iq-message"
+        required
+        error={errors.message?.message}
+      >
         <Textarea
           id="iq-message"
           rows={4}
@@ -160,12 +171,11 @@ export function InquiryForm({
       )}
 
       <Button type="submit" size="lg" fullWidth disabled={state === "sending"}>
-        {state === "sending" ? "Sending…" : "Send enquiry"}
+        {state === "sending" ? d.enquiry.submitting : d.enquiry.submit}
       </Button>
 
       <p className="text-[13px] leading-relaxed text-[var(--muted)]">
-        Your details go to the owner of this listing and to kani.lk. We do not
-        share them with anyone else.
+        {d.enquiry.privacyNote}
       </p>
     </form>
   );

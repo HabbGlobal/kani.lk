@@ -8,6 +8,8 @@ import { LandEditor } from "@/components/admin/LandEditor";
 import { getAdminTaxonomies } from "@/lib/admin-queries";
 import { plain } from "@/lib/utils";
 import type { LandFormValues } from "@/lib/validation";
+import { getDictionary } from "@/lib/i18n";
+import { adminLocale } from "@/lib/i18n/server";
 
 export const metadata: Metadata = { title: "Edit listing", robots: { index: false } };
 export const dynamic = "force-dynamic";
@@ -15,6 +17,7 @@ export const dynamic = "force-dynamic";
 type Params = { params: Promise<{ id: string }> };
 
 export default async function EditLandPage({ params }: Params) {
+  const d = getDictionary(await adminLocale());
   const { id } = await params;
   if (!mongoose.Types.ObjectId.isValid(id)) notFound();
 
@@ -86,7 +89,9 @@ export default async function EditLandPage({ params }: Params) {
         images={plain(images)}
         coverImageId={land.coverImageId ? String(land.coverImageId) : undefined}
         title={land.title}
-        subtitle={`${land.refCode} · ${land.isPublished ? "Published" : "Draft"}`}
+        subtitle={`${land.refCode} · ${
+          land.isPublished ? d.admin.published : d.admin.draft
+        }`}
       />
     </div>
   );

@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { imageUrl } from "@/lib/image-url";
 import { PurposeBadge, StatusRibbon } from "@/components/ui/Badge";
+import { useI18n } from "@/lib/i18n/client";
 import { cn } from "@/lib/utils";
 import type { LandStatus, Purpose } from "@/models/types";
 
@@ -27,6 +28,7 @@ export function Gallery({
   status: LandStatus;
   blurThumb?: string;
 }) {
+  const { d, locale } = useI18n();
   const [index, setIndex] = useState(0);
   const [lightbox, setLightbox] = useState(false);
   const mainRef = useRef<HTMLDivElement>(null);
@@ -62,7 +64,7 @@ export function Gallery({
       <div className="relative aspect-[4/3] overflow-hidden rounded-[var(--radius-lg)] bg-[var(--hairline)] sm:aspect-[16/10]">
         <Image
           src="/placeholder-land.svg"
-          alt="No photographs available for this listing yet"
+          alt={d.favourites.noPhotosAlt}
           fill
           className="object-cover"
         />
@@ -93,15 +95,15 @@ export function Gallery({
             className={cn("animate-fade object-cover", isGone && "img-sold")}
           />
 
-          <StatusRibbon status={status} />
+          <StatusRibbon status={status} locale={locale} />
           <div className="absolute left-4 top-4 z-10">
-            <PurposeBadge purpose={purpose} />
+            <PurposeBadge purpose={purpose} locale={locale} />
           </div>
 
           {count > 1 && (
             <>
-              <GalleryArrow side="left" onClick={() => go(-1)} />
-              <GalleryArrow side="right" onClick={() => go(1)} />
+              <GalleryArrow side="left" onClick={() => go(-1)} prevLabel={d.favourites.previousPhoto} nextLabel={d.favourites.nextPhoto} />
+              <GalleryArrow side="right" onClick={() => go(1)} prevLabel={d.favourites.previousPhoto} nextLabel={d.favourites.nextPhoto} />
               <span className="tabular absolute bottom-4 left-4 rounded-[var(--radius-pill)]
                                bg-[var(--kani-green-deep)]/72 px-3 py-1.5 text-[13px] text-white
                                backdrop-blur-[2px]">
@@ -121,38 +123,48 @@ export function Gallery({
               <path d="M6 2H2v4M10 2h4v4M6 14H2v-4M10 14h4v-4" stroke="currentColor"
                     strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-            View full size
+            {d.favourites.viewFullSize}
           </button>
         </div>
 
         {count > 1 && (
-          <ul className="rail flex gap-2.5 overflow-x-auto pb-1">
-            {images.map((img, i) => (
-              <li key={img._id} className="shrink-0">
-                <button
-                  type="button"
-                  onClick={() => setIndex(i)}
-                  aria-label={`Show photo ${i + 1} of ${count}`}
-                  aria-current={i === index}
-                  className={cn(
-                    "relative block size-20 cursor-pointer overflow-hidden rounded-[var(--radius-md)]",
-                    "transition-[opacity,box-shadow] duration-200 sm:size-24",
-                    i === index
-                      ? "opacity-100 ring-2 ring-[var(--kani-green)] ring-offset-2 ring-offset-[var(--bone)]"
-                      : "opacity-65 hover:opacity-100"
-                  )}
-                >
-                  <Image
-                    src={imageUrl(img._id)}
-                    alt=""
-                    fill
-                    sizes="96px"
-                    className="object-cover"
-                  />
-                </button>
-              </li>
-            ))}
-          </ul>
+          // The scrollbar is hidden by `.rail`, so without this fade there's
+          // no signal more thumbnails exist once the strip overflows.
+          <div
+            className="relative"
+            style={{
+              maskImage: "linear-gradient(to right, black calc(100% - 28px), transparent)",
+              WebkitMaskImage: "linear-gradient(to right, black calc(100% - 28px), transparent)",
+            }}
+          >
+            <ul className="rail flex gap-2.5 overflow-x-auto pb-1 pr-6">
+              {images.map((img, i) => (
+                <li key={img._id} className="shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setIndex(i)}
+                    aria-label={`Show photo ${i + 1} of ${count}`}
+                    aria-current={i === index}
+                    className={cn(
+                      "relative block size-20 cursor-pointer overflow-hidden rounded-[var(--radius-md)]",
+                      "transition-[opacity,box-shadow] duration-200 sm:size-24",
+                      i === index
+                        ? "opacity-100 ring-2 ring-[var(--kani-green)] ring-offset-2 ring-offset-[var(--bone)]"
+                        : "opacity-65 hover:opacity-100"
+                    )}
+                  >
+                    <Image
+                      src={imageUrl(img._id)}
+                      alt=""
+                      fill
+                      sizes="96px"
+                      className="object-cover"
+                    />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
       </div>
 
@@ -166,7 +178,7 @@ export function Gallery({
           <button
             type="button"
             onClick={() => setLightbox(false)}
-            aria-label="Close"
+            aria-label={d.common.close}
             autoFocus
             className="absolute right-4 top-4 z-10 grid size-12 cursor-pointer place-items-center
                        rounded-full bg-white/12 text-white transition-colors hover:bg-white/22"
@@ -189,8 +201,8 @@ export function Gallery({
 
           {count > 1 && (
             <>
-              <GalleryArrow side="left" onClick={() => go(-1)} onDark />
-              <GalleryArrow side="right" onClick={() => go(1)} onDark />
+              <GalleryArrow side="left" onClick={() => go(-1)} onDark prevLabel={d.favourites.previousPhoto} nextLabel={d.favourites.nextPhoto} />
+              <GalleryArrow side="right" onClick={() => go(1)} onDark prevLabel={d.favourites.previousPhoto} nextLabel={d.favourites.nextPhoto} />
               <p className="tabular absolute bottom-6 left-1/2 -translate-x-1/2 text-[15px] text-white/80">
                 {index + 1} / {count}
               </p>
@@ -206,16 +218,20 @@ function GalleryArrow({
   side,
   onClick,
   onDark = false,
+  prevLabel,
+  nextLabel,
 }: {
   side: "left" | "right";
   onClick: () => void;
   onDark?: boolean;
+  prevLabel: string;
+  nextLabel: string;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      aria-label={side === "left" ? "Previous photo" : "Next photo"}
+      aria-label={side === "left" ? prevLabel : nextLabel}
       className={cn(
         "absolute top-1/2 z-10 grid size-12 -translate-y-1/2 cursor-pointer place-items-center rounded-full",
         "transition-[background-color,opacity] duration-200",

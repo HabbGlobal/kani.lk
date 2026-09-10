@@ -1,0 +1,94 @@
+import type { Locale } from "./config";
+
+/**
+ * Admin-entered content is bilingual by column, not by document: District,
+ * City and LandType each carry `nameTa`, and Land carries `descriptionTa`.
+ * These fields have existed in the schema from the start but were never read
+ * by the site — these helpers are the single place that resolves them.
+ *
+ * Fallback is always to English, never to an empty string: a listing whose
+ * Tamil description the admin has not written yet must still render something.
+ */
+
+type Named = { name: string; nameTa?: string | null };
+
+/** Resolves the display name of a district / city / land type. */
+export function localizedName(entity: Named | null | undefined, locale: Locale): string {
+  if (!entity) return "";
+  if (locale === "ta") {
+    const ta = entity.nameTa?.trim();
+    if (ta) return ta;
+  }
+  return entity.name;
+}
+
+type Described = { description?: string | null; descriptionTa?: string | null };
+
+/** Resolves a listing's description body. */
+export function localizedDescription(
+  land: Described | null | undefined,
+  locale: Locale
+): string {
+  if (!land) return "";
+  if (locale === "ta") {
+    const ta = land.descriptionTa?.trim();
+    if (ta) return ta;
+  }
+  return land.description ?? "";
+}
+
+type PageContent = {
+  title: string;
+  titleTa?: string | null;
+  body: string;
+  bodyTa?: string | null;
+};
+
+/**
+ * Resolves an admin-authored page (about / terms / privacy). Title and body
+ * fall back independently: an admin may well translate the heading before
+ * getting to the body.
+ */
+export function localizedPage(page: PageContent, locale: Locale) {
+  const ta = locale === "ta";
+  const titleTa = page.titleTa?.trim();
+  const bodyTa = page.bodyTa?.trim();
+
+  return {
+    title: ta && titleTa ? titleTa : page.title,
+    body: ta && bodyTa ? bodyTa : page.body,
+    /** True when the body shown is English despite the visitor reading Tamil. */
+    bodyIsFallback: ta && !bodyTa && Boolean(page.body),
+  };
+}
+
+type HeroContent = {
+  heroTitle?: string | null;
+  heroTitleTa?: string | null;
+  heroSubtitle?: string | null;
+  heroSubtitleTa?: string | null;
+};
+
+/** Resolves the homepage hero headline and subtitle from SiteSettings. */
+export function localizedHero(settings: HeroContent, locale: Locale) {
+  const ta = locale === "ta";
+  const titleTa = settings.heroTitleTa?.trim();
+  const subtitleTa = settings.heroSubtitleTa?.trim();
+
+  return {
+    title: (ta && titleTa ? titleTa : settings.heroTitle) ?? "",
+    subtitle: (ta && subtitleTa ? subtitleTa : settings.heroSubtitle) ?? "",
+  };
+}
+
+/**
+ * True when the visitor is reading Tamil but this listing has no Tamil
+ * description, so the UI is showing the English one. Lets a caller mark the
+ * block `lang="en"` for screen readers instead of lying about the language.
+ */
+export function isDescriptionFallback(
+  land: Described | null | undefined,
+  locale: Locale
+): boolean {
+  return locale === "ta" && !land?.descriptionTa?.trim() && Boolean(land?.description);
+}

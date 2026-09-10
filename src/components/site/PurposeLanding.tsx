@@ -3,9 +3,13 @@ import { LandGrid } from "./LandRail";
 import { Pagination } from "@/components/ui/Pagination";
 import { EmptyState } from "@/components/ui/Card";
 import { ButtonLink } from "@/components/ui/Button";
+import { SortSelect } from "@/components/land/SortSelect";
 import { searchLands, getDistrictsWithCounts } from "@/lib/queries";
 import { parseFilters, buildQuery, type RawParams } from "@/lib/search-params";
 import type { Purpose } from "@/models/types";
+import { getDictionary, interpolate } from "@/lib/i18n";
+import { localeHref, type Locale } from "@/lib/i18n/config";
+import { localizedName } from "@/lib/i18n/localized";
 
 /**
  * Shared body for /for-sale and /for-rent. These carry real intro copy because
@@ -13,15 +17,18 @@ import type { Purpose } from "@/models/types";
  */
 export async function PurposeLanding({
   purpose,
+  locale,
   searchParams,
   title,
   intro,
 }: {
   purpose: Purpose;
+  locale: Locale;
   searchParams: RawParams;
   title: string;
   intro: string;
 }) {
+  const d = getDictionary(locale);
   const base = parseFilters(searchParams);
   const filters = { ...base, purpose };
 
@@ -30,34 +37,36 @@ export async function PurposeLanding({
     getDistrictsWithCounts(),
   ]);
 
-  const path = purpose === "sale" ? "/for-sale" : "/for-rent";
+  const path = localeHref(purpose === "sale" ? "/for-sale" : "/for-rent", locale);
 
   return (
     <div className="container-kani py-8 md:py-12">
       <header className="mb-8 max-w-3xl">
         <h1 className="text-[27px] text-[var(--kani-green)] md:text-[34px]">{title}</h1>
         <p className="mt-1.5 text-[16px] text-[var(--muted)]">
-          {result.total} {result.total === 1 ? "listing" : "listings"} available now
+          {result.total === 1
+            ? d.purposeLanding.availableNowOne
+            : interpolate(d.purposeLanding.availableNow, { count: result.total })}
         </p>
         <p className="mt-4 text-[17px] leading-relaxed text-[var(--ink)]">{intro}</p>
       </header>
 
       {/* District shortcuts double as internal links for crawlers. */}
-      <nav aria-label="Filter by district" className="mb-8">
+      <nav aria-label={d.purposeLanding.filterByDistrict} className="mb-8">
         <ul className="flex flex-wrap gap-2">
           {districts
-            .filter((d) => d.count > 0)
-            .map((d) => (
-              <li key={d._id}>
+            .filter((district) => district.count > 0)
+            .map((district) => (
+              <li key={district._id}>
                 <Link
-                  href={`${path}?district=${d.slug}`}
-                  className="inline-flex h-10 items-center gap-1.5 rounded-[var(--radius-pill)]
+                  href={`${path}?district=${district.slug}`}
+                  className="inline-flex h-11 items-center gap-1.5 rounded-[var(--radius-pill)]
                              border border-[var(--hairline)] bg-[var(--card)] px-4 text-[15px]
                              text-[var(--ink)] transition-colors duration-200
                              hover:border-[var(--kani-green)]/40 hover:text-[var(--kani-green)]"
                 >
-                  {d.name}
-                  <span className="tabular text-[13px] text-[var(--muted)]">{d.count}</span>
+                  {localizedName(district, locale)}
+                  <span className="tabular text-[13px] text-[var(--muted)]">{district.count}</span>
                 </Link>
               </li>
             ))}
@@ -66,8 +75,12 @@ export async function PurposeLanding({
 
       {result.items.length > 0 ? (
         <>
-          <LandGrid lands={result.items} />
+          <div className="mb-5 flex justify-end">
+            <SortSelect className="w-full sm:w-auto sm:min-w-[200px]" />
+          </div>
+          <LandGrid lands={result.items} locale={locale} />
           <Pagination
+            locale={locale}
             page={result.page}
             pages={result.pages}
             buildHref={(p) =>
@@ -77,10 +90,14 @@ export async function PurposeLanding({
         </>
       ) : (
         <EmptyState
-          title="Nothing listed here right now"
-          action={<ButtonLink href="/lands">Browse everything</ButtonLink>}
+          title={d.purposeLanding.emptyTitle}
+          action={
+            <ButtonLink href={localeHref("/lands", locale)}>
+              {d.purposeLanding.emptyCta}
+            </ButtonLink>
+          }
         >
-          <p>New land is added every week. Try a wider search.</p>
+          <p>{d.purposeLanding.emptyBody}</p>
         </EmptyState>
       )}
     </div>

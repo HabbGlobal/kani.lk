@@ -146,6 +146,7 @@ export const districtSchema = z.object({
     .regex(/^[A-Z]+$/, "Letters only"),
   province: z.string().trim().max(60).optional(),
   intro: z.string().trim().max(4000).optional(),
+  introTa: z.string().trim().max(4000).optional(),
   order: z.coerce.number().int().min(0).default(0),
   isActive: z.boolean().default(true),
 });
@@ -169,7 +170,9 @@ export const landTypeSchema = z.object({
 
 export const pageSchema = z.object({
   title: z.string().trim().min(2).max(160),
+  titleTa: z.string().trim().max(160).optional(),
   body: z.string().trim().max(40000),
+  bodyTa: z.string().trim().max(40000).optional(),
   seoTitle: z.string().trim().max(200).optional(),
   seoDescription: z.string().trim().max(400).optional(),
 });
@@ -178,7 +181,9 @@ export type PageInput = z.infer<typeof pageSchema>;
 
 export const settingsSchema = z.object({
   heroTitle: z.string().trim().max(200),
+  heroTitleTa: z.string().trim().max(200).optional(),
   heroSubtitle: z.string().trim().max(600),
+  heroSubtitleTa: z.string().trim().max(600).optional(),
   contactPhone: z.string().trim().max(40),
   contactPhoneAlt: z.string().trim().max(40).optional(),
   contactEmail: z.union([z.string().trim().email(), z.literal("")]),

@@ -6,11 +6,14 @@ import SiteSettings from "@/models/SiteSettings";
 import District from "@/models/District";
 import { PopularManager, type PopularLand } from "@/components/admin/PopularManager";
 import { Card } from "@/components/ui/Card";
+import { getDictionary } from "@/lib/i18n";
+import { adminLocale } from "@/lib/i18n/server";
 
 export const metadata: Metadata = { title: "Popular row", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function AdminPopularPage() {
+  const d = getDictionary(await adminLocale());
   await dbConnect();
 
   const [docs, settings] = await Promise.all([
@@ -39,21 +42,17 @@ export default async function AdminPopularPage() {
     <div className="max-w-3xl">
       <header className="mb-6">
         <h1 className="text-[27px] text-[var(--heading)] md:text-[34px]">
-          Popular row
+          {d.admin.popularRow}
         </h1>
-        <p className="mt-1 text-[16px] text-[var(--muted)]">
-          Drag to reorder the &ldquo;Most popular lands&rdquo; row on the homepage.
-        </p>
+        <p className="mt-1 text-[16px] text-[var(--muted)]">{d.admin.popularSub}</p>
       </header>
 
       {mode === "automatic" && (
         <Card className="mb-6 border-[var(--palmyra-gold)]/40 bg-[var(--palmyra-gold)]/10 p-4">
           <p className="text-[15px] text-[var(--ink)]">
-            The popular row is currently in <strong>automatic</strong> mode —
-            it orders by 30-day view count, and this manual order is ignored
-            until you switch back. Change the mode in{" "}
+            {d.admin.popularAutoNote}{" "}
             <Link href="/admin/settings" className="font-medium text-[var(--heading)] hover:underline">
-              Settings
+              {d.admin.settings}
             </Link>
             .
           </p>
@@ -62,12 +61,11 @@ export default async function AdminPopularPage() {
 
       {mode === "manual" && (
         <p className="mb-6 text-[14px] text-[var(--muted)]">
-          Manual mode is on — this order is what visitors see. Switch to
-          automatic in{" "}
+          {d.admin.popularManualNote}{" "}
           <Link href="/admin/settings" className="font-medium text-[var(--heading)] hover:underline">
-            Settings
+            {d.admin.settings}
           </Link>{" "}
-          to rank by views instead.
+          {d.admin.popularToRankByViews}
         </p>
       )}
 

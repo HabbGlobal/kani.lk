@@ -7,12 +7,15 @@ import { getSession } from "@/lib/auth";
 import { formatDate, timeAgo, plain } from "@/lib/utils";
 import { formatLKR } from "@/lib/units";
 import { Card } from "@/components/ui/Card";
+import { getDictionary, interpolate } from "@/lib/i18n";
+import { adminLocale } from "@/lib/i18n/server";
 
 export const metadata: Metadata = { title: "Dashboard", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboard() {
-  const user = await getSession();
+  const [user, locale] = await Promise.all([getSession(), adminLocale()]);
+  const d = getDictionary(locale);
   await dbConnect();
 
   const [
@@ -36,20 +39,38 @@ export default async function AdminDashboard() {
   ]);
 
   const stats = [
-    { label: "Published listings", value: publishedLands, href: "/admin/lands?status=published" },
-    { label: "Awaiting publish", value: unpublishedLands, href: "/admin/lands?status=draft" },
-    { label: "Sold / rented", value: soldLands, href: "/admin/lands?status=sold" },
-    { label: "New enquiries", value: newInquiries, href: "/admin/inquiries", accent: newInquiries > 0 },
+    {
+      label: d.admin.publishedListings,
+      value: publishedLands,
+      href: "/admin/lands?status=published",
+    },
+    {
+      label: d.admin.awaitingPublish,
+      value: unpublishedLands,
+      href: "/admin/lands?status=draft",
+    },
+    { label: d.admin.soldRented, value: soldLands, href: "/admin/lands?status=sold" },
+    {
+      label: d.admin.newEnquiries,
+      value: newInquiries,
+      href: "/admin/inquiries",
+      accent: newInquiries > 0,
+    },
   ];
 
   return (
     <div className="max-w-6xl">
       <header className="mb-8">
         <h1 className="text-[27px] text-[var(--heading)] md:text-[34px]">
-          Welcome back, {user?.name?.split(" ")[0]}
+          {interpolate(d.admin.welcomeBack, {
+            name: user?.name?.split(" ")[0] ?? "",
+          })}
         </h1>
         <p className="mt-1 text-[16px] text-[var(--muted)]">
-          {totalLands} total listings · {totalInquiries} enquiries received all time
+          {interpolate(d.admin.dashboardSub, {
+            lands: totalLands,
+            inquiries: totalInquiries,
+          })}
         </p>
       </header>
 
@@ -74,13 +95,15 @@ export default async function AdminDashboard() {
       <div className="grid gap-6 lg:grid-cols-2">
         <Card className="p-5">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-[19px] text-[var(--heading)]">Recent enquiries</h2>
+            <h2 className="text-[19px] text-[var(--heading)]">
+              {d.admin.recentEnquiries}
+            </h2>
             <Link href="/admin/inquiries" className="text-[14px] font-medium text-[var(--heading)] hover:underline">
-              View all
+              {d.admin.viewAll}
             </Link>
           </div>
           {recentInquiries.length === 0 ? (
-            <p className="text-[15px] text-[var(--muted)]">No enquiries yet.</p>
+            <p className="text-[15px] text-[var(--muted)]">{d.admin.noEnquiries}</p>
           ) : (
             <ul className="divide-y divide-[var(--hairline)]">
               {plain<any[]>(recentInquiries).map((iq) => (
@@ -88,14 +111,14 @@ export default async function AdminDashboard() {
                   <div className="min-w-0">
                     <p className="truncate text-[15px] font-medium text-[var(--ink)]">{iq.name}</p>
                     <p className="truncate text-[14px] text-[var(--muted)]">
-                      {iq.landTitle ?? "General enquiry"}
+                      {iq.landTitle ?? d.admin.generalEnquiry}
                     </p>
                   </div>
                   <div className="shrink-0 text-right">
                     {!iq.isHandled && (
                       <span className="mb-1 inline-block rounded-[var(--radius-pill)] bg-[var(--laterite)]/12
                                        px-2 py-0.5 text-[11px] font-semibold uppercase text-[var(--laterite)]">
-                        New
+                        {d.admin.newBadge}
                       </span>
                     )}
                     <p className="text-[13px] text-[var(--muted)]">{timeAgo(iq.createdAt)}</p>
@@ -108,9 +131,11 @@ export default async function AdminDashboard() {
 
         <Card className="p-5">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-[19px] text-[var(--heading)]">Recent listings</h2>
+            <h2 className="text-[19px] text-[var(--heading)]">
+              {d.admin.recentListings}
+            </h2>
             <Link href="/admin/lands" className="text-[14px] font-medium text-[var(--heading)] hover:underline">
-              View all
+              {d.admin.viewAll}
             </Link>
           </div>
           <ul className="divide-y divide-[var(--hairline)]">
@@ -126,7 +151,7 @@ export default async function AdminDashboard() {
                   </div>
                   <div className="shrink-0 text-right text-[13px]">
                     <span className={land.isPublished ? "text-[var(--paddy)]" : "text-[var(--muted)]"}>
-                      {land.isPublished ? "Published" : "Draft"}
+                      {land.isPublished ? d.admin.published : d.admin.draft}
                     </span>
                     <p className="text-[var(--muted)]">{formatDate(land.createdAt)}</p>
                   </div>
