@@ -78,7 +78,6 @@ export default async function HomePage({
   const phone = String(settings.contactPhone ?? "");
   const whatsapp = String(settings.contactWhatsapp ?? "");
   const hero = localizedHero(settings as Record<string, string>, locale);
-  const isTamil = locale === "ta";
 
   return (
     <>
@@ -89,19 +88,7 @@ export default async function HomePage({
           the search panel sits after it, pulled up with a negative margin
           so it's never inside the clipped layer. ────────────────────── */}
       <section className="kani-hero-shell relative isolate">
-        <div
-          className={`kani-hero-media relative isolate overflow-hidden rounded-b-[28px] ${
-            isTamil
-              ? // Tamil copy runs far longer than the English headline and the
-                // Noto Tamil face is tall, so a fixed height clips the first
-                // line up behind the navbar. Tamil gets a min-height that can
-                // grow with the copy; English keeps its exact original height.
-                // Both were trimmed from their original clamps so the search
-                // panel and first row of listings sit closer to the fold.
-                "[min-height:clamp(560px,70svh,700px)] md:[min-height:clamp(520px,60vh,620px)]"
-              : "[height:clamp(520px,64svh,640px)] md:[height:clamp(480px,56vh,560px)]"
-          }`}
-        >
+        <div className="kani-hero-media relative isolate min-h-[100svh] overflow-hidden rounded-b-[28px] [min-height:max(620px,100svh)] md:[min-height:max(680px,100svh)]">
           <HeroSlideshow />
           {/* Directional scrim: solid enough for text on the left, easing off
               so the land itself stays visible on the right. Pointer-events
@@ -130,9 +117,9 @@ export default async function HomePage({
           />
 
           <div className="kani-hero-content container-kani on-dark flex min-h-full flex-col justify-center pt-28 pb-16 md:pt-32 md:pb-20">
-            {/* Tamil needs a wider measure: the 620px column that holds the
-                English headline on two lines pushes the Tamil one to five. */}
-            <div className={`animate-rise ${isTamil ? "max-w-[760px]" : "max-w-[620px]"}`}>
+            {/* Both locales share the wider measure — it holds the headline on
+                two lines in English and five in Tamil without overflowing. */}
+            <div className="animate-rise max-w-[760px]">
               <HeroWelcomeText
                 title={hero.title}
                 subtitle={hero.subtitle}
@@ -151,32 +138,24 @@ export default async function HomePage({
 
         {/* Search panel: normal document flow on mobile (overlap causes
             cramped stacking below ~640px), pulled up to overlap the media
-            layer's bottom edge from sm upward. */}
-        <div className="container-kani relative z-10 -mt-6 pb-10 sm:-mt-16 md:pb-4">
-          <p className="mb-3 flex justify-center animate-rise">
-            <span
-              className="inline-flex max-w-full items-center gap-2 rounded-[var(--radius-pill)]
-                         border border-[var(--palmyra-gold)]/40 bg-[var(--kani-green-deep)] px-4 py-1.5
-                         text-[13px] font-medium text-white shadow-[0_6px_18px_-6px_rgba(10,44,30,0.45)]
-                         sm:text-[14px]"
-            >
-              <span className="size-1.5 shrink-0 rounded-full bg-[var(--palmyra-gold)]" aria-hidden="true" />
-              <span className="truncate">
-                {interpolate(d.home.statBar, {
-                  listings: totalListings,
-                  districts: districts.length,
-                })}
-              </span>
-            </span>
-          </p>
-          <div
-            className="mt-8 animate-rise sm:mt-0"
-            style={{ animationDelay: "160ms" }}
-          >
+            layer's bottom edge from sm upward. The stat line now renders
+            inside the card itself, inline with the purpose tabs — it used to
+            float above the card as its own pill and overlapped the hero's
+            bottom edge. */}
+        <div
+          className={`container-kani relative z-10 pb-10 md:pb-4 ${
+            locale === "en" ? "-mt-2 sm:-mt-5" : "-mt-6 sm:-mt-10"
+          }`}
+        >
+          <div className="animate-rise" style={{ animationDelay: "160ms" }}>
             <HeroSearch
               districts={taxonomies.districts}
               landTypes={taxonomies.landTypes}
               locale={locale}
+              statLine={interpolate(d.home.statBar, {
+                listings: totalListings,
+                districts: districts.length,
+              })}
             />
           </div>
         </div>

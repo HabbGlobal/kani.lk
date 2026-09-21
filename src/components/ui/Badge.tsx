@@ -20,12 +20,31 @@ export function PurposeBadge({
   locale?: Locale;
 }) {
   const d = getDictionary(locale);
-  const pad = size === "sm" ? "px-2.5 py-1 text-[12px]" : "px-3 py-1.5 text-[13px]";
+  const small = size === "sm";
+  const pad = small ? "px-2.5 py-1 text-[12px]" : "px-3 py-1.5 text-[13px]";
   const shell =
     "inline-flex items-center rounded-[var(--radius-pill)] font-semibold tracking-tight " +
     "shadow-[0_2px_8px_rgba(10,44,30,0.28)] backdrop-blur-[2px]";
 
   if (purpose === "both") {
+    if (locale === "ta" && small) {
+      return (
+        <span
+          className={cn(
+            "inline-flex flex-col items-start gap-1",
+            className
+          )}
+        >
+          <span className="rounded-[var(--radius-pill)] bg-[var(--kani-green)] px-2.5 py-1 text-[11.5px] font-semibold leading-none text-white shadow-[0_2px_8px_rgba(10,44,30,0.24)] backdrop-blur-[2px]">
+            {d.land.forSale}
+          </span>
+          <span className="rounded-[var(--radius-pill)] bg-[var(--palmyra-gold)] px-2.5 py-1 text-[11.5px] font-semibold leading-none text-[var(--kani-green-deep)] shadow-[0_2px_8px_rgba(10,44,30,0.2)] backdrop-blur-[2px]">
+            {d.land.forRent}
+          </span>
+        </span>
+      );
+    }
+
     return (
       <span className={cn(shell, "overflow-hidden p-0", className)}>
         <span className={cn("bg-[var(--kani-green)] text-white", pad)}>
@@ -76,9 +95,12 @@ export function StatusRibbon({
   return (
     <span
       aria-hidden="true"
-      className="pointer-events-none absolute -left-12 top-5 z-20 w-44 -rotate-45
-                 py-1.5 text-center text-[13px] font-bold uppercase tracking-[0.14em]
-                 shadow-[0_2px_10px_rgba(10,44,30,0.35)]"
+      className={cn(
+        "pointer-events-none absolute -left-12 top-5 z-20 w-44 -rotate-45 py-1.5 text-center font-bold shadow-[0_2px_10px_rgba(10,44,30,0.35)]",
+        locale === "ta"
+          ? "font-tamil text-[12px] leading-tight tracking-normal"
+          : "text-[13px] uppercase tracking-[0.14em]"
+      )}
       style={{ background: bg, color: fg }}
     >
       {label}

@@ -31,8 +31,8 @@ function BarSelect({
     <select
       {...props}
       className={cn(
-        "h-10 w-full cursor-pointer appearance-none rounded-[var(--radius-md)] border border-[var(--hairline)] bg-[var(--bone)]",
-        "pl-3.5 pr-8 text-[13.5px] font-medium text-[var(--ink)]",
+        "h-10 min-w-0 w-full cursor-pointer appearance-none truncate rounded-[var(--radius-md)] border border-[var(--hairline)] bg-[var(--bone)]",
+        "pl-3 pr-7 text-[13px] font-medium text-[var(--ink)]",
         "bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22 fill=%22none%22><path d=%22M4 6l4 4 4-4%22 stroke=%22%23566a5f%22 stroke-width=%221.6%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/></svg>')] bg-[length:14px] bg-[right_10px_center] bg-no-repeat",
         "transition-colors duration-200 hover:border-[var(--kani-green)]/40",
         "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--kani-green)]",
@@ -266,7 +266,7 @@ export function FilterPanel({
       </Field>
 
       <Field label={d.lands.sizePerches}>
-        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2">
           <Select
             aria-label={d.lands.minSizeAria}
             value={get("minPerch")}
@@ -292,7 +292,7 @@ export function FilterPanel({
       </Field>
 
       <Field label={d.lands.priceLKR}>
-        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2">
           <Select
             aria-label={d.lands.minPriceAria}
             value={get("minPrice")}
@@ -332,146 +332,158 @@ export function FilterPanel({
           truly fixed while scrolling. */}
       <aside
         className={cn(
-          "hidden flex-col gap-5 rounded-[var(--radius-lg)] border border-[var(--hairline)] bg-[var(--card)] p-5 shadow-[var(--shadow-md)] lg:sticky lg:flex lg:[top:calc(var(--nav-h)+28px)]",
+          "hidden flex-col gap-3 self-start lg:sticky lg:flex lg:[top:calc(var(--nav-h)+28px)]",
           pending && "opacity-60 transition-opacity duration-200"
         )}
         role="search"
         aria-label={d.lands.filterListings}
       >
-        <BarField label={d.lands.purpose}>
-          <div className="flex items-center gap-0.5 rounded-[var(--radius-md)] border border-[var(--hairline)] bg-[var(--bone)] p-1">
-            {[
-              { value: "", label: d.common.all },
-              { value: "sale", label: d.land.forSale },
-              { value: "rent", label: d.land.forRent },
-            ].map((opt) => {
-              const active = purpose === opt.value;
-              return (
-                <button
-                  key={opt.label}
-                  type="button"
-                  onClick={() => setParam({ purpose: opt.value || null })}
-                  aria-pressed={active}
-                  className={cn(
-                    "flex-1 rounded-[var(--radius-sm)] px-2 py-1.5 text-[13px] font-medium transition-[background-color,color] duration-200",
-                    active
-                      ? "bg-[var(--palmyra-gold)] text-[var(--kani-green-deep)] shadow-[var(--shadow-md)]"
-                      : "text-[var(--muted)] hover:bg-[var(--kani-green)]/8 hover:text-[var(--ink)]"
-                  )}
-                >
-                  {opt.label}
-                </button>
-              );
-            })}
-          </div>
-        </BarField>
+        <h2 className="text-[15px] font-semibold leading-none text-[var(--ink)]">
+          {d.lands.filters}
+        </h2>
 
-        <BarField label={d.lands.district} htmlFor="f-district">
-          <BarSelect
-            id="f-district"
-            value={districtSlug}
-            onChange={(e) => setParam({ district: e.target.value, city: null })}
-          >
-            <option value="">{d.lands.allDistricts}</option>
-            {districts.map((district) => (
-              <option key={district._id} value={district.slug}>
-                {localizedName(district, locale)}
-              </option>
-            ))}
-          </BarSelect>
-        </BarField>
+        <div className="flex flex-col gap-5 rounded-[var(--radius-lg)] border border-[var(--hairline)] bg-[var(--card)] p-5 shadow-[var(--shadow-md)]">
+          <BarField label={d.lands.purpose}>
+            <div
+              className={cn(
+                "grid items-stretch gap-0.5 rounded-[var(--radius-md)] border border-[var(--hairline)] bg-[var(--bone)] p-1",
+                locale === "ta" ? "grid-cols-1" : "grid-cols-3"
+              )}
+            >
+              {[
+                { value: "", label: d.common.all },
+                { value: "sale", label: d.land.forSale },
+                { value: "rent", label: d.land.forRent },
+              ].map((opt) => {
+                const active = purpose === opt.value;
+                return (
+                  <button
+                    key={opt.label}
+                    type="button"
+                    onClick={() => setParam({ purpose: opt.value || null })}
+                    aria-pressed={active}
+                    className={cn(
+                      "min-w-0 rounded-[var(--radius-sm)] px-2 py-1.5 text-center font-medium leading-snug transition-[background-color,color] duration-200",
+                      locale === "ta" ? "text-[12.5px]" : "text-[13px]",
+                      active
+                        ? "bg-[var(--palmyra-gold)] text-[var(--kani-green-deep)] shadow-[var(--shadow-md)]"
+                        : "text-[var(--muted)] hover:bg-[var(--kani-green)]/8 hover:text-[var(--ink)]"
+                    )}
+                  >
+                    {opt.label}
+                  </button>
+                );
+              })}
+            </div>
+          </BarField>
 
-        <BarField label={d.lands.landType} htmlFor="f-land-type">
-          <BarSelect
-            id="f-land-type"
-            value={get("landType")}
-            onChange={(e) => setParam({ landType: e.target.value })}
-          >
-            <option value="">{d.lands.allLandTypes}</option>
-            {landTypes.map((type) => (
-              <option key={type._id} value={type.slug}>
-                {localizedName(type, locale)}
-              </option>
-            ))}
-          </BarSelect>
-        </BarField>
+          <BarField label={d.lands.district} htmlFor="f-district">
+            <BarSelect
+              id="f-district"
+              value={districtSlug}
+              onChange={(e) => setParam({ district: e.target.value, city: null })}
+            >
+              <option value="">{d.lands.allDistricts}</option>
+              {districts.map((district) => (
+                <option key={district._id} value={district.slug}>
+                  {localizedName(district, locale)}
+                </option>
+              ))}
+            </BarSelect>
+          </BarField>
+
+          <BarField label={d.lands.landType} htmlFor="f-land-type">
+            <BarSelect
+              id="f-land-type"
+              value={get("landType")}
+              onChange={(e) => setParam({ landType: e.target.value })}
+            >
+              <option value="">{d.lands.allLandTypes}</option>
+              {landTypes.map((type) => (
+                <option key={type._id} value={type.slug}>
+                  {localizedName(type, locale)}
+                </option>
+              ))}
+            </BarSelect>
+          </BarField>
 
         {/* Full min/max on both size and price — matching the mobile sheet's
             field set exactly. Desktop used to offer only a size minimum and a
             price maximum, so the same visitor got two different result sets
             depending on which UI they were filtering from. */}
-        <BarField label={d.lands.sizePerches}>
-          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
-            <BarSelect
-              aria-label={d.lands.minSizeAria}
-              value={get("minPerch")}
-              onChange={(e) => setParam({ minPerch: e.target.value })}
+          <BarField label={d.lands.sizePerches}>
+            <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2">
+              <BarSelect
+                aria-label={d.lands.minSizeAria}
+                value={get("minPerch")}
+                onChange={(e) => setParam({ minPerch: e.target.value })}
+              >
+                <option value="">{d.lands.anySize}</option>
+                {PERCH_STEPS.map((p) => (
+                  <option key={p} value={p}>{t(d.land.perchesValue, { n: p })}</option>
+                ))}
+              </BarSelect>
+              <span className="text-[var(--muted)]" aria-hidden="true">-</span>
+              <BarSelect
+                aria-label={d.lands.maxSizeAria}
+                value={get("maxPerch")}
+                onChange={(e) => setParam({ maxPerch: e.target.value })}
+              >
+                <option value="">{d.lands.anySize}</option>
+                {PERCH_STEPS.map((p) => (
+                  <option key={p} value={p}>{t(d.land.perchesValue, { n: p })}</option>
+                ))}
+              </BarSelect>
+            </div>
+          </BarField>
+
+          <BarField label={d.lands.priceLKR}>
+            <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2">
+              <BarSelect
+                aria-label={d.lands.minPriceAria}
+                value={get("minPrice")}
+                onChange={(e) => setParam({ minPrice: e.target.value })}
+              >
+                <option value="">{d.lands.anyPrice}</option>
+                {PRICE_STEPS.map((p) => (
+                  <option key={p} value={p}>{compactLKR(p)}</option>
+                ))}
+              </BarSelect>
+              <span className="text-[var(--muted)]" aria-hidden="true">-</span>
+              <BarSelect
+                aria-label={d.lands.maxPriceAria}
+                value={get("maxPrice")}
+                onChange={(e) => setParam({ maxPrice: e.target.value })}
+              >
+                <option value="">{d.lands.anyPrice}</option>
+                {PRICE_STEPS.map((p) => (
+                  <option key={p} value={p}>{compactLKR(p)}</option>
+                ))}
+              </BarSelect>
+            </div>
+          </BarField>
+
+          <div className="border-t border-[var(--hairline)] pt-4">
+            <button
+              type="button"
+              onClick={() => setMoreOpen((v) => !v)}
+              aria-expanded={moreOpen}
+              className="flex w-full cursor-pointer items-center justify-between text-[13.5px] font-medium
+                         text-[var(--kani-green)] transition-colors duration-200 hover:text-[var(--kani-green-deep)]"
             >
-              <option value="">{d.lands.anySize}</option>
-              {PERCH_STEPS.map((p) => (
-                <option key={p} value={p}>{t(d.land.perchesValue, { n: p })}</option>
-              ))}
-            </BarSelect>
-            <span className="text-[var(--muted)]" aria-hidden="true">–</span>
-            <BarSelect
-              aria-label={d.lands.maxSizeAria}
-              value={get("maxPerch")}
-              onChange={(e) => setParam({ maxPerch: e.target.value })}
-            >
-              <option value="">{d.lands.anySize}</option>
-              {PERCH_STEPS.map((p) => (
-                <option key={p} value={p}>{t(d.land.perchesValue, { n: p })}</option>
-              ))}
-            </BarSelect>
+              {d.lands.moreFilters}
+              <svg
+                viewBox="0 0 16 16"
+                className={cn("size-3.5 transition-transform duration-200", moreOpen && "rotate-180")}
+                fill="none"
+                aria-hidden="true"
+              >
+                <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+
+            {moreOpen && <div className="mt-4">{moreControls}</div>}
           </div>
-        </BarField>
-
-        <BarField label={d.lands.priceLKR}>
-          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
-            <BarSelect
-              aria-label={d.lands.minPriceAria}
-              value={get("minPrice")}
-              onChange={(e) => setParam({ minPrice: e.target.value })}
-            >
-              <option value="">{d.lands.anyPrice}</option>
-              {PRICE_STEPS.map((p) => (
-                <option key={p} value={p}>{compactLKR(p)}</option>
-              ))}
-            </BarSelect>
-            <span className="text-[var(--muted)]" aria-hidden="true">–</span>
-            <BarSelect
-              aria-label={d.lands.maxPriceAria}
-              value={get("maxPrice")}
-              onChange={(e) => setParam({ maxPrice: e.target.value })}
-            >
-              <option value="">{d.lands.anyPrice}</option>
-              {PRICE_STEPS.map((p) => (
-                <option key={p} value={p}>{compactLKR(p)}</option>
-              ))}
-            </BarSelect>
-          </div>
-        </BarField>
-
-        <div className="border-t border-[var(--hairline)] pt-4">
-          <button
-            type="button"
-            onClick={() => setMoreOpen((v) => !v)}
-            aria-expanded={moreOpen}
-            className="flex w-full cursor-pointer items-center justify-between text-[13.5px] font-medium
-                       text-[var(--kani-green)] transition-colors duration-200 hover:text-[var(--kani-green-deep)]"
-          >
-            {d.lands.moreFilters}
-            <svg
-              viewBox="0 0 16 16"
-              className={cn("size-3.5 transition-transform duration-200", moreOpen && "rotate-180")}
-              fill="none"
-              aria-hidden="true"
-            >
-              <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
-
-          {moreOpen && <div className="mt-4">{moreControls}</div>}
         </div>
       </aside>
 

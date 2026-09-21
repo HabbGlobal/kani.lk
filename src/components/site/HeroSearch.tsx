@@ -32,28 +32,35 @@ export function HeroSearch({
   districts,
   landTypes,
   locale = DEFAULT_LOCALE,
+  statLine,
 }: {
   districts: { _id: string; name: string; nameTa?: string; slug: string }[];
   landTypes: { _id: string; name: string; nameTa?: string; slug: string }[];
   locale?: Locale;
+  /** "15 lands listed across 6 districts" — shown inline with the purpose
+   * tabs instead of floating above the card, where it overlapped the hero's
+   * bottom edge. Optional so the form still renders without it. */
+  statLine?: string;
 }) {
   const d = getDictionary(locale);
   const href = (path: string) => localeHref(path, locale);
 
   return (
     <div className="kani-hero-search-glow relative rounded-[22px] p-[2.5px]">
-      {/* Rotating gold beam, CSS-only — a conic-gradient arc masked down to a
-          thin ring around the panel. Purely decorative: sits behind the form
-          in paint order and never intercepts pointer or focus events. */}
+      {/* Rotating gold beam kept, but the ambient pulsing glow behind it was
+          removed — it hurt legibility against the hero photo. A firmer
+          border + shadow on the panel itself carries the contrast now. */}
       <div aria-hidden="true" className="kani-hero-search-beam absolute inset-0 rounded-[22px]" />
       <form
         action={href("/lands")}
         method="get"
-        className="kani-hero-search-panel relative rounded-[20px] border border-black/[0.06] bg-[var(--card)]
-                   p-3 shadow-[0_16px_40px_-16px_rgba(10,44,30,0.35)] sm:p-4"
+        className="relative rounded-[20px] border-2 border-[var(--hairline)] bg-[var(--card)]
+                   p-3 shadow-[0_20px_48px_-16px_rgba(10,44,30,0.45)] sm:p-4"
       >
-      {/* Purpose: real radios, styled as compact tabs. */}
-      <fieldset className="mb-3 border-b border-black/[0.08] pb-3">
+      {/* Purpose: real radios, styled as compact tabs. The stat line sits in
+          the same row, right-aligned — it used to float above the card as
+          its own pill and overlapped the hero's bottom edge. */}
+      <fieldset className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-black/[0.08] pb-3">
         <legend className="sr-only">{d.lands.purpose}</legend>
         <div className="flex gap-1">
           {[
@@ -86,6 +93,18 @@ export function HeroSearch({
             </label>
           ))}
         </div>
+
+        {statLine && (
+          <span
+            className="inline-flex max-w-full items-center gap-2 rounded-[var(--radius-pill)]
+                       bg-[var(--palmyra-gold)] px-4 py-1.5 text-[13px] font-semibold
+                       text-[var(--kani-green-deep)] shadow-[0_4px_14px_-4px_rgba(190,155,78,0.55)]
+                       sm:text-[14px]"
+          >
+            <span className="size-1.5 shrink-0 rounded-full bg-[var(--kani-green-deep)]" aria-hidden="true" />
+            <span className="truncate">{statLine}</span>
+          </span>
+        )}
       </fieldset>
 
       {/* Three fields up front — district, type, price — instead of four. Size
