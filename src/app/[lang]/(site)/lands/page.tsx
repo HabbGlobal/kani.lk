@@ -65,9 +65,6 @@ export default async function LandsPage({
           its own `sticky` + `self-start`. */}
       <div className="grid gap-6 lg:grid-cols-[minmax(260px,300px)_1fr]">
         <div>
-          <h2 className="mb-3 hidden text-[15px] font-semibold text-[var(--ink)] lg:block">
-            {d.lands.filters}
-          </h2>
           <FilterPanel
             districts={taxonomies.districts}
             cities={taxonomies.cities}

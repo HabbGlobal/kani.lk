@@ -84,7 +84,7 @@ export const Select = forwardRef<
   React.SelectHTMLAttributes<HTMLSelectElement>
 >(function Select({ className, children, ...props }, ref) {
   return (
-    <div className="relative">
+    <div className="relative min-w-0">
       <select
         ref={ref}
         // Tighter horizontal padding than a text input: the chevron needs room,

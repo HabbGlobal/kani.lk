@@ -69,7 +69,16 @@ export function LandCard({
         <StatusRibbon status={land.status} locale={locale} />
 
         {/* Purpose must be readable from the image alone, before any text. */}
-        <div className="absolute left-3 top-3 z-10">
+        <div
+          className={cn(
+            "absolute z-10",
+            land.status === "reserved"
+              ? "left-1/2 top-3 -translate-x-1/2"
+              : land.status === "available"
+                ? "left-3 top-3"
+                : "left-3 top-12"
+          )}
+        >
           <PurposeBadge purpose={land.purpose} size="sm" locale={locale} />
         </div>
 
