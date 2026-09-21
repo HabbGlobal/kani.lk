@@ -1,5 +1,5 @@
 export { default as Land, LAND_CARD_PROJECTION } from "./Land";
-export { default as KaniImage, IMAGE_META_PROJECTION } from "./Image";
+export { default as KaniImage } from "./Image";
 export { default as District } from "./District";
 export { default as City } from "./City";
 export { default as LandType } from "./LandType";

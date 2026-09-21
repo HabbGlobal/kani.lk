@@ -5,6 +5,7 @@ import District from "@/models/District";
 import City from "@/models/City";
 import LandType from "@/models/LandType";
 import KaniImage from "@/models/Image";
+import { deleteObjects } from "@/lib/s3";
 import { landSchema } from "@/lib/validation";
 import { requireSession } from "@/lib/auth";
 import { authErrorResponse, zodErrorResponse } from "@/lib/api";
@@ -114,6 +115,8 @@ export async function DELETE(_req: Request, ctx: { params: Promise<{ id: string 
   const land = await Land.findById(id);
   if (!land) return NextResponse.json({ error: "Listing not found" }, { status: 404 });
 
+  const images = await KaniImage.find({ landId: land._id }).select("key").lean();
+  await deleteObjects(images.map((img) => img.key)).catch(() => {});
   await KaniImage.deleteMany({ landId: land._id });
   await land.deleteOne();
 

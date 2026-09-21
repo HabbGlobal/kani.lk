@@ -14,10 +14,11 @@ controlled from an admin dashboard.
 - **JWT auth** for admins only (`jose`, httpOnly cookies)
 - **Nodemailer** for inquiry email
 - **Zod + React Hook Form** for validation
-- **sharp** for image processing — photos are stored as base64 in MongoDB and
-  served as binary through a cached `/api/images/[id]` route (see
-  [Section 9 of the build brief](kani-lk-build-brief.md) for why, and the
-  rules that keep it fast)
+- **sharp** for image processing — photos are stored as WebP objects in HABB's
+  S3-compatible storage under the `kani.lk/` folder (metadata in the
+  `kani_images` collection) and served through a cached `/api/images/[id]`
+  route. Requires the `S3_*` env vars (`S3_ENDPOINT`, `S3_ACCESS_KEY`,
+  `S3_SECRET_KEY`, `S3_BUCKET`, `S3_REGION`)
 
 ## Getting started
 

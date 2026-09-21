@@ -5,7 +5,7 @@ import Land from "@/models/Land";
 import KaniImage from "@/models/Image";
 import { requireSession } from "@/lib/auth";
 import { authErrorResponse, zodErrorResponse } from "@/lib/api";
-import { processImage, makeLqip, storeImage, MAX_IMAGES_PER_LAND, ImageTooLargeError } from "@/lib/images";
+import { processImage, makeLqip, makeLqipForStored, storeImage, MAX_IMAGES_PER_LAND, ImageTooLargeError } from "@/lib/images";
 import { revalidateLandPages } from "@/lib/revalidate";
 import { plain } from "@/lib/utils";
 
@@ -126,10 +126,7 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
   if (coverChanged) {
     land.coverImageId = parsed.data.coverImageId as unknown as typeof land.coverImageId;
     // Regenerate the LQIP from the newly-chosen cover's own stored bytes.
-    const coverDoc = await KaniImage.findById(parsed.data.coverImageId).select("data").lean();
-    if (coverDoc) {
-      land.coverThumb = await makeLqip(Buffer.from(coverDoc.data, "base64"));
-    }
+    land.coverThumb = await makeLqipForStored(parsed.data.coverImageId!);
   }
 
   await land.save();
