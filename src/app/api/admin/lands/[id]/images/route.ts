@@ -62,7 +62,16 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
       }
       return NextResponse.json({ error: "Could not process one of the photos" }, { status: 400 });
     }
-    const imageId = await storeImage(processed, { landId: land._id, order });
+    let imageId;
+    try {
+      imageId = await storeImage(processed, { landId: land._id, order });
+    } catch (err) {
+      console.error("[images] storage upload failed", err);
+      return NextResponse.json(
+        { error: "Photo storage is unavailable right now. Please try again shortly." },
+        { status: 502 }
+      );
+    }
     newIds.push(imageId);
 
     if (order === 0) {
