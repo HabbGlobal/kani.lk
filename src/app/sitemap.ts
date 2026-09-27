@@ -15,7 +15,13 @@ const site = process.env.NEXT_PUBLIC_SITE_URL ?? "https://kani.lk";
  * redirect now. Each entry carries `alternates.languages` so Google treats the
  * Tamil and English versions as translations of one page rather than as
  * duplicates competing with each other.
+ *
+ * Forced dynamic: unlike districts/[slug], this route has no
+ * generateStaticParams and gains nothing from build-time evaluation, but
+ * `next build` still tries to collect it as a route — which would otherwise
+ * require a reachable MONGODB_URI just to finish a build.
  */
+export const dynamic = "force-dynamic";
 type Route = {
   path: string;
   changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"];
