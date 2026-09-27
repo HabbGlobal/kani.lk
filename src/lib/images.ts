@@ -1,12 +1,14 @@
 import sharp from "sharp";
-import type { Types } from "mongoose";
+import mongoose, { type Types } from "mongoose";
 import KaniImage from "@/models/Image";
+import { imageKey, uploadObject, deleteObject, publicUrl } from "@/lib/s3";
 
 /**
- * Image pipeline. Photos are stored base64 in Mongo (one document each) and
- * always delivered as binary through GET /api/images/[id]. Base64 must never
- * appear in a page payload or JSON response — the sole exception is the sub-1KB
- * LQIP thumb, which is what stops the grid flashing grey.
+ * Image pipeline. Photos are stored as WebP objects in S3-compatible storage
+ * under `kani.lk/<imageId>.webp`, with one metadata document each in Mongo, and
+ * always delivered through GET /api/images/[id]. Base64 must never appear in a
+ * page payload or JSON response — the sole exception is the sub-1KB LQIP thumb,
+ * which is what stops the grid flashing grey.
  */
 
 export const MAX_IMAGES_PER_LAND = 15;
@@ -15,7 +17,7 @@ export const MAX_LONG_EDGE = 1600;
 export const WEBP_QUALITY = 72;
 
 export type ProcessedImage = {
-  data: string; // base64, no data-URI prefix
+  buffer: Buffer; // encoded WebP bytes
   mimeType: "image/webp";
   bytes: number;
   width: number;
@@ -89,7 +91,7 @@ export async function processImage(
   const outMeta = await sharp(out).metadata();
 
   return {
-    data: out.toString("base64"),
+    buffer: out,
     mimeType: "image/webp",
     bytes: out.length,
     width: outMeta.width ?? 0,
@@ -110,21 +112,41 @@ export async function makeLqip(input: Buffer): Promise<string> {
   return `data:image/webp;base64,${buf.toString("base64")}`;
 }
 
-/** Store a processed photo as its own document and return the id. */
+/** Upload a processed photo to storage, save its metadata, and return the id. */
 export async function storeImage(
   processed: ProcessedImage,
   meta: { landId?: Types.ObjectId; alt?: string; order?: number }
 ) {
-  const doc = await KaniImage.create({
-    landId: meta.landId,
-    data: processed.data,
-    mimeType: processed.mimeType,
-    bytes: processed.bytes,
-    width: processed.width,
-    height: processed.height,
-    alt: meta.alt ?? "",
-    order: meta.order ?? 0,
-  });
-  return doc._id;
+  const _id = new mongoose.Types.ObjectId();
+  const key = imageKey(_id);
+  await uploadObject(key, processed.buffer, processed.mimeType);
+  try {
+    await KaniImage.create({
+      _id,
+      landId: meta.landId,
+      key,
+      mimeType: processed.mimeType,
+      bytes: processed.bytes,
+      width: processed.width,
+      height: processed.height,
+      alt: meta.alt ?? "",
+      order: meta.order ?? 0,
+    });
+  } catch (err) {
+    // Don't leave an orphaned object behind if the metadata write fails.
+    await deleteObject(key).catch(() => {});
+    throw err;
+  }
+  return _id;
 }
 
+/** LQIP for an already-stored photo, read back from storage. Empty on failure. */
+export async function makeLqipForStored(id: string | { toString(): string }): Promise<string> {
+  try {
+    const res = await fetch(publicUrl(imageKey(id)));
+    if (!res.ok) return "";
+    return await makeLqip(Buffer.from(await res.arrayBuffer()));
+  } catch {
+    return "";
+  }
+}

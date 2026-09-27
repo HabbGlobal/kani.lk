@@ -17,7 +17,7 @@ import District from "@/models/District";
 import City from "@/models/City";
 import LandType from "@/models/LandType";
 import SiteSettings from "@/models/SiteSettings";
-import KaniImage, { IMAGE_META_PROJECTION } from "@/models/Image";
+import KaniImage from "@/models/Image";
 import { plain } from "./utils";
 import type { LandStatus, Purpose, DeedType } from "@/models/types";
 
@@ -209,11 +209,11 @@ export async function getLandBySlug(slug: string) {
   return plain<LandCard & Record<string, unknown>>(doc);
 }
 
-/** Gallery metadata only — the payload stays in the images collection. */
+/** Gallery metadata; the photo bytes live in S3 storage. */
 export async function getLandImages(landId: string) {
   await dbConnect();
   const docs = await KaniImage.find({ landId })
-    .select(IMAGE_META_PROJECTION)
+    .select("alt width height order")
     .sort({ order: 1 })
     .lean();
   return plain<
