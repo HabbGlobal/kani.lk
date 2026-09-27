@@ -16,11 +16,7 @@ export function FavouritesList({ locale }: { locale: Locale }) {
   const [items, setItems] = useState<LandCardType[] | null>(null);
 
   useEffect(() => {
-    if (!ready) return;
-    if (ids.length === 0) {
-      setItems([]);
-      return;
-    }
+    if (!ready || ids.length === 0) return;
 
     let cancelled = false;
     fetch("/api/lands/by-ids", {
@@ -41,7 +37,7 @@ export function FavouritesList({ locale }: { locale: Locale }) {
     };
   }, [ids, ready]);
 
-  if (!ready || items === null) {
+  if (!ready || (items === null && ids.length > 0)) {
     return (
       <ul className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
         {Array.from({ length: 3 }, (_, i) => (
@@ -53,7 +49,9 @@ export function FavouritesList({ locale }: { locale: Locale }) {
     );
   }
 
-  if (items.length === 0) {
+  const resolved = items ?? [];
+
+  if (resolved.length === 0) {
     return (
       <EmptyState
         title={d.favourites.emptyTitleLong}
@@ -67,15 +65,15 @@ export function FavouritesList({ locale }: { locale: Locale }) {
   }
 
   // Ids that no longer resolve: unpublished or deleted since being saved.
-  const missing = ids.length - items.length;
+  const missing = ids.length - resolved.length;
 
   return (
     <>
       <div className="mb-5 flex items-center justify-between gap-4">
         <p className="text-[15px] text-[var(--muted)]">
-          {items.length === 1
+          {resolved.length === 1
             ? d.favourites.savedCountOne
-            : t(d.favourites.savedCount, { count: items.length })}
+            : t(d.favourites.savedCount, { count: resolved.length })}
           {missing > 0 && (
             <span className="ml-1.5 text-[var(--muted)]/80">
               {t(d.favourites.noLongerAvailable, { count: missing })}
@@ -88,7 +86,7 @@ export function FavouritesList({ locale }: { locale: Locale }) {
       </div>
 
       <ul className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-        {items.map((land, i) => (
+        {resolved.map((land, i) => (
           <li key={land._id}>
             <LandCard land={land} locale={locale} priority={i < 2} />
           </li>

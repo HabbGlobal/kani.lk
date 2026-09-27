@@ -35,24 +35,14 @@ export function ScrollReveal({
   startWhen?: boolean;
 }) {
   const ref = useRef<HTMLParagraphElement>(null);
-  const [visible, setVisible] = useState(false);
-  const [reduced, setReduced] = useState(false);
+  const [reduced] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  );
+  const [visible, setVisible] = useState(reduced);
 
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
-
-    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    setReduced(prefersReduced);
-    if (prefersReduced) {
-      setVisible(true);
-      return;
-    }
-
-    if (startWhen !== undefined) {
-      if (startWhen) setVisible(true);
-      return;
-    }
+    if (!el || reduced || startWhen !== undefined) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -65,8 +55,11 @@ export function ScrollReveal({
     );
     observer.observe(el);
     return () => observer.disconnect();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [startWhen]);
+  }, [startWhen, reduced]);
+
+  // `startWhen` controls visibility directly for blocks already above the
+  // fold on load, where "on scroll into view" would never fire naturally.
+  const isVisible = startWhen !== undefined ? Boolean(startWhen) : visible;
 
   const words = children.split(" ");
 
@@ -80,9 +73,9 @@ export function ScrollReveal({
             reduced
               ? undefined
               : {
-                  opacity: visible ? 1 : 0.08,
-                  filter: visible ? "blur(0px)" : "blur(6px)",
-                  transform: visible
+                  opacity: isVisible ? 1 : 0.08,
+                  filter: isVisible ? "blur(0px)" : "blur(6px)",
+                  transform: isVisible
                     ? "translate3d(0,0,0) rotate(0deg)"
                     : `translate3d(0,10px,0) rotate(${baseRotation}deg)`,
                   transition:

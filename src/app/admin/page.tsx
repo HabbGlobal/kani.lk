@@ -5,7 +5,6 @@ import Land from "@/models/Land";
 import Inquiry from "@/models/Inquiry";
 import { getSession } from "@/lib/auth";
 import { formatDate, timeAgo, plain } from "@/lib/utils";
-import { formatLKR } from "@/lib/units";
 import { Card } from "@/components/ui/Card";
 import { getDictionary, interpolate } from "@/lib/i18n";
 import { adminLocale } from "@/lib/i18n/server";
@@ -106,6 +105,7 @@ export default async function AdminDashboard() {
             <p className="text-[15px] text-[var(--muted)]">{d.admin.noEnquiries}</p>
           ) : (
             <ul className="divide-y divide-[var(--hairline)]">
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- lean doc read directly for display only */}
               {plain<any[]>(recentInquiries).map((iq) => (
                 <li key={iq._id} className="flex items-start justify-between gap-3 py-3">
                   <div className="min-w-0">
@@ -139,6 +139,7 @@ export default async function AdminDashboard() {
             </Link>
           </div>
           <ul className="divide-y divide-[var(--hairline)]">
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- lean doc read directly for display only */}
             {plain<any[]>(recentLands).map((land) => (
               <li key={land._id}>
                 <Link

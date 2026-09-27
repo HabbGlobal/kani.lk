@@ -23,17 +23,13 @@ export function Reveal({
   as?: "div" | "section" | "li" | "article";
 }) {
   const ref = useRef<HTMLElement>(null);
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  );
 
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
-
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduced) {
-      setVisible(true);
-      return;
-    }
+    if (!el || visible) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -49,6 +45,9 @@ export function Reveal({
 
     observer.observe(el);
     return () => observer.disconnect();
+    // Deliberately mount-once: re-running when `visible` flips true would only
+    // re-attach an observer that immediately bails via the guard above.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

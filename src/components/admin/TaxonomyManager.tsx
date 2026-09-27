@@ -19,6 +19,7 @@ type Kind = "district" | "city" | "land-type";
 type Row = {
   _id: string;
   name: string;
+  nameTa?: string;
   order: number;
   isActive: boolean;
   code?: string;
@@ -93,6 +94,7 @@ export function TaxonomyManager({
       typeof row.district === "object" ? row.district?._id : row.district;
     reset({
       name: row.name,
+      nameTa: row.nameTa,
       order: row.order,
       isActive: row.isActive,
       code: row.code,
@@ -174,6 +176,15 @@ export function TaxonomyManager({
               error={errors.name?.message as string | undefined}
             >
               <Input id="name" {...register("name")} />
+            </Field>
+
+            <Field
+              label={d.admin.nameTa}
+              htmlFor="nameTa"
+              hint={d.admin.nameTaHint}
+              error={(errors as never as Record<string, { message?: string }>).nameTa?.message}
+            >
+              <Input id="nameTa" {...register("nameTa" as never)} />
             </Field>
 
             {kind === "district" && (

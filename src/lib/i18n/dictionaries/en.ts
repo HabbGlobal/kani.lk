@@ -573,6 +573,8 @@ export const en = {
     couldNotDelete: "Could not delete",
     couldNotUpdate: "Could not update",
     codeLabel: "Code (used in ref codes)",
+    nameTa: "Tamil name",
+    nameTaHint: "Shown on the Tamil site. Falls back to the English name until set.",
     province: "Province",
     chooseDistrict: "Choose a district",
     hasBuilding: "Has a building (shows bedrooms/bathrooms in the editor)",

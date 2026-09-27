@@ -3,6 +3,8 @@ import Link from "next/link";
 import { dbConnect } from "@/lib/db";
 import Land from "@/models/Land";
 import SiteSettings from "@/models/SiteSettings";
+// Registers the District schema so .populate("district") below can resolve it
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import District from "@/models/District";
 import { PopularManager, type PopularLand } from "@/components/admin/PopularManager";
 import { Card } from "@/components/ui/Card";
@@ -25,6 +27,7 @@ export default async function AdminPopularPage() {
     SiteSettings.findOne({ key: "main" }).select("popularMode").lean(),
   ]);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- lean + populate doc mapped to PopularLand below
   const items: PopularLand[] = docs.map((d: any) => ({
     _id: String(d._id),
     title: d.title,
