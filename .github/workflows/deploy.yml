@@ -64,15 +64,11 @@ jobs:
             echo "Building application..."
             npm run build
 
-            # `pm2 restart` fails outright when the process is not registered
-            # yet, which is every first deploy to a fresh VPS. Start it in that
-            # case instead, then persist the list so it survives a reboot.
+            # The VPS runs several apps under one PM2 account, each named
+            # <app>-<port>. This one is kani-3008 and Nginx proxies to that
+            # port, so the name must match exactly — starting a differently
+            # named process would leave the real site running the old build.
             echo "Restarting application..."
-            if pm2 describe kani > /dev/null 2>&1; then
-              pm2 restart kani --update-env
-            else
-              pm2 start npm --name kani -- start
-            fi
-            pm2 save
+            pm2 restart kani-3008 --update-env
 
             echo "Deployment completed successfully."
