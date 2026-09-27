@@ -50,9 +50,20 @@ export async function generateMetadata({
   };
 }
 
-/** Pre-render all districts in both locales — six each, and they change rarely. */
+/**
+ * Pre-render all districts in both locales — six each, and they change rarely.
+ *
+ * A build without a reachable database (CI on a fork, a DB outage) falls back
+ * to pre-rendering none: `revalidate` still generates and caches each district
+ * on its first request, so the only cost is a slower first hit.
+ */
 export async function generateStaticParams() {
-  const districts = await getDistrictsWithCounts();
+  let districts: Awaited<ReturnType<typeof getDistrictsWithCounts>>;
+  try {
+    districts = await getDistrictsWithCounts();
+  } catch {
+    return [];
+  }
   return districts.flatMap((district) =>
     ["ta", "en"].map((lang) => ({ lang, slug: district.slug }))
   );
