@@ -105,8 +105,13 @@ npm run build
 
 ### 3. PM2
 
+The process name must be `kani-3008`: the VPS hosts several apps under one
+PM2 account and names each `<app>-<port>`, and the deploy workflow restarts
+that exact name. `PORT` must match the port in the name and the one Nginx
+proxies to below.
+
 ```bash
-pm2 start npm --name kani -- start
+PORT=3008 pm2 start npm --name kani-3008 -- start
 pm2 save
 pm2 startup   # follow the printed instructions to enable on boot
 ```
@@ -121,7 +126,7 @@ server {
     server_name kani.lk www.kani.lk;
 
     location / {
-        proxy_pass http://127.0.0.1:3000;
+        proxy_pass http://127.0.0.1:3008;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
