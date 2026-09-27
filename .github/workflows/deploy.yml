@@ -20,11 +20,14 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm run lint
-      # A real build needs real env vars — a placeholder Mongo URI is enough
-      # to prove the build compiles; it never connects during `next build`.
+      # generateStaticParams() on the district pages queries Mongo at build
+      # time to pre-render one page per district, so the gate build needs a
+      # real, reachable connection string — a placeholder no longer proves
+      # the build actually works. CI_MONGODB_URI should point at the same
+      # database as production (read-only access is enough).
       - run: npm run build
         env:
-          MONGODB_URI: mongodb://placeholder/placeholder
+          MONGODB_URI: ${{ secrets.CI_MONGODB_URI }}
           JWT_SECRET: placeholder-build-only-secret
           JWT_REFRESH_SECRET: placeholder-build-only-refresh-secret
           NEXT_PUBLIC_SITE_URL: https://kani.lk

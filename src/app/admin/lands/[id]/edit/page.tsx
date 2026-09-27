@@ -31,6 +31,9 @@ export default async function EditLandPage({ params }: Params) {
 
   if (!doc) notFound();
 
+  // Raw Mongo doc mapped field-by-field into LandFormValues below; a precise
+  // type here would just relocate the `any`s to every field access.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const land = plain<Record<string, any>>(doc);
 
   // Mongo stores ObjectId refs; the form's selects work off string ids.

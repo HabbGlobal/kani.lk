@@ -35,6 +35,11 @@ export function Navbar({ overHero = false }: { overHero?: boolean }) {
   const lastY = useRef(0);
   const menuRef = useRef<HTMLDivElement>(null);
 
+  // Close the mobile menu on navigation. Genuinely reacting to an external
+  // event (the router changing pathname), not derivable state.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => setOpen(false), [pathname]);
+
   useEffect(() => {
     // The hero is ~72vh; switch the treatment a little before its bottom edge.
     const threshold = overHero ? Math.round(window.innerHeight * 0.62) : 24;
@@ -60,13 +65,6 @@ export function Navbar({ overHero = false }: { overHero?: boolean }) {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, [overHero]);
-
-  useEffect(() => setOpen(false), [pathname]);
-
-  // Never hide it behind the visitor's back while the mobile menu is open.
-  useEffect(() => {
-    if (open) setHidden(false);
-  }, [open]);
 
   const closeMenu = () => setOpen(false);
   useFocusTrap(open, menuRef, closeMenu);
@@ -97,7 +95,8 @@ export function Navbar({ overHero = false }: { overHero?: boolean }) {
             "h-[68px] rounded-[var(--radius-pill)] glass-nav md:h-[76px]",
             overHeroGlow && "glass-nav--over-hero",
             scrolled && "md:h-[70px]",
-            hidden && "glass-nav-hidden"
+            // Never hide it behind the visitor's back while the mobile menu is open.
+            hidden && !open && "glass-nav-hidden"
           )}
         >
           <Link

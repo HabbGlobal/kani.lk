@@ -6,22 +6,22 @@
  */
 
 export const DISTRICTS = [
-  { name: "Vavuniya", code: "VAV", slug: "vavuniya", province: "Northern", order: 1,
+  { name: "Vavuniya", nameTa: "வவுனியா", code: "VAV", slug: "vavuniya", province: "Northern", order: 1,
     intro:
       "Vavuniya sits at the gateway to the Northern Province, where the A9 meets the road east to Trincomalee. Land here ranges from small residential blocks inside town to paddy and chena acreage along the Omanthai and Cheddikulam roads. Good access to the A9 and a clear deed are what move a block fastest." },
-  { name: "Mannar", code: "MAN", slug: "mannar", province: "Northern", order: 2,
+  { name: "Mannar", nameTa: "மன்னார்", code: "MAN", slug: "mannar", province: "Northern", order: 2,
     intro:
       "Mannar district covers the island causeway, the palmyra belt and the coastal stretch toward Musali. Buyers here look for coconut and palmyra land, tank-fed paddy, and increasingly coastal plots with road frontage." },
-  { name: "Jaffna", code: "JAF", slug: "jaffna", province: "Northern", order: 3,
+  { name: "Jaffna", nameTa: "யாழ்ப்பாணம்", code: "JAF", slug: "jaffna", province: "Northern", order: 3,
     intro:
       "Jaffna is the most tightly held land market in the North. Blocks are smaller and priced per perch well above the mainland, with residential plots in Nallur, Chundikuli and Kokuvil in steady demand from returning families." },
-  { name: "Mullaitivu", code: "MUL", slug: "mullaitivu", province: "Northern", order: 4,
+  { name: "Mullaitivu", nameTa: "முல்லைத்தீவு", code: "MUL", slug: "mullaitivu", province: "Northern", order: 4,
     intro:
       "Mullaitivu offers the largest parcels in the North at the lowest price per perch — agricultural land, coconut, and coastal blocks near Nayaru and Mullaitivu town. Access road width is the single biggest value factor here." },
-  { name: "Trincomalee", code: "TRI", slug: "trincomalee", province: "Eastern", order: 5,
+  { name: "Trincomalee", nameTa: "திருகோணமலை", code: "TRI", slug: "trincomalee", province: "Eastern", order: 5,
     intro:
       "Trincomalee combines a deep-water harbour town with paddy country inland toward Kantale. Coastal and near-town land carries a tourism premium; inland agricultural blocks remain among the best value in the East." },
-  { name: "Batticaloa", code: "BAT", slug: "batticaloa", province: "Eastern", order: 6,
+  { name: "Batticaloa", nameTa: "மட்டக்களப்பு", code: "BAT", slug: "batticaloa", province: "Eastern", order: 6,
     intro:
       "Batticaloa is lagoon country — paddy land, coconut gardens and residential blocks around the town, Kattankudy and Eravur. Water source and flood level are the questions every serious buyer asks first." },
 ];
@@ -36,23 +36,23 @@ export const CITIES: { district: string; names: string[] }[] = [
 ];
 
 export const LAND_TYPES = [
-  { name: "Bare land", slug: "bare-land", order: 1, hasBuilding: false,
+  { name: "Bare land", nameTa: "வெற்று காணி", slug: "bare-land", order: 1, hasBuilding: false,
     description: "Cleared or lightly wooded blocks with no structure, sold by the perch." },
-  { name: "Agricultural land", slug: "agricultural-land", order: 2, hasBuilding: false,
+  { name: "Agricultural land", nameTa: "விவசாய காணி", slug: "agricultural-land", order: 2, hasBuilding: false,
     description: "Chena and cultivated acreage, usually sold by the acre." },
-  { name: "Paddy land", slug: "paddy-land", order: 3, hasBuilding: false,
+  { name: "Paddy land", nameTa: "நெல் வயல்", slug: "paddy-land", order: 3, hasBuilding: false,
     description: "Tank-fed or rain-fed paddy fields with established water access." },
-  { name: "Coconut land", slug: "coconut-land", order: 4, hasBuilding: false,
+  { name: "Coconut land", nameTa: "தென்னை காணி", slug: "coconut-land", order: 4, hasBuilding: false,
     description: "Established coconut gardens with a bearing crop." },
-  { name: "Residential plot", slug: "residential-plot", order: 5, hasBuilding: false,
+  { name: "Residential plot", nameTa: "குடியிருப்பு காணி", slug: "residential-plot", order: 5, hasBuilding: false,
     description: "Surveyed blocks inside or near town, ready to build on." },
-  { name: "House & land", slug: "house-and-land", order: 6, hasBuilding: true,
+  { name: "House & land", nameTa: "வீடு மற்றும் காணி", slug: "house-and-land", order: 6, hasBuilding: true,
     description: "A built house sold together with its block." },
-  { name: "Commercial land", slug: "commercial-land", order: 7, hasBuilding: false,
+  { name: "Commercial land", nameTa: "வணிக காணி", slug: "commercial-land", order: 7, hasBuilding: false,
     description: "Road-frontage land zoned or suited for business use." },
-  { name: "Building", slug: "building", order: 8, hasBuilding: true,
+  { name: "Building", nameTa: "கட்டிடம்", slug: "building", order: 8, hasBuilding: true,
     description: "Standalone commercial or residential buildings." },
-  { name: "Shop", slug: "shop", order: 9, hasBuilding: true,
+  { name: "Shop", nameTa: "கடை", slug: "shop", order: 9, hasBuilding: true,
     description: "Retail units in a town centre or along a main road." },
 ];
 
