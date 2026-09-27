@@ -63,15 +63,18 @@ ask before writing code — don't quietly build a login system or a payment flow
 
 ## Image pipeline — do not bypass this
 
-Photos are base64 in MongoDB (`kani_images`, one document per photo) but are
-**never** sent inline in a page, Server Component, or JSON response except
-the sub-1KB `coverThumb` LQIP. Every photo is served through
-`GET /api/images/[id]` (immutable cache, ETag, binary body). If you add a new
-place that shows a photo, use `imageUrl()` from `src/lib/image-url.ts` (the
-client-safe helper — it has no imports and must stay that way, since anything
-importing `sharp`/Mongoose into a client component breaks the build) and let
-`next/image` point at that URL. Never query `KaniImage` without projecting
-`{ data: 0 }` unless you are inside `/api/images/[id]` itself.
+Photos are WebP objects in HABB's S3-compatible storage under the `kani.lk/`
+key prefix (`kani.lk/<imageId>.webp`, see `src/lib/s3.ts`); `kani_images` holds
+metadata only (`key`, size, alt, order). No photo bytes are ever stored in
+Mongo or sent inline in a page, Server Component, or JSON response except the
+sub-1KB `coverThumb` LQIP. Every photo is served through
+`GET /api/images/[id]` (immutable cache, ETag, streamed from storage). If you
+add a new place that shows a photo, use `imageUrl()` from
+`src/lib/image-url.ts` (the client-safe helper — it has no imports and must
+stay that way, since anything importing `sharp`/Mongoose/the S3 SDK into a
+client component breaks the build) and let `next/image` point at that URL.
+The bucket is public-read and shared with other projects: only ever write
+under `kani.lk/`, and delete the object when its `kani_images` doc is deleted.
 
 ## Database note
 

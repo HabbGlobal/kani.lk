@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import mongoose from "mongoose";
 import { dbConnect } from "@/lib/db";
 import Land from "@/models/Land";
-import KaniImage, { IMAGE_META_PROJECTION } from "@/models/Image";
+import KaniImage from "@/models/Image";
 import { LandEditor } from "@/components/admin/LandEditor";
 import { getAdminTaxonomies } from "@/lib/admin-queries";
 import { plain } from "@/lib/utils";
@@ -26,7 +26,7 @@ export default async function EditLandPage({ params }: Params) {
   const [doc, taxonomies, images] = await Promise.all([
     Land.findById(id).lean(),
     getAdminTaxonomies(),
-    KaniImage.find({ landId: id }).select(IMAGE_META_PROJECTION).sort({ order: 1 }).lean(),
+    KaniImage.find({ landId: id }).select("alt width height order").sort({ order: 1 }).lean(),
   ]);
 
   if (!doc) notFound();

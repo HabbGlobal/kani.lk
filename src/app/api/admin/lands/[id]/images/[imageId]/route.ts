@@ -4,7 +4,8 @@ import Land from "@/models/Land";
 import KaniImage from "@/models/Image";
 import { requireSession } from "@/lib/auth";
 import { authErrorResponse } from "@/lib/api";
-import { makeLqip } from "@/lib/images";
+import { makeLqipForStored } from "@/lib/images";
+import { imageKey, deleteObject } from "@/lib/s3";
 import { revalidateLandPages } from "@/lib/revalidate";
 import { plain } from "@/lib/utils";
 
@@ -28,14 +29,14 @@ export async function DELETE(
 
   land.imageIds = (land.imageIds ?? []).filter((imgId) => String(imgId) !== imageId);
   await KaniImage.findByIdAndDelete(imageId);
+  await deleteObject(imageKey(imageId)).catch(() => {});
 
   const wasCover = String(land.coverImageId ?? "") === imageId;
   if (wasCover) {
     const nextCoverId = land.imageIds[0];
     land.coverImageId = nextCoverId;
     if (nextCoverId) {
-      const coverDoc = await KaniImage.findById(nextCoverId).select("data").lean();
-      land.coverThumb = coverDoc ? await makeLqip(Buffer.from(coverDoc.data, "base64")) : "";
+      land.coverThumb = await makeLqipForStored(nextCoverId);
     } else {
       land.coverThumb = "";
     }

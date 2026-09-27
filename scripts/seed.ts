@@ -17,7 +17,7 @@ import KaniImage from "../src/models/Image";
 import AdminUser from "../src/models/AdminUser";
 import SiteSettings from "../src/models/SiteSettings";
 import PageModel from "../src/models/Page";
-import { processImage, makeLqip } from "../src/lib/images";
+import { processImage, makeLqip, storeImage } from "../src/lib/images";
 import { slugify, buildLandSlug } from "../src/lib/slug";
 import { formatSize, toPerches } from "../src/lib/units";
 import { DISTRICTS, CITIES, LAND_TYPES, SAMPLE_LANDS } from "./seed-data";
@@ -128,19 +128,14 @@ async function main() {
         watermark: k === 0,
         filename: `${refCode}-${k + 1}.jpg`,
       });
-      const doc = await KaniImage.create({
-        data: processed.data,
-        mimeType: processed.mimeType,
-        bytes: processed.bytes,
-        width: processed.width,
-        height: processed.height,
+      const imageId = await storeImage(processed, {
         alt:
           k === 0
             ? `${seed.title} — view of the property`
             : `${seed.title} — photo ${k + 1}`,
         order: k,
       });
-      imageIds.push(doc._id);
+      imageIds.push(imageId);
     }
 
     const coverThumb = await makeLqip(raw[0]);
@@ -211,10 +206,7 @@ async function main() {
   ]);
   if (stats[0]) {
     const mb = stats[0].total / 1024 / 1024;
-    console.log(
-      `   image payload: ${mb.toFixed(1)}MB binary across ${stats[0].n} photos ` +
-        `(~${(mb * 1.33).toFixed(1)}MB stored as base64)`
-    );
+    console.log(`   image payload: ${mb.toFixed(1)}MB across ${stats[0].n} photos in S3`);
   }
 
   console.log(`\n✓ Seed complete.\n  Admin login: ${email}\n`);

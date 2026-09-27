@@ -113,8 +113,13 @@ LandSchema.index(
   { weights: { title: 10, area: 5, description: 1 }, name: "land_text_search" }
 );
 
-/** Derive everything derivable, so callers can never get it wrong. */
-LandSchema.pre("save", function () {
+/**
+ * Derive everything derivable, so callers can never get it wrong. This is a
+ * "validate" hook, not "save": Mongoose validates before pre-save hooks run,
+ * so deriving the required `sizeInPerches` there would fail every create.
+ * Validation runs on every save(), so this still fires on each save.
+ */
+LandSchema.pre("validate", function () {
   this.sizeInPerches = toPerches(this.sizeValue, this.sizeUnit);
 
   this.pricePerPerch =
