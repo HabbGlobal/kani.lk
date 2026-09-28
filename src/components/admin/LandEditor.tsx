@@ -119,6 +119,11 @@ export function LandEditor({
     }
   }
 
+  function onInvalidSubmit() {
+    setServerError("Please complete the highlighted fields before saving.");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
   // Live preview built from watch() — placeholder identity fields until the
   // listing actually exists (create) or from the real ones (edit).
   const previewDistrict = taxonomies.districts.find((d) => d._id === values.district);
@@ -175,12 +180,12 @@ export function LandEditor({
           <p className="tabular mt-1 text-[16px] text-[var(--muted)]">{subtitle}</p>
         )}
         {serverError && (
-          <p role="alert" className="mt-2 text-[14px] font-medium text-[var(--laterite)]">{serverError}</p>
+          <p role="alert" aria-live="polite" className="mt-2 text-[14px] font-medium text-[var(--laterite)]">{serverError}</p>
         )}
       </header>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-8">
+        <form onSubmit={handleSubmit(onSubmit, onInvalidSubmit)} noValidate className="space-y-8">
           {/* ── Publish ────────────────────────────────────────────────── */}
           <section>
             <SectionHeading title={d.admin.publish} />
@@ -604,7 +609,7 @@ export function LandEditor({
           type="button"
           size="lg"
           disabled={isSubmitting}
-          onClick={handleSubmit(onSubmit)}
+          onClick={handleSubmit(onSubmit, onInvalidSubmit)}
           className="fixed bottom-6 right-6 z-40 shadow-[var(--shadow-lg)]"
         >
           {isSubmitting ? d.common.saving : mode === "create" ? d.admin.saveDraft : d.admin.saveChanges}
