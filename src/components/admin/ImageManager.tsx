@@ -8,7 +8,61 @@ import { cn } from "@/lib/utils";
 import { adminFetchOrThrow, SessionExpiredError } from "@/lib/admin-fetch";
 import { useI18n } from "@/lib/i18n/client";
 
+const MAX_BROWSER_UPLOAD_BYTES = 800 * 1024;
+
 export type LandImage = { _id: string; alt?: string };
+
+async function compressForUpload(file: File): Promise<File> {
+  if (!file.type.startsWith("image/") || file.type === "image/svg+xml") return file;
+
+  const objectUrl = URL.createObjectURL(file);
+  try {
+    const source = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const image = new window.Image();
+      image.onload = () => resolve(image);
+      image.onerror = () => reject(new Error("Could not read the selected photo"));
+      image.src = objectUrl;
+    });
+
+    const edgeSizes = [1600, 1280, 1024];
+    const qualities = [0.72, 0.62, 0.52];
+    let lastBlob: Blob | null = null;
+
+    for (const edge of edgeSizes) {
+      const scale = Math.min(1, edge / Math.max(source.naturalWidth, source.naturalHeight));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.max(1, Math.round(source.naturalWidth * scale));
+      canvas.height = Math.max(1, Math.round(source.naturalHeight * scale));
+      const context = canvas.getContext("2d");
+      if (!context) throw new Error("Could not prepare the selected photo");
+      context.drawImage(source, 0, 0, canvas.width, canvas.height);
+
+      for (const quality of qualities) {
+        const blob = await new Promise<Blob | null>((resolve) =>
+          canvas.toBlob(resolve, "image/webp", quality)
+        );
+        if (!blob) throw new Error("Could not compress the selected photo");
+        lastBlob = blob;
+        if (blob.size <= MAX_BROWSER_UPLOAD_BYTES) {
+          return new File([blob], `${file.name.replace(/\.[^.]+$/, "")}.webp`, {
+            type: "image/webp",
+            lastModified: file.lastModified,
+          });
+        }
+      }
+    }
+
+    if (lastBlob) {
+      return new File([lastBlob], `${file.name.replace(/\.[^.]+$/, "")}.webp`, {
+        type: "image/webp",
+        lastModified: file.lastModified,
+      });
+    }
+    return file;
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
+}
 
 /**
  * Photo upload + reorder + cover selection for an existing (saved) listing.
@@ -100,16 +154,20 @@ export function ImageManager({
     setUploading(true);
     setError("");
     try {
-      const form = new FormData();
-      Array.from(files).forEach((f) => form.append("files", f));
-      const res = await adminFetchOrThrow(`/api/admin/lands/${landId}/images`, { method: "POST", body: form });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error ?? d.admin.uploadFailed);
+      const newImages: LandImage[] = [];
+      for (const file of Array.from(files)) {
+        const form = new FormData();
+        form.append("files", await compressForUpload(file));
+        const res = await adminFetchOrThrow(`/api/admin/lands/${landId}/images`, {
+          method: "POST",
+          body: form,
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error ?? d.admin.uploadFailed);
 
-      const newImages: LandImage[] = (data.imageIds as string[]).map((id) => ({ _id: id }));
-      const next = [...images, ...newImages];
-      const nextCover = cover ?? newImages[0]?._id;
-      emit(next, nextCover);
+        newImages.push(...(data.imageIds as string[]).map((id) => ({ _id: id })));
+        emit([...images, ...newImages], cover ?? newImages[0]?._id);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : d.admin.uploadFailed);
     } finally {

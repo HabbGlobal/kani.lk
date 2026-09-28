@@ -124,6 +124,7 @@ pm2 startup   # follow the printed instructions to enable on boot
 server {
     listen 80;
     server_name kani.lk www.kani.lk;
+    client_max_body_size 10M;
 
     location / {
         proxy_pass http://127.0.0.1:3008;
