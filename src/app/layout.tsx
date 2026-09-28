@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Newsreader, Public_Sans, Noto_Sans_Tamil } from "next/font/google";
+import { Newsreader, Public_Sans, Hind_Madurai } from "next/font/google";
 import { cookies } from "next/headers";
 import { HTML_LANG, LOCALE_COOKIE, toLocale } from "@/lib/i18n/config";
 import "./globals.css";
@@ -21,10 +21,10 @@ const publicSans = Public_Sans({
 });
 
 /** Tamil is the default locale, so this face is on the critical path now. */
-const notoTamil = Noto_Sans_Tamil({
-  variable: "--font-noto-tamil",
+const hindMadurai = Hind_Madurai({
+  variable: "--font-hind-madurai",
   subsets: ["tamil"],
-  weight: ["400", "500", "600"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
@@ -77,7 +77,7 @@ export default async function RootLayout({
     // not disable hydration mismatch checks anywhere else in the tree.
     <html
       lang={HTML_LANG[locale]}
-      className={`${newsreader.variable} ${publicSans.variable} ${notoTamil.variable} h-full`}
+      className={`${newsreader.variable} ${publicSans.variable} ${hindMadurai.variable} h-full`}
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col bg-bone text-ink">{children}</body>

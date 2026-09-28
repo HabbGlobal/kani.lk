@@ -54,7 +54,7 @@ export function HeroWelcomeText({
     const GREETING_MS = 620;
 
     return (
-      <div style={{ fontFamily: "var(--font-tamil)" }}>
+      <div style={{ fontFamily: isTamil ? "var(--font-tamil)" : "var(--font-sans)" }}>
         <p
           className="kani-type-line text-[22px] font-semibold leading-[1.3] sm:text-[27px] lg:text-[31px]"
           style={{

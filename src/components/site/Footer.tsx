@@ -32,8 +32,8 @@ export async function Footer({ locale }: { locale: Locale }) {
   }[];
 
   return (
-    <footer className="relative mt-12 overflow-hidden bg-[var(--kani-green-deep)] text-white/70 on-dark">
-      <AsciiWave color="#d8bd82" speed={0.6} opacity={0.22} />
+    <footer className="relative mt-12 overflow-hidden bg-[var(--kani-green-deep)] text-white/80 on-dark">
+      <AsciiWave color="#d8bd82" speed={0.6} opacity={0.055} />
       {/* Fades the wave out from the top so the page edge stays clean. */}
       <div
         aria-hidden="true"
@@ -43,7 +43,7 @@ export async function Footer({ locale }: { locale: Locale }) {
 
       <div className="relative">
         {/* Masthead — the wordmark and the one line that says what this is. */}
-        <div className="container-kani flex flex-col gap-3 border-b border-white/10 py-6
+        <div className="container-kani flex flex-col gap-6 border-b border-white/10 py-10
                         md:flex-row md:items-end md:justify-between">
           <div>
             <Logo onDark withTagline tagline={d.common.tagline} />
@@ -72,7 +72,7 @@ export async function Footer({ locale }: { locale: Locale }) {
           )}
         </div>
 
-        <div className="container-kani grid gap-6 py-7 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="container-kani grid gap-8 py-10 sm:grid-cols-2 lg:grid-cols-4">
           <FooterColumn id="foot-browse" title={d.footer.browse}>
             <FooterLink href={href("/lands")}>{d.footer.allListings}</FooterLink>
             <FooterLink href={href("/for-sale")}>{d.footer.landForSale}</FooterLink>
@@ -137,7 +137,17 @@ export async function Footer({ locale }: { locale: Locale }) {
           <div className="container-kani flex flex-col gap-1.5 py-3.5 text-[12.5px] text-white/50
                           md:flex-row md:items-center md:justify-between">
             <p>{interpolate(d.footer.rights, { year: new Date().getFullYear() })}</p>
-            <p>{d.footer.legalNote}</p>
+            <div className="flex flex-wrap gap-x-4 gap-y-1.5">
+              <p>{d.footer.legalNote}</p>
+              <a
+                href="https://www.habb.lk"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="transition-colors duration-200 hover:text-white"
+              >
+                Developed BY HABB(PVT) LTD
+              </a>
+            </div>
           </div>
         </div>
       </div>

@@ -58,6 +58,7 @@ export function Logo({
         // this nudges it down to the mark's visual center instead.
         <span className="flex translate-y-[3px] flex-col justify-center sm:translate-y-[3.5px]">
           <span
+            lang="en"
             className="font-serif text-[21px] font-semibold leading-none sm:text-[24px]"
             style={{ letterSpacing: "-0.01em" }}
           >
@@ -69,7 +70,7 @@ export function Logo({
           {withTagline && (
             <span
               className={cn(
-                "text-[10px] font-medium uppercase tracking-[0.28em]",
+                "mt-2 text-[11px] font-medium leading-relaxed uppercase tracking-[0.12em]",
                 onDark ? "text-white/70" : "text-[var(--muted)]"
               )}
             >

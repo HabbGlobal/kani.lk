@@ -4,7 +4,7 @@ import { getDictionary, interpolate } from "@/lib/i18n";
 import { DEFAULT_LOCALE, localeHref, type Locale } from "@/lib/i18n/config";
 
 /**
- * Compact horizontal "have land to sell or rent" strip. A Server Component —
+ * Responsive "have land to sell or rent" panel. A Server Component —
  * every link here is a plain anchor, so nothing needs client JS.
  */
 export function ListLandCta({
@@ -65,33 +65,33 @@ export function ListLandCta({
         </div>
 
         <div
-          className="relative flex w-full min-w-0 flex-col items-center gap-6 px-6 py-10
-                     text-center sm:px-10 md:flex-row md:items-center md:gap-8
-                     md:px-12 md:py-0 md:text-left lg:min-h-[190px]"
+          className="relative grid w-full min-w-0 grid-cols-1 items-center gap-6 px-6 py-8
+                     text-center sm:px-10 sm:py-10 md:grid-cols-[96px_minmax(0,1fr)] md:gap-x-8
+                     md:text-left lg:grid-cols-[110px_minmax(0,1fr)_auto] lg:px-10 lg:py-12"
         >
           <LandSaleSign
-            className="h-[110px] w-[110px] shrink-0 text-[var(--palmyra-gold-soft)] md:h-[130px] md:w-[130px]
+            className="mx-auto h-[96px] w-[96px] shrink-0 text-[var(--palmyra-gold-soft)] lg:h-[110px] lg:w-[110px]
                        transition-transform duration-500 [transition-timing-function:var(--ease-out)]
                        group-hover:-translate-y-1 motion-reduce:transition-none motion-reduce:group-hover:translate-y-0"
           />
 
-          <div className="w-full min-w-0 md:flex-1">
-            <h2 className="text-balance text-[26px] text-white sm:text-[30px] md:text-[32px]">
+          <div className="w-full min-w-0">
+            <h2 className="text-balance text-[25px] text-white sm:text-[28px] lg:text-[30px]">
               {d.home.ctaTitle}
             </h2>
-            <p className="mx-auto mt-2.5 max-w-xl text-pretty text-[15px] leading-relaxed text-white/75 sm:text-[16px] md:mx-0">
+            <p className="mx-auto mt-2.5 max-w-xl text-pretty text-[15px] leading-relaxed text-white/85 sm:text-[16px] md:mx-0">
               {d.home.ctaBody}
             </p>
           </div>
 
           <div
-            className="flex w-full min-w-0 flex-col gap-3 sm:w-auto sm:flex-row md:shrink-0"
+            className="flex w-full min-w-0 flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center md:col-start-2 md:justify-start lg:col-start-3 lg:row-start-1 lg:max-w-[290px] lg:flex-col"
           >
             <a
               href={`${localeHref("/contact", locale)}?intent=list-land`}
               aria-label={d.home.ctaAria}
-              className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-[var(--radius-pill)] sm:w-auto
-                         bg-[var(--palmyra-gold)] px-6 text-[15px] font-semibold text-[var(--kani-green-deep)]
+              className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-[var(--radius-pill)] sm:w-auto lg:w-full
+                         bg-[var(--palmyra-gold)] px-5 py-3 text-center text-[15px] font-semibold text-[var(--kani-green-deep)]
                          shadow-[0_4px_14px_rgba(0,0,0,0.22)]
                          transition-[background-color,transform] duration-200 [transition-timing-function:var(--ease-out)]
                          hover:-translate-y-0.5 hover:bg-[var(--palmyra-gold-soft)]
@@ -118,8 +118,8 @@ export function ListLandCta({
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={interpolate(d.home.ctaWhatsappAria, { phone: waDisplay })}
-                className="inline-flex h-12 w-full items-center justify-center gap-2.5 rounded-[var(--radius-pill)] sm:w-auto
-                           border border-white/25 bg-transparent px-6 text-[15px] font-medium text-white
+                className="inline-flex min-h-12 w-full items-center justify-center gap-2.5 rounded-[var(--radius-pill)] sm:w-auto lg:w-full
+                           border border-white/25 bg-transparent px-5 py-3 text-center text-[15px] font-medium text-white
                            tabular
                            transition-[background-color,border-color,transform] duration-200 [transition-timing-function:var(--ease-out)]
                            hover:border-[var(--palmyra-gold-soft)]/60 hover:bg-white/8

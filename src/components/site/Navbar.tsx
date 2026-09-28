@@ -102,22 +102,15 @@ export function Navbar({ overHero = false }: { overHero?: boolean }) {
           <Link
             href={href("/")}
             aria-label={d.nav.homeAria}
-            className="ml-2 shrink-0 rounded-full md:ml-3"
+            className="ml-1 shrink-0 rounded-full md:ml-3"
           >
-            <Logo onDark />
+            <Logo onDark className="[&>span:first-child]:max-[400px]:hidden" />
           </Link>
 
-          {/* Desktop links — one glowing oval group, not a separate pill per
-              link, echoing a single capsule holding every nav item. Shown
-              from `lg` (not `xl`): `/lands` already switches to its desktop
-              two-column layout at `lg`, so a tablet was getting a hamburger
-              while the rest of the site assumed it had a desktop nav. The
-              Tamil labels are what forced the wider breakpoint originally —
-              handled here with a tighter type step and padding at `lg` that
-              relaxes back to the original sizing from `xl` up. */}
+          {/* Keep the full navigation for widths that fit both locales. */}
           <ul
             className="ml-auto hidden items-center gap-0.5 rounded-[var(--radius-pill)]
-                       border px-1 py-1 nav-group--dark lg:flex xl:px-1.5 xl:py-1.5"
+                       border px-1 py-1 nav-group--dark xl:flex xl:px-1.5 xl:py-1.5"
           >
             {LINKS.map((link) => {
               const to = href(link.href);
@@ -143,7 +136,7 @@ export function Navbar({ overHero = false }: { overHero?: boolean }) {
             })}
           </ul>
 
-          <div className="ml-auto flex items-center gap-1 lg:ml-1">
+          <div className="ml-auto flex shrink-0 items-center gap-1 xl:ml-1">
             <LanguageSwitch onDark />
 
             <Link
@@ -173,7 +166,7 @@ export function Navbar({ overHero = false }: { overHero?: boolean }) {
               aria-controls="mobile-menu"
               aria-label={open ? d.nav.closeMenu : d.nav.openMenu}
               className="grid size-11 cursor-pointer place-items-center rounded-full text-white
-                         transition-colors duration-200 hover:bg-white/12 lg:hidden"
+                         transition-colors duration-200 hover:bg-white/12 xl:hidden"
             >
               <svg viewBox="0 0 24 24" className="size-6" fill="none" stroke="currentColor"
                    strokeWidth="1.9" strokeLinecap="round" aria-hidden="true">
@@ -194,7 +187,7 @@ export function Navbar({ overHero = false }: { overHero?: boolean }) {
 
       {/* Mobile menu */}
       {open && (
-        <div className="fixed inset-0 z-40 lg:hidden">
+        <div className="fixed inset-0 z-40 xl:hidden">
           <button
             type="button"
             aria-label={d.nav.closeMenu}
@@ -207,7 +200,7 @@ export function Navbar({ overHero = false }: { overHero?: boolean }) {
             role="dialog"
             aria-modal="true"
             aria-label={d.nav.mainNav}
-            className="absolute inset-x-3 overflow-hidden rounded-[var(--radius-xl)]
+            className="absolute inset-x-3 max-h-[calc(100dvh-var(--nav-h)-32px)] overflow-y-auto rounded-[var(--radius-xl)]
                        border border-[var(--hairline)] bg-[var(--bone)] p-2 shadow-[var(--shadow-lg)]
                        animate-rise"
             style={{ top: "calc(var(--nav-h) + 16px)" }}
