@@ -69,6 +69,11 @@ type HeroContent = {
   heroSubtitleTa?: string | null;
 };
 
+const DEFAULT_HERO_TITLE_TA =
+  "KANI.LK-க்கு வரவேற்கிறோம். வடக்கு மற்றும் கிழக்கில் நீங்கள் நம்பக்கூடிய நிலத்தைக் கண்டறியுங்கள்.";
+const DEFAULT_HERO_SUBTITLE_TA =
+  "வவுனியா, மன்னார், யாழ்ப்பாணம், மட்டக்களப்பு, திருகோணமலை மற்றும் முல்லைத்தீவு முழுவதும் சரிபார்க்கப்பட்ட மனைகள், நெல் வயல்கள் மற்றும் வீடுகள் - ஒவ்வொரு பட்டியலிலும் உரிமையாளரின் எண்ணுடன் கிடைக்கும்.";
+
 /** Resolves the homepage hero headline and subtitle from SiteSettings. */
 export function localizedHero(settings: HeroContent, locale: Locale) {
   const ta = locale === "ta";
@@ -76,8 +81,10 @@ export function localizedHero(settings: HeroContent, locale: Locale) {
   const subtitleTa = settings.heroSubtitleTa?.trim();
 
   return {
-    title: (ta && titleTa ? titleTa : settings.heroTitle) ?? "",
-    subtitle: (ta && subtitleTa ? subtitleTa : settings.heroSubtitle) ?? "",
+    title: ta ? titleTa || DEFAULT_HERO_TITLE_TA : settings.heroTitle ?? "",
+    subtitle: ta
+      ? subtitleTa || DEFAULT_HERO_SUBTITLE_TA
+      : settings.heroSubtitle ?? "",
   };
 }
 

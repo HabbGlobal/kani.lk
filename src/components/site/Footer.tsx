@@ -145,7 +145,7 @@ export async function Footer({ locale }: { locale: Locale }) {
                 rel="noopener noreferrer"
                 className="transition-colors duration-200 hover:text-white"
               >
-                Developed BY HABB(PVT) LTD
+                Developed by HABB (PVT) LTD
               </a>
             </div>
           </div>
