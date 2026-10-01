@@ -96,9 +96,14 @@ export function Gallery({
           />
 
           <StatusRibbon status={status} locale={locale} />
-          <div className="absolute left-4 top-4 z-10">
-            <PurposeBadge purpose={purpose} locale={locale} />
-          </div>
+          {/* Mutually exclusive with the status ribbon above — see LandCard
+              for why a reserved/sold/rented listing doesn't also show
+              "For sale" / "For rent". */}
+          {status === "available" && (
+            <div className="absolute left-4 top-4 z-10">
+              <PurposeBadge purpose={purpose} locale={locale} />
+            </div>
+          )}
 
           {count > 1 && (
             <>

@@ -68,19 +68,16 @@ export function LandCard({
 
         <StatusRibbon status={land.status} locale={locale} />
 
-        {/* Purpose must be readable from the image alone, before any text. */}
-        <div
-          className={cn(
-            "absolute z-10",
-            land.status === "reserved"
-              ? "left-1/2 top-3 -translate-x-1/2"
-              : land.status === "available"
-                ? "left-3 top-3"
-                : "left-3 top-12"
-          )}
-        >
-          <PurposeBadge purpose={land.purpose} size="sm" locale={locale} />
-        </div>
+        {/* Mutually exclusive with the status ribbon above: a reserved/sold/
+            rented listing already says so via the ribbon, so showing "For
+            sale" or "For rent" alongside it would contradict that message.
+            Purpose must be readable from the image alone, before any text,
+            for the listings where it IS shown. */}
+        {land.status === "available" && (
+          <div className="absolute left-3 top-3 z-10">
+            <PurposeBadge purpose={land.purpose} size="sm" locale={locale} />
+          </div>
+        )}
 
         {showFavourite && (
           <div className="absolute right-3 top-3 z-10">

@@ -73,9 +73,16 @@ export function PurposeBadge({
 }
 
 /**
- * Status ribbon across the top-left corner of the cover photo. Laterite for the
- * terminal states, gold for reserved — which keeps full colour, because it may
- * come back to market.
+ * Folded-corner status ribbon pinned to the top-left of the cover photo —
+ * a short diagonal strip confined to the corner, not a full-width sash
+ * across the whole image. Laterite for the terminal states, gold for
+ * reserved — which keeps full colour, because it may come back to market.
+ * Slightly translucent (color-mix, not a flat fill) so the photo underneath
+ * still reads through.
+ *
+ * Lives inside the cover image's own positioning context (see LandCard /
+ * LandGallery), which clips overflow with the card's rounded corners, so the
+ * ribbon's sharp edges never show outside the image.
  */
 export function StatusRibbon({
   status,
@@ -89,19 +96,20 @@ export function StatusRibbon({
   const d = getDictionary(locale);
   const label =
     status === "sold" ? d.land.sold : status === "rented" ? d.land.rented : d.land.reserved;
-  const bg = status === "reserved" ? "var(--palmyra-gold)" : "var(--laterite)";
+  const tone = status === "reserved" ? "var(--palmyra-gold)" : "var(--laterite)";
   const fg = status === "reserved" ? "var(--kani-green-deep)" : "#fff";
 
   return (
     <span
       aria-hidden="true"
       className={cn(
-        "pointer-events-none absolute -left-12 top-5 z-20 w-44 -rotate-45 py-1.5 text-center font-bold shadow-[0_2px_10px_rgba(10,44,30,0.35)]",
+        "pointer-events-none absolute -left-9 top-4 z-20 w-32 -rotate-45 py-1 text-center font-bold",
+        "shadow-[0_3px_10px_rgba(10,44,30,0.4)] sm:-left-10 sm:top-5 sm:w-36 sm:py-1.5",
         locale === "ta"
-          ? "font-tamil text-[12px] leading-tight tracking-normal"
-          : "text-[13px] uppercase tracking-[0.14em]"
+          ? "font-tamil text-[10px] leading-tight tracking-normal sm:text-[11px]"
+          : "text-[10.5px] uppercase tracking-[0.08em] sm:text-[12px] sm:tracking-[0.1em]"
       )}
-      style={{ background: bg, color: fg }}
+      style={{ background: `color-mix(in srgb, ${tone} 90%, transparent)`, color: fg }}
     >
       {label}
     </span>

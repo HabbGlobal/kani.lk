@@ -8,31 +8,67 @@
 export const DISTRICTS = [
   { name: "Vavuniya", nameTa: "வவுனியா", code: "VAV", slug: "vavuniya", province: "Northern", order: 1,
     intro:
-      "Vavuniya sits at the gateway to the Northern Province, where the A9 meets the road east to Trincomalee. Land here ranges from small residential blocks inside town to paddy and chena acreage along the Omanthai and Cheddikulam roads. Good access to the A9 and a clear deed are what move a block fastest." },
+      "Vavuniya sits at the gateway to the Northern Province, where the A9 meets the road east to Trincomalee. Land here ranges from small residential blocks inside town to paddy and chena acreage along the Omanthai and Cheddikulam roads. Good access to the A9 and a clear deed are what move a block fastest.",
+    introTa:
+      "வவுனியா வடக்கு மாகாணத்தின் நுழைவாயிலில் அமைந்துள்ளது, இங்கு A9 பாதை திருகோணமலைக்கான கிழக்குப் பாதையுடன் சந்திக்கிறது. இங்குள்ள நிலங்கள் நகருக்குள் உள்ள சிறிய குடியிருப்புத் துண்டுகள் முதல் ஓமந்தை மற்றும் செட்டிகுளம் வீதிகளில் உள்ள வயல் மற்றும் சேனைக் காணி வரை பலவகைப்படும். A9 க்கு நல்ல அணுகலும் தெளிவான உரிமைப் பத்திரமும் ஒரு நிலத்துண்டை விரைவாக விற்கச் செய்யும் முக்கிய காரணிகள்." },
   { name: "Mannar", nameTa: "மன்னார்", code: "MAN", slug: "mannar", province: "Northern", order: 2,
     intro:
-      "Mannar district covers the island causeway, the palmyra belt and the coastal stretch toward Musali. Buyers here look for coconut and palmyra land, tank-fed paddy, and increasingly coastal plots with road frontage." },
+      "Mannar district covers the island causeway, the palmyra belt and the coastal stretch toward Musali. Buyers here look for coconut and palmyra land, tank-fed paddy, and increasingly coastal plots with road frontage.",
+    introTa:
+      "மன்னார் மாவட்டம் தீவுப் பாலம், பனை வளர்ச்சிப் பகுதி மற்றும் முசலி நோக்கிய கரையோரப் பகுதியை உள்ளடக்கியது. இங்குள்ள வாங்குபவர்கள் தென்னை மற்றும் பனை காணி, குளத்தால் நீர்ப்பாசனம் பெறும் வயல்கள், மேலும் அதிகரித்து வரும் அளவில் வீதி முகப்புடைய கரையோர மனைகளைத் தேடுகின்றனர்." },
   { name: "Jaffna", nameTa: "யாழ்ப்பாணம்", code: "JAF", slug: "jaffna", province: "Northern", order: 3,
     intro:
-      "Jaffna is the most tightly held land market in the North. Blocks are smaller and priced per perch well above the mainland, with residential plots in Nallur, Chundikuli and Kokuvil in steady demand from returning families." },
+      "Jaffna is the most tightly held land market in the North. Blocks are smaller and priced per perch well above the mainland, with residential plots in Nallur, Chundikuli and Kokuvil in steady demand from returning families.",
+    introTa:
+      "யாழ்ப்பாணம் வடக்கில் மிகவும் இறுக்கமாக வைத்திருக்கப்படும் நில சந்தை ஆகும். இங்கு மனைகள் சிறியவையாகவும், பரப்பு ஒன்றுக்கான விலை பிரதான நிலத்தை விட அதிகமாகவும் இருக்கும்; நல்லூர், சுண்டுக்குளி மற்றும் கொக்குவில் ஆகிய இடங்களில் உள்ள குடியிருப்புத் துண்டுகளுக்கு திரும்பி வரும் குடும்பங்களிடமிருந்து நிலையான தேவை உள்ளது." },
   { name: "Mullaitivu", nameTa: "முல்லைத்தீவு", code: "MUL", slug: "mullaitivu", province: "Northern", order: 4,
     intro:
-      "Mullaitivu offers the largest parcels in the North at the lowest price per perch — agricultural land, coconut, and coastal blocks near Nayaru and Mullaitivu town. Access road width is the single biggest value factor here." },
+      "Mullaitivu offers the largest parcels in the North at the lowest price per perch — agricultural land, coconut, and coastal blocks near Nayaru and Mullaitivu town. Access road width is the single biggest value factor here.",
+    introTa:
+      "முல்லைத்தீவு வடக்கில் மிகக் குறைந்த பரப்பு விலையில் மிகப் பெரிய நிலத்துண்டுகளை வழங்குகிறது — விவசாய காணி, தென்னை, மற்றும் நாயாறு மற்றும் முல்லைத்தீவு நகரை அடுத்த கரையோர மனைகள். இங்கு வீதி அணுகலின் அகலமே மதிப்பை தீர்மானிக்கும் மிக முக்கிய காரணியாகும்." },
   { name: "Trincomalee", nameTa: "திருகோணமலை", code: "TRI", slug: "trincomalee", province: "Eastern", order: 5,
     intro:
-      "Trincomalee combines a deep-water harbour town with paddy country inland toward Kantale. Coastal and near-town land carries a tourism premium; inland agricultural blocks remain among the best value in the East." },
+      "Trincomalee combines a deep-water harbour town with paddy country inland toward Kantale. Coastal and near-town land carries a tourism premium; inland agricultural blocks remain among the best value in the East.",
+    introTa:
+      "திருகோணமலை ஆழ்கடல் துறைமுக நகரத்தையும் கந்தளாய் நோக்கிய உள்நாட்டு வயல் பிரதேசத்தையும் இணைக்கிறது. கரையோர மற்றும் நகருக்கு அருகிலுள்ள நிலங்களுக்கு சுற்றுலாத்துறை முக்கியத்துவம் காரணமாக கூடுதல் விலை உள்ளது; உள்நாட்டு விவசாய மனைகள் கிழக்கில் சிறந்த மதிப்புள்ள தெரிவுகளில் ஒன்றாக உள்ளன." },
   { name: "Batticaloa", nameTa: "மட்டக்களப்பு", code: "BAT", slug: "batticaloa", province: "Eastern", order: 6,
     intro:
-      "Batticaloa is lagoon country — paddy land, coconut gardens and residential blocks around the town, Kattankudy and Eravur. Water source and flood level are the questions every serious buyer asks first." },
+      "Batticaloa is lagoon country — paddy land, coconut gardens and residential blocks around the town, Kattankudy and Eravur. Water source and flood level are the questions every serious buyer asks first.",
+    introTa:
+      "மட்டக்களப்பு ஒரு கடலோரத் தடாகப் பிரதேசம் — வயல் காணி, தென்னந்தோட்டங்கள் மற்றும் நகரம், கட்டாங்குடி மற்றும் ஏறாவூர் சுற்றியுள்ள குடியிருப்புத் துண்டுகள். நீர் ஆதாரமும் வெள்ள மட்டமும் ஒவ்வொரு தீவிர வாங்குபவரும் முதலில் கேட்கும் கேள்விகளாகும்." },
 ];
 
-export const CITIES: { district: string; names: string[] }[] = [
-  { district: "vavuniya", names: ["Vavuniya Town", "Omanthai", "Cheddikulam", "Nedunkeni", "Panichankulam", "Puliyankulam", "Thandikulam"] },
-  { district: "mannar", names: ["Mannar Town", "Nanattan", "Murunkan", "Adampan", "Pesalai", "Musali"] },
-  { district: "jaffna", names: ["Jaffna Town", "Nallur", "Chavakachcheri", "Point Pedro", "Kokuvil", "Chunnakam", "Manipay"] },
-  { district: "mullaitivu", names: ["Mullaitivu Town", "Oddusuddan", "Puthukkudiyiruppu", "Nayaru", "Mankulam"] },
-  { district: "trincomalee", names: ["Trincomalee Town", "Kantale", "Kinniya", "Mutur", "Nilaveli", "Uppuveli"] },
-  { district: "batticaloa", names: ["Batticaloa Town", "Kattankudy", "Eravur", "Valaichchenai", "Kaluwanchikudy", "Arayampathy"] },
+export const CITIES: { district: string; names: string[]; namesTa: string[] }[] = [
+  {
+    district: "vavuniya",
+    names: ["Vavuniya Town", "Omanthai", "Cheddikulam", "Nedunkeni", "Panichankulam", "Puliyankulam", "Thandikulam"],
+    namesTa: ["வவுனியா நகரம்", "ஓமந்தை", "செட்டிகுளம்", "நெடுங்கேணி", "பனிச்சங்குளம்", "புளியங்குளம்", "தாண்டிக்குளம்"],
+  },
+  {
+    district: "mannar",
+    names: ["Mannar Town", "Nanattan", "Murunkan", "Adampan", "Pesalai", "Musali"],
+    namesTa: ["மன்னார் நகரம்", "நானாட்டான்", "முருங்கன்", "அடம்பன்", "பேசாலை", "முசலி"],
+  },
+  {
+    district: "jaffna",
+    names: ["Jaffna Town", "Nallur", "Chavakachcheri", "Point Pedro", "Kokuvil", "Chunnakam", "Manipay"],
+    namesTa: ["யாழ்ப்பாணம் நகரம்", "நல்லூர்", "சாவகச்சேரி", "பருத்தித்துறை", "கொக்குவில்", "சுன்னாகம்", "மணிப்பாய்"],
+  },
+  {
+    district: "mullaitivu",
+    names: ["Mullaitivu Town", "Oddusuddan", "Puthukkudiyiruppu", "Nayaru", "Mankulam"],
+    namesTa: ["முல்லைத்தீவு நகரம்", "ஒட்டிசுட்டான்", "புதுக்குடியிருப்பு", "நாயாறு", "மான்குளம்"],
+  },
+  {
+    district: "trincomalee",
+    names: ["Trincomalee Town", "Kantale", "Kinniya", "Mutur", "Nilaveli", "Uppuveli"],
+    namesTa: ["திருகோணமலை நகரம்", "கந்தளாய்", "கிண்ணியா", "முத்தூர்", "நிலாவெளி", "உப்புவெளி"],
+  },
+  {
+    district: "batticaloa",
+    names: ["Batticaloa Town", "Kattankudy", "Eravur", "Valaichchenai", "Kaluwanchikudy", "Arayampathy"],
+    namesTa: ["மட்டக்களப்பு நகரம்", "கட்டாங்குடி", "ஏறாவூர்", "வாழைச்சேனை", "காலுவாஞ்சிக்குடி", "அரையம்பதி"],
+  },
 ];
 
 export const LAND_TYPES = [

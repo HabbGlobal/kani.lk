@@ -39,6 +39,12 @@ export type LandRow = {
 type ToggleField = "isPublished" | "isFeatured" | "isPopular";
 
 const PAGE_SIZE = 5;
+/** The Featured hero rail and the Popular row (manual mode) each only ever
+ * render this many on the homepage — see CLAUDE.md. The API enforces this
+ * too; this is just the fast local check so the admin doesn't wait on a
+ * round trip to find out. */
+const MAX_FEATURED = 4;
+const MAX_POPULAR = 4;
 
 export function LandsTable({
   initialRows,
@@ -83,18 +89,38 @@ export function LandsTable({
 
   async function toggle(row: LandRow, field: ToggleField) {
     const prevValue = row[field];
-    setRows((cur) => cur.map((r) => (r._id === row._id ? { ...r, [field]: !prevValue } : r)));
+    const nextValue = !prevValue;
+
+    if (field === "isFeatured" && nextValue) {
+      const featuredCount = rows.filter((r) => r.isFeatured).length;
+      if (featuredCount >= MAX_FEATURED) {
+        setError(d.admin.featuredLimitReached);
+        return;
+      }
+    }
+    if (field === "isPopular" && nextValue) {
+      const popularCount = rows.filter((r) => r.isPopular).length;
+      if (popularCount >= MAX_POPULAR) {
+        setError(d.admin.popularLimitReached);
+        return;
+      }
+    }
+
+    setRows((cur) => cur.map((r) => (r._id === row._id ? { ...r, [field]: nextValue } : r)));
     setError("");
     try {
       const res = await adminFetch(`/api/admin/lands/${row._id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ [field]: !prevValue }),
+        body: JSON.stringify({ [field]: nextValue }),
       });
-      if (!res.ok) throw new Error();
-    } catch {
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || undefined);
+      }
+    } catch (err) {
       setRows((cur) => cur.map((r) => (r._id === row._id ? { ...r, [field]: prevValue } : r)));
-      setError(d.admin.listingUpdateFailed);
+      setError(err instanceof Error && err.message ? err.message : d.admin.listingUpdateFailed);
     }
   }
 

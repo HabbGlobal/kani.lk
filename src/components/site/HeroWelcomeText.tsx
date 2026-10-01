@@ -88,50 +88,78 @@ export function HeroWelcomeText({
 
         {promise && (
           <h1
-            className="mt-3 max-w-[16ch] text-[25px] font-semibold leading-[1.38] text-white sm:max-w-[22ch] sm:text-[31px] lg:text-[37px]"
+            className="mt-3 max-w-[22ch] text-[32px] font-semibold leading-[1.2] text-white
+                       sm:max-w-[22ch] sm:text-[31px] sm:leading-[1.38] lg:text-[37px]"
             style={{
               textShadow:
                 "0 1px 3px rgba(10, 44, 30, 0.55), 0 1px 14px rgba(10, 44, 30, 0.3)",
             }}
           >
-            {promiseLines.map((line, k) => {
-              const delay = GREETING_MS + 140 + k * LINE_MS;
-              const isLast = k === promiseLines.length - 1;
-              return (
-                <span
-                  key={k}
-                  className={`kani-type-line ${isLast ? "kani-type-caret" : ""}`}
-                  style={{
-                    ["--kani-type-dur" as string]: `${LINE_MS}ms`,
-                    ["--kani-type-delay" as string]: `${delay}ms`,
-                    ["--kani-caret-end" as string]: `${delay + LINE_MS + 1900}ms`,
-                  }}
-                >
-                  {/* The promise's key word is gold: "நம்பக்கூடிய"
-                      ("trustworthy") in Tamil; "trust" / "north" / "east" in
-                      English — the same accent role in each locale. */}
-                  {line.split(
-                    isTamil ? /(நம்பக்கூடிய)/ : /(\btrust\b|\bnorth\b|\beast\b)/i
-                  ).map((part, m) =>
-                    (isTamil
-                      ? part === "நம்பக்கூடிய"
-                      : /^(trust|north|east)$/i.test(part)) ? (
-                      <span key={m} style={{ color: "var(--palmyra-gold-soft)" }}>
-                        {part}
-                      </span>
-                    ) : (
-                      part
-                    )
-                  )}
-                </span>
-              );
-            })}
+            {/* Mobile (< sm): one flowing block of text that wraps naturally
+                to the viewport, instead of the fixed three-way chunking
+                below — forcing a line break at a word count rather than the
+                available width is what made the Tamil headline run to five
+                cramped lines on a phone. No animation here: `kani-type-line`
+                relies on `display: block` per span, which is exactly the
+                hard-break behaviour being removed for this breakpoint. */}
+            <span className="block sm:hidden">
+              {promise.split(
+                isTamil ? /(நம்பக்கூடிய)/ : /(\btrust\b|\bnorth\b|\beast\b)/i
+              ).map((part, m) =>
+                (isTamil
+                  ? part === "நம்பக்கூடிய"
+                  : /^(trust|north|east)$/i.test(part)) ? (
+                  <span key={m} style={{ color: "var(--palmyra-gold-soft)" }}>
+                    {part}
+                  </span>
+                ) : (
+                  part
+                )
+              )}
+            </span>
+
+            {/* sm and up: unchanged — the per-line typewriter reveal. */}
+            <span className="hidden sm:block">
+              {promiseLines.map((line, k) => {
+                const delay = GREETING_MS + 140 + k * LINE_MS;
+                const isLast = k === promiseLines.length - 1;
+                return (
+                  <span
+                    key={k}
+                    className={`kani-type-line ${isLast ? "kani-type-caret" : ""}`}
+                    style={{
+                      ["--kani-type-dur" as string]: `${LINE_MS}ms`,
+                      ["--kani-type-delay" as string]: `${delay}ms`,
+                      ["--kani-caret-end" as string]: `${delay + LINE_MS + 1900}ms`,
+                    }}
+                  >
+                    {/* The promise's key word is gold: "நம்பக்கூடிய"
+                        ("trustworthy") in Tamil; "trust" / "north" / "east" in
+                        English — the same accent role in each locale. */}
+                    {line.split(
+                      isTamil ? /(நம்பக்கூடிய)/ : /(\btrust\b|\bnorth\b|\beast\b)/i
+                    ).map((part, m) =>
+                      (isTamil
+                        ? part === "நம்பக்கூடிய"
+                        : /^(trust|north|east)$/i.test(part)) ? (
+                        <span key={m} style={{ color: "var(--palmyra-gold-soft)" }}>
+                          {part}
+                        </span>
+                      ) : (
+                        part
+                      )
+                    )}
+                  </span>
+                );
+              })}
+            </span>
           </h1>
         )}
 
         {subtitle && (
           <p
-            className="kani-hero-sub-ta mt-4 max-w-[52ch] text-[15px] font-medium leading-[1.75] text-white md:text-[17px]"
+            className="kani-hero-sub-ta mt-3 max-w-[52ch] text-[13px] font-medium leading-[1.55] text-white
+                       sm:mt-4 sm:text-[15px] sm:leading-[1.75] md:text-[17px]"
             style={{
               // Brighter than the English subtitle's white/85 and lifted off a
               // busy photograph by a deep scrim shadow plus a faint warm glow.
