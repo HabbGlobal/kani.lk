@@ -48,6 +48,21 @@ export default async function ContentPage({
 
   return (
     <div className="container-kani py-8 md:py-12">
+      {/* Watermark mark, large and blurred behind the copy — decorative only,
+          so it's aria-hidden. `fixed` (not `absolute`) pins it to the
+          viewport rather than the article, so it stays in place, centered,
+          as the page scrolls instead of travelling with the text. */}
+      <Image
+        src="/navbar-logo.png"
+        alt=""
+        aria-hidden="true"
+        width={1170}
+        height={811}
+        className="pointer-events-none fixed left-1/2 top-1/2 -z-10 w-[380px] max-w-none
+                   -translate-x-1/2 -translate-y-1/2 select-none opacity-[0.11] blur-[1px]
+                   sm:w-[480px] md:w-[640px]"
+      />
+
       <article className="mx-auto max-w-3xl">
         <div className="mb-8 overflow-hidden rounded-[var(--radius-lg)] border border-[var(--hairline)]">
           <Image

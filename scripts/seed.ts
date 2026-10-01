@@ -49,11 +49,12 @@ async function main() {
   console.log(`→ ${districts.length} districts`);
 
   // ── cities ───────────────────────────────────────────────────────────
-  const cityDocs = CITIES.flatMap(({ district, names }) => {
+  const cityDocs = CITIES.flatMap(({ district, names, namesTa }) => {
     const d = districtBySlug.get(district);
     if (!d) throw new Error(`Unknown district in seed: ${district}`);
     return names.map((name, i) => ({
       name,
+      nameTa: namesTa[i],
       slug: slugify(name),
       district: d._id,
       order: i,

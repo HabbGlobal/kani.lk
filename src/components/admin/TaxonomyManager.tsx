@@ -11,6 +11,7 @@ import { PagerBar } from "@/components/admin/PagerBar";
 import { adminFetch } from "@/lib/admin-fetch";
 import { districtSchema, citySchema, landTypeSchema } from "@/lib/validation";
 import { useI18n } from "@/lib/i18n/client";
+import { localizedName } from "@/lib/i18n/localized";
 
 const PAGE_SIZE = 5;
 
@@ -57,7 +58,7 @@ export function TaxonomyManager({
   const [rows, setRows] = useState(initialRows);
   const [editing, setEditing] = useState<Row | null>(null);
   const [showForm, setShowForm] = useState(false);
-  const { d, t } = useI18n();
+  const { d, t, locale } = useI18n();
   const [error, setError] = useState("");
   const [page, setPage] = useState(1);
 
@@ -262,7 +263,7 @@ export function TaxonomyManager({
             <div key={row._id} className="flex items-center justify-between gap-3 p-4">
               <div className="min-w-0">
                 <p className="truncate text-[15px] font-medium text-[var(--ink)]">
-                  {row.name}
+                  {localizedName(row, locale)}
                   {!row.isActive && (
                     <span className="ml-2 rounded-[var(--radius-pill)] border border-[var(--hairline)] px-2 py-0.5 text-[11px] font-semibold uppercase text-[var(--muted)]">
                       Inactive
@@ -270,7 +271,16 @@ export function TaxonomyManager({
                   )}
                 </p>
                 <p className="truncate text-[13px] text-[var(--muted)]">
-                  {[row.code, districtName(row)].filter(Boolean).join(" · ") || `Order ${row.order}`}
+                  {/* Row's own name shown alongside when the localized label differs,
+                      so an admin editing in Tamil can still tell records apart by
+                      their canonical English name. */}
+                  {[
+                    row.code,
+                    locale === "ta" && row.nameTa?.trim() ? row.name : undefined,
+                    districtName(row),
+                  ]
+                    .filter(Boolean)
+                    .join(" · ") || `Order ${row.order}`}
                 </p>
               </div>
               <div className="flex shrink-0 gap-2">

@@ -61,6 +61,13 @@ export function LandEditor({
   const [serverError, setServerError] = useState("");
   const [images_, setImages] = useState(images);
   const [cover, setCover] = useState(coverImageId);
+  // In create mode, the listing doesn't exist yet — photo upload needs a real
+  // landId, so the first time the admin tries to add a photo we silently save
+  // the (already-valid) form as a draft and switch over to that id, without
+  // navigating away from the page. Undefined until that happens; in edit mode
+  // this is never used, `landId` is already real.
+  const [draftId, setDraftId] = useState<string | undefined>(landId);
+  const [creatingDraft, setCreatingDraft] = useState(false);
 
   const {
     register,
@@ -98,8 +105,12 @@ export function LandEditor({
   async function onSubmit(data: LandFormValues) {
     setServerError("");
     try {
-      const url = mode === "create" ? "/api/admin/lands" : `/api/admin/lands/${landId}`;
-      const method = mode === "create" ? "POST" : "PATCH";
+      // A draft may already have been created in the background by the photo
+      // uploader (see onCreateDraftForPhotos) — reuse that id instead of
+      // creating a second listing.
+      const existingId = draftId ?? landId;
+      const url = existingId ? `/api/admin/lands/${existingId}` : "/api/admin/lands";
+      const method = existingId ? "PATCH" : "POST";
       const res = await adminFetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
@@ -108,12 +119,8 @@ export function LandEditor({
       const result = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(result.error ?? d.admin.couldNotSaveListing);
 
-      if (mode === "create") {
-        router.push(`/admin/lands/${result.item._id}/edit?created=1`);
-        router.refresh();
-      } else {
-        router.refresh();
-      }
+      router.push("/admin/lands");
+      router.refresh();
     } catch (err) {
       setServerError(err instanceof Error ? err.message : "Could not save the listing");
     }
@@ -122,6 +129,31 @@ export function LandEditor({
   function onInvalidSubmit() {
     setServerError("Please complete the highlighted fields before saving.");
     window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  // Bound to the Photos section in create mode. Runs the same validation as
+  // Save, but on success it saves the draft in place (no redirect) and stays
+  // on the page so the admin can keep filling in the rest of the form while
+  // photo upload becomes available.
+  async function onCreateDraftForPhotos(data: LandFormValues) {
+    if (draftId) return;
+    setServerError("");
+    setCreatingDraft(true);
+    try {
+      const res = await adminFetch("/api/admin/lands", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      const result = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(result.error ?? d.admin.couldNotSaveListing);
+      setDraftId(result.item._id as string);
+    } catch (err) {
+      setServerError(err instanceof Error ? err.message : "Could not save the listing");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } finally {
+      setCreatingDraft(false);
+    }
   }
 
   // Live preview built from watch() — placeholder identity fields until the
@@ -141,7 +173,7 @@ export function LandEditor({
   };
 
   const previewCard: LandCardType = {
-    _id: landId ?? "preview",
+    _id: draftId ?? "preview",
     refCode: refCode ?? "KANI-DRAFT",
     title: values.title || "Untitled listing",
     slug: slug ?? "preview",
@@ -487,13 +519,24 @@ export function LandEditor({
         <section>
           <SectionHeading title={d.admin.photos} />
           <Card className="p-5">
-            {mode === "create" ? (
-              <p className="text-[15px] text-[var(--muted)]">
-                {d.admin.saveDraftFirst}
-              </p>
+            {!draftId ? (
+              <div className="space-y-3">
+                <p className="text-[15px] text-[var(--muted)]">
+                  {d.admin.addPhotosHint}
+                </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={creatingDraft}
+                  onClick={handleSubmit(onCreateDraftForPhotos, onInvalidSubmit)}
+                >
+                  {creatingDraft ? d.common.saving : d.admin.addPhotos}
+                </Button>
+              </div>
             ) : (
               <ImageManager
-                landId={landId!}
+                landId={draftId}
                 images={images_}
                 coverImageId={cover}
                 onChange={(imgs, coverId) => {
@@ -592,6 +635,7 @@ export function LandEditor({
           <div className="max-w-sm">
             <LandCard
               land={previewCard}
+              locale={locale}
               href={mode === "edit" ? `/lands/${slug}?preview=1` : undefined}
               newTab={mode === "edit"}
               showFavourite={false}

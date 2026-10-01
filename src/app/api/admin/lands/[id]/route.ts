@@ -15,6 +15,13 @@ import { z } from "zod";
 
 export const runtime = "nodejs";
 
+/** The Featured hero rail and the Popular row (manual mode) each only ever
+ * render this many on the homepage — see CLAUDE.md. Enforced here, not just
+ * in the admin UI, since the UI check is trivially bypassed by calling this
+ * endpoint directly. */
+const MAX_FEATURED = 4;
+const MAX_POPULAR = 4;
+
 /** Whitelist for the row-level quick toggles in the listing table. */
 const toggleSchema = z
   .object({
@@ -60,6 +67,29 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
   await dbConnect();
   const land = await Land.findById(id);
   if (!land) return NextResponse.json({ error: "Listing not found" }, { status: 404 });
+
+  // Newly turning Featured/Popular on (not already set) must respect the
+  // cap — re-saving an already-flagged listing, or turning it off, never
+  // counts against the limit.
+  const patch = body as Record<string, unknown>;
+  if (patch?.isFeatured === true && !land.isFeatured) {
+    const featuredCount = await Land.countDocuments({ isFeatured: true });
+    if (featuredCount >= MAX_FEATURED) {
+      return NextResponse.json(
+        { error: "You have already added 4 items in Featured." },
+        { status: 409 }
+      );
+    }
+  }
+  if (patch?.isPopular === true && !land.isPopular) {
+    const popularCount = await Land.countDocuments({ isPopular: true });
+    if (popularCount >= MAX_POPULAR) {
+      return NextResponse.json(
+        { error: "You have already added 4 items in Popular." },
+        { status: 409 }
+      );
+    }
+  }
 
   // The full editor form always submits every field; the row-level toggles in
   // the table send only a handful — tell the two apart by whether the body

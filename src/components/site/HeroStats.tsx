@@ -35,17 +35,20 @@ export function HeroStats({
   ];
 
   return (
-    <ul className="kani-hero-stats mt-5 flex flex-wrap gap-2">
+    // Even 2x2 grid on mobile, where four variable-width flex items can wrap
+    // unevenly in a narrow column; back to the original flex-wrap from `sm`
+    // up, unchanged.
+    <ul className="kani-hero-stats mt-4 grid grid-cols-2 gap-1.5 sm:mt-5 sm:flex sm:flex-wrap sm:gap-2">
       {stats.map((s) => (
         <li
           key={s.label}
-          className="flex items-baseline gap-1.5 rounded-[var(--radius-md)] border border-white/20
-                     bg-white/10 px-3 py-1.5 backdrop-blur-md"
+          className="flex items-baseline gap-1.5 rounded-[var(--radius-md)] border border-white/30
+                     bg-black/45 px-2.5 py-1.5 backdrop-blur-md sm:px-3"
         >
-          <span className="font-serif text-[15px] leading-none text-[var(--palmyra-gold-soft)]">
+          <span className="font-serif text-[14px] font-bold leading-none text-[var(--palmyra-gold-soft)] sm:text-[15px]">
             {s.value}
           </span>
-          <span className="text-[12px] leading-none text-white/80">{s.label}</span>
+          <span className="text-[11px] font-semibold leading-none text-white sm:text-[12px]">{s.label}</span>
         </li>
       ))}
     </ul>

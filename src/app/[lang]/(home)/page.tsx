@@ -4,6 +4,7 @@ import { HeroSearch } from "@/components/site/HeroSearch";
 import { HeroSlideshow } from "@/components/site/HeroSlideshow";
 import { HeroStats } from "@/components/site/HeroStats";
 import { HeroWelcomeText } from "@/components/site/HeroWelcomeText";
+import { HeroPublishCta } from "@/components/site/HeroPublishCta";
 import { LandRail } from "@/components/site/LandRail";
 import { ListLandCta } from "@/components/site/ListLandCta";
 import { SectionHeading } from "@/components/ui/Card";
@@ -65,8 +66,8 @@ export default async function HomePage({
 
   const [popular, featured, latest, sold, districts, taxonomies, settings] =
     await Promise.all([
-      getPopularLands(8),
-      getFeaturedLands(6),
+      getPopularLands(4),
+      getFeaturedLands(4),
       getLatestLands(8),
       getRecentlySold(6),
       getDistrictsWithCounts(),
@@ -116,6 +117,8 @@ export default async function HomePage({
                        bg-gradient-to-t from-[var(--kani-green-deep)]/55 to-transparent"
           />
 
+          <HeroPublishCta phone={phone} locale={locale} />
+
           <div className="kani-hero-content container-kani on-dark flex min-h-full flex-col justify-center pt-28 pb-16 md:pt-32 md:pb-20">
             {/* Both locales share the wider measure — it holds the headline on
                 two lines in English and five in Tamil without overflowing. */}
@@ -126,12 +129,29 @@ export default async function HomePage({
                 locale={locale}
               />
 
-              <HeroStats
-                listings={totalListings}
-                districts={districts.length}
-                categories={taxonomies.landTypes.length}
-                locale={locale}
-              />
+              {/* English's shorter headline/description leaves more empty
+                  photo below the centered content block than Tamil's does
+                  on mobile, so the stats + card sat high with a lot of bare
+                  space underneath. Extra top margin here, English-mobile
+                  only, moves the block down into that space instead of
+                  changing the block's centering (which both locales share
+                  and which already reads well for Tamil). */}
+              <div className={locale === "en" ? "mt-10 sm:mt-0" : undefined}>
+                <HeroStats
+                  listings={totalListings}
+                  districts={districts.length}
+                  categories={taxonomies.landTypes.length}
+                  locale={locale}
+                />
+
+                {/* Compact mobile-only counterpart to the floating card below
+                    (`sm` and up) — normal document flow, directly beneath the
+                    stats, auto height. See HeroPublishCta.tsx for why this
+                    isn't just a breakpoint variant of the same markup. */}
+                <div className="mt-4 sm:hidden">
+                  <HeroPublishCta.Compact phone={phone} locale={locale} />
+                </div>
+              </div>
             </div>
           </div>
         </div>

@@ -48,46 +48,57 @@ export default async function DistrictsPage({
       </header>
 
       <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {districts.map((district, i) => (
-          <Reveal as="li" key={district._id} delay={Math.min(i * 55, 220)}>
-            <Link
-              href={localeHref(`/districts/${district.slug}`, locale)}
-              className="group flex h-full flex-col rounded-[var(--radius-lg)] border
-                         border-[var(--hairline)] bg-[var(--card)] p-6 lift"
-            >
-              <div className="mb-2 flex items-baseline justify-between gap-3">
-                <h2 className="font-serif text-[24px] text-[var(--kani-green)]">
-                  {localizedName(district, locale)}
-                </h2>
-                <span className="tabular shrink-0 rounded-[var(--radius-pill)] bg-[var(--kani-green)]/10
-                                 px-2.5 py-1 text-[13px] font-semibold text-[var(--kani-green)]">
-                  {district.count}
-                </span>
-              </div>
-              <p className="mb-3 text-[14px] text-[var(--muted)]">
-                {district.province} {d.districts.province}
-              </p>
-              {district.intro && (
-                <p className="text-[15px] leading-relaxed text-[var(--ink)]">
-                  {truncate(district.intro, 150)}
+        {districts.map((district, i) => {
+          // The Tamil intro when there is one, falling back to English —
+          // same resolution as the district's own detail page.
+          const introTa = district.introTa?.trim();
+          const intro = locale === "ta" && introTa ? introTa : district.intro;
+          const introIsFallback = locale === "ta" && !introTa;
+
+          return (
+            <Reveal as="li" key={district._id} delay={Math.min(i * 55, 220)}>
+              <Link
+                href={localeHref(`/districts/${district.slug}`, locale)}
+                className="group flex h-full flex-col rounded-[var(--radius-lg)] border
+                           border-[var(--hairline)] bg-[var(--card)] p-6 lift"
+              >
+                <div className="mb-2 flex items-baseline justify-between gap-3">
+                  <h2 className="font-serif text-[24px] text-[var(--kani-green)]">
+                    {localizedName(district, locale)}
+                  </h2>
+                  <span className="tabular shrink-0 rounded-[var(--radius-pill)] bg-[var(--kani-green)]/10
+                                   px-2.5 py-1 text-[13px] font-semibold text-[var(--kani-green)]">
+                    {district.count}
+                  </span>
+                </div>
+                <p className="mb-3 text-[14px] text-[var(--muted)]">
+                  {district.province} {d.districts.province}
                 </p>
-              )}
-              <span className="mt-auto inline-flex items-center gap-1.5 pt-4 text-[15px]
-                               font-medium text-[var(--kani-green)]">
-                {interpolate(d.districts.browseDistrict, {
-                  name: localizedName(district, locale),
-                })}
-                <svg viewBox="0 0 16 16" className="size-3.5 transition-transform duration-200
-                                                    [transition-timing-function:var(--ease-out)]
-                                                    group-hover:translate-x-1"
-                     fill="none" aria-hidden="true">
-                  <path d="M3 8h9M8 4l4 4-4 4" stroke="currentColor" strokeWidth="1.7"
-                        strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </span>
-            </Link>
-          </Reveal>
-        ))}
+                {intro && (
+                  <p
+                    className="text-[15px] leading-relaxed text-[var(--ink)]"
+                    lang={introIsFallback ? "en" : undefined}
+                  >
+                    {truncate(intro, 150)}
+                  </p>
+                )}
+                <span className="mt-auto inline-flex items-center gap-1.5 pt-4 text-[15px]
+                                 font-medium text-[var(--kani-green)]">
+                  {interpolate(d.districts.browseDistrict, {
+                    name: localizedName(district, locale),
+                  })}
+                  <svg viewBox="0 0 16 16" className="size-3.5 transition-transform duration-200
+                                                      [transition-timing-function:var(--ease-out)]
+                                                      group-hover:translate-x-1"
+                       fill="none" aria-hidden="true">
+                    <path d="M3 8h9M8 4l4 4-4 4" stroke="currentColor" strokeWidth="1.7"
+                          strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
+              </Link>
+            </Reveal>
+          );
+        })}
       </ul>
     </div>
   );
