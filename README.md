@@ -19,7 +19,7 @@ controlled from an admin dashboard.
   `kani_images` collection) and served through a cached `/api/images/[id]`
   route. Requires the `S3_*` env vars (`S3_ENDPOINT`, `S3_ACCESS_KEY`,
   `S3_SECRET_KEY`, `S3_BUCKET`, `S3_REGION`)
-
+.
 ## Getting started
 
 ```bash
