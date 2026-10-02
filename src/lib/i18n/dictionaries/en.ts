@@ -102,6 +102,8 @@ export const en = {
     soldTitle: "Recently sold and rented",
     soldSub: "Land that moved through kani.lk. Proof the market here is active.",
 
+    howEyebrow: "Simple • Transparent • Direct",
+    howNote: "Simple steps to your land",
     howTitle: "How kani.lk works",
     howSub: "No account, no commission, no middleman.",
     how1Title: "Search the way you buy",

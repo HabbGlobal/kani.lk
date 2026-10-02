@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { HeroSearch } from "@/components/site/HeroSearch";
@@ -248,19 +249,21 @@ export default async function HomePage({
 
       {/* ── Districts ────────────────────────────────────────────────── */}
       <section className="container-kani pt-16 md:pt-20">
+        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:items-center lg:gap-10">
+        <div>
         <Reveal>
           <SectionHeading
             title={d.home.districtsTitle}
             subtitle={d.home.districtsSub}
           />
         </Reveal>
-        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {districts.map((district, i) => (
             <Reveal as="li" key={district._id} delay={Math.min(i * 55, 220)}>
               <Link
                 href={href(`/districts/${district.slug}`)}
                 className="group flex h-full items-center justify-between gap-4 rounded-[var(--radius-lg)]
-                           border border-[var(--hairline)] bg-[var(--card)] p-5 lift"
+                           border border-[var(--hairline)] bg-[var(--card)] p-5 lift glow-card"
               >
                 <span className="min-w-0">
                   <span className="block font-serif text-[21px] text-[var(--kani-green)]">
@@ -287,34 +290,81 @@ export default async function HomePage({
             </Reveal>
           ))}
         </ul>
+        </div>
+        <Image
+          src="/district-map.webp"
+          alt=""
+          width={900}
+          height={1080}
+          sizes="480px"
+          className="pointer-events-none -my-24 -ml-28 hidden h-auto w-[480px] max-w-none select-none lg:block"
+        />
+        </div>
       </section>
 
       {/* ── How it works ─────────────────────────────────────────────── */}
       {/* Moved ahead of "Recently sold" — this answers the first-time
           visitor's question, and used to sit near the footer where it was
           rarely reached. */}
-      <section id="how-it-works" className="container-kani scroll-mt-24 pt-16 md:pt-20">
-        <Reveal>
-          <SectionHeading
-            title={d.home.howTitle}
-            subtitle={d.home.howSub}
-          />
+      <section id="how-it-works" className="container-kani relative scroll-mt-24 pt-16 md:pt-20">
+        <Image
+          src="/how-bg.webp"
+          alt=""
+          width={1400}
+          height={468}
+          sizes="(min-width: 1024px) 700px, 100vw"
+          aria-hidden="true"
+          className="pointer-events-none absolute right-0 top-8 hidden h-auto w-[62%] max-w-[760px] select-none opacity-80 md:block"
+          style={{ maskImage: "linear-gradient(to right, transparent, #000 35%)" }}
+        />
+        <p
+          aria-hidden="true"
+          className="pointer-events-none absolute left-[46%] top-14 hidden max-w-[220px] -rotate-6 text-center
+                     font-serif text-[24px] italic leading-tight text-[var(--kani-green)] lg:block"
+        >
+          {d.home.howNote}
+        </p>
+        <Reveal className="relative mb-6 md:mt-12">
+          <p className="mb-2 flex items-center gap-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--palmyra-gold)]">
+            {d.home.howEyebrow}
+            <svg viewBox="0 0 40 8" className="h-2 w-10" fill="none" aria-hidden="true">
+              <path d="M0 4h38M34 1l4 3-4 3" stroke="currentColor" strokeWidth="1.2"
+                    strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </p>
+          <h2 className="text-[27px] font-bold leading-tight text-[var(--heading)] md:text-[34px]">
+            {d.home.howTitle}
+          </h2>
+          <p className="mt-1.5 max-w-2xl text-[15px] text-[var(--muted)] md:text-[16px]">
+            {d.home.howSub}
+          </p>
         </Reveal>
-        <ol className="grid gap-4 md:grid-cols-3">
+        <ol className="relative grid gap-4 md:mt-16 md:grid-cols-3">
           {[
-            { n: "1", title: d.home.how1Title, body: d.home.how1Body },
-            { n: "2", title: d.home.how2Title, body: d.home.how2Body },
-            { n: "3", title: d.home.how3Title, body: d.home.how3Body },
+            { n: "1", title: d.home.how1Title, body: d.home.how1Body, img: "/how-1.webp" },
+            { n: "2", title: d.home.how2Title, body: d.home.how2Body, img: "/how-2.webp" },
+            { n: "3", title: d.home.how3Title, body: d.home.how3Body, img: "/how-3.webp" },
           ].map((step, i) => (
             <Reveal as="li" key={step.n} delay={i * 70}>
-              <div className="h-full rounded-[var(--radius-lg)] border border-[var(--hairline)] bg-[var(--card)] p-6">
-                <span
-                  className="mb-4 grid size-11 place-items-center rounded-full bg-[var(--kani-green)]
-                             font-serif text-[19px] text-white"
-                  aria-hidden="true"
-                >
-                  {step.n}
-                </span>
+              <div className="h-full rounded-[10px] border border-[var(--hairline)] bg-[var(--card)] p-6">
+                <div className="mb-3 flex min-h-[100px] items-start justify-between">
+                  <span
+                    className="grid size-11 shrink-0 place-items-center rounded-full bg-[var(--kani-green)]
+                               font-serif text-[19px] text-white"
+                    aria-hidden="true"
+                  >
+                    {step.n}
+                  </span>
+                  <Image
+                    src={step.img}
+                    alt=""
+                    width={560}
+                    height={step.n === "3" ? 518 : 373}
+                    sizes="210px"
+                    aria-hidden="true"
+                    className="pointer-events-none -mr-3 -mt-3 h-auto w-[170px] select-none"
+                  />
+                </div>
                 <h3 className="mb-2 text-[21px] text-[var(--kani-green)]">{step.title}</h3>
                 <p className="text-[15px] leading-relaxed text-[var(--muted)]">{step.body}</p>
               </div>

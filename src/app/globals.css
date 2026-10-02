@@ -501,6 +501,18 @@ html { scroll-padding-top: calc(var(--nav-h) + 32px); }
 }
 .lift:active { transform: translateY(-1px); }
 
+/* Minimal glow: a faint gold halo at rest that warms up on hover. Pair with .lift. */
+.glow-card {
+  box-shadow: 0 0 0 1px rgba(190, 155, 78, 0.22), 0 0 22px rgba(190, 155, 78, 0.34),
+              0 0 44px rgba(190, 155, 78, 0.16);
+}
+@media (hover: hover) {
+  .glow-card:hover {
+    box-shadow: 0 0 0 1px rgba(190, 155, 78, 0.55), 0 0 30px rgba(190, 155, 78, 0.6),
+                0 0 60px rgba(190, 155, 78, 0.3), 0 14px 28px -12px rgba(10, 44, 30, 0.18);
+  }
+}
+
 /* Photo push-in inside a fixed frame. The frame clips; layout never moves. */
 .zoom-frame { overflow: hidden; }
 .zoom-frame img {
