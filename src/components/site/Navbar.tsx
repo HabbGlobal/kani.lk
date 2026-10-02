@@ -90,7 +90,7 @@ export function Navbar({ overHero = false }: { overHero?: boolean }) {
         <nav
           aria-label={d.nav.mainNav}
           className={cn(
-            "container-kani flex items-center gap-3 !px-2 md:!px-3",
+            "container-kani flex items-center gap-1.5 !px-2 sm:gap-3 md:!px-3",
             // The oval: a fully rounded pill, floating clear of the page edge.
             "h-[68px] rounded-[var(--radius-pill)] glass-nav md:h-[76px]",
             overHeroGlow && "glass-nav--over-hero",
@@ -102,7 +102,7 @@ export function Navbar({ overHero = false }: { overHero?: boolean }) {
           <Link
             href={href("/")}
             aria-label={d.nav.homeAria}
-            className="ml-1 shrink-0 rounded-full md:ml-3"
+            className="nav-logo-capsule ml-1 shrink-0 rounded-full md:ml-3"
           >
             <Logo onDark className="[&>span:first-child]:max-[400px]:hidden" />
           </Link>
@@ -126,7 +126,7 @@ export function Navbar({ overHero = false }: { overHero?: boolean }) {
                       "xl:px-3.5 xl:py-2 xl:text-[15px]",
                       active
                         ? "bg-[var(--palmyra-gold)] text-[var(--kani-green-deep)] nav-pill-glow--dark"
-                        : "text-white/85 hover:bg-white/12 hover:text-white"
+                        : "font-semibold text-[#123F32] hover:bg-white/30 hover:text-[#123F32]"
                     )}
                   >
                     {d.nav[link.key]}
@@ -136,14 +136,14 @@ export function Navbar({ overHero = false }: { overHero?: boolean }) {
             })}
           </ul>
 
-          <div className="ml-auto flex shrink-0 items-center gap-1 xl:ml-1">
+          <div className="ml-auto flex shrink-0 items-center gap-0.5 sm:gap-1 xl:ml-1">
             <LanguageSwitch onDark />
 
             <Link
               href={href("/favourites")}
               aria-label={`${d.nav.savedLands}${ready && ids.length ? ` (${ids.length})` : ""}`}
-              className="relative grid size-11 place-items-center rounded-full text-white
-                         transition-colors duration-200 hover:bg-white/12"
+              className="relative grid size-9 place-items-center rounded-full bg-white/80 sm:size-11 text-[#123F32]
+                         transition-colors duration-200 nav-fav-glow hover:bg-white/90"
             >
               <svg viewBox="0 0 24 24" className="size-5" fill="none" strokeWidth="1.9"
                    stroke="currentColor" strokeLinejoin="round" aria-hidden="true">
@@ -165,8 +165,8 @@ export function Navbar({ overHero = false }: { overHero?: boolean }) {
               aria-expanded={open}
               aria-controls="mobile-menu"
               aria-label={open ? d.nav.closeMenu : d.nav.openMenu}
-              className="grid size-11 cursor-pointer place-items-center rounded-full text-white
-                         transition-colors duration-200 hover:bg-white/12 xl:hidden"
+              className="nav-hamburger grid size-9 cursor-pointer place-items-center rounded-full sm:size-11 text-[#123F32]
+                         transition-colors duration-200 xl:hidden"
             >
               <svg viewBox="0 0 24 24" className="size-6" fill="none" stroke="currentColor"
                    strokeWidth="1.9" strokeLinecap="round" aria-hidden="true">

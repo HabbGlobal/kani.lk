@@ -281,17 +281,40 @@ html { scroll-padding-top: calc(var(--nav-h) + 32px); }
 
 /* ─── Oval glass navbar ─────────────────────────────────────────────── */
 .glass-nav {
-  background: color-mix(in srgb, #060606 94%, transparent);
-  backdrop-filter: blur(18px) saturate(180%);
-  -webkit-backdrop-filter: blur(18px) saturate(180%);
-  border: 1px solid color-mix(in srgb, var(--palmyra-gold-soft) 30%, transparent);
-  box-shadow: var(--shadow-glass),
-              0 0 0 1px color-mix(in srgb, var(--palmyra-gold) 20%, transparent),
-              0 8px 24px -8px rgba(0, 0, 0, 0.25);
+  /* Very light veil — landscape image shows clearly through the glass. */
+  background-image:
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.06) 100%),
+    url('/navbar-bg.webp');
+  /* 100% width is the least zoom possible without gaps on this wide, short bar
+     (it was 160%). The veil layer still fills the whole bar. */
+  background-size: 100% 100%, 120% auto;
+  background-position: center, center 55%;
+  background-repeat: no-repeat;
+  backdrop-filter: blur(10px) saturate(130%);
+  -webkit-backdrop-filter: blur(10px) saturate(130%);
+  border: 1px solid rgba(210, 170, 65, 0.75);
+  box-shadow:
+    0 4px 20px rgba(180, 150, 50, 0.18),
+    0 0 0 1px rgba(210, 170, 65, 0.20),
+    inset 0 1px 0 rgba(255, 255, 255, 0.40);
   transition: background var(--dur-base) var(--ease-out),
               border-color var(--dur-base) var(--ease-out),
               box-shadow var(--dur-base) var(--ease-out),
               transform var(--dur-base) var(--ease-out);
+}
+
+/* Golden halo around the logo link — keeps it legible over the landscape. */
+.nav-logo-glow {
+  filter:
+    drop-shadow(0 0 8px rgba(212, 175, 55, 0.75))
+    drop-shadow(0 0 16px rgba(212, 175, 55, 0.40));
+}
+
+/* Golden ring + glow on the favourites heart button. */
+.nav-fav-glow {
+  box-shadow:
+    0 0 0 1.5px rgba(212, 175, 55, 0.70),
+    0 0 10px 2px rgba(212, 175, 55, 0.35);
 }
 
 /* Slides the whole floating bar off-screen on scroll-down, back on scroll-up. */
@@ -299,14 +322,12 @@ html { scroll-padding-top: calc(var(--nav-h) + 32px); }
   transform: translate3d(0, -140%, 0);
 }
 
-/* Over the hero photo the bar stays the same black — one consistent navbar
-   color everywhere, rather than swapping tint by what's behind it. */
+/* Over the hero the bar uses the same glass treatment, slightly stronger gold. */
 .glass-nav--over-hero {
-  background: color-mix(in srgb, #060606 94%, transparent);
-  border-color: color-mix(in srgb, var(--palmyra-gold-soft) 38%, transparent);
-  box-shadow: var(--shadow-glass),
-              0 0 0 1.5px color-mix(in srgb, var(--palmyra-gold) 28%, transparent),
-              0 0 40px 4px rgba(0, 0, 0, 0.55);
+  border-color: rgba(210, 170, 65, 0.85);
+  box-shadow:
+    0 6px 28px rgba(180, 150, 50, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
 /* Glow on the active nav-link pill — the "current section" indicator inside
@@ -328,15 +349,65 @@ html { scroll-padding-top: calc(var(--nav-h) + 32px); }
   box-shadow: 0 0 12px -2px color-mix(in srgb, var(--paddy) 40%, transparent);
 }
 .nav-group--dark {
-  border-color: color-mix(in srgb, var(--palmyra-gold-soft) 28%, transparent);
-  box-shadow: 0 0 14px -2px color-mix(in srgb, var(--palmyra-gold) 40%, transparent);
+  /* Inner pill: more opaque glass — links crisp over the visible landscape */
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-color: rgba(210, 170, 65, 0.40);
+  box-shadow:
+    0 0 0 1px rgba(210, 170, 65, 0.18),
+    0 2px 14px -2px rgba(40, 80, 40, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.60);
 }
 
 /* Browsers without backdrop-filter get an opaque bar rather than
    unreadable text sitting over a photograph. */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .glass-nav { background: #060606; }
-  .glass-nav--over-hero { background: #060606; }
+  /* Fallback for browsers without backdrop-filter: show the image with an opaque overlay */
+  .glass-nav { background: rgba(235, 245, 220, 0.92); }
+  .glass-nav--over-hero { background: rgba(235, 245, 220, 0.92); }
+}
+
+/* ─── Mobile navbar: pill landscape image (below xl = 1280px) ────────── */
+/* The desktop glass-nav is untouched above. This block ONLY applies to   */
+/* mobile/tablet breakpoints where the nav links are hidden and the pill   */
+/* background uses the dedicated mobile landscape artwork.                 */
+@media (max-width: 1279px) {
+  .glass-nav {
+    /* The mobile image already contains the rounded pill shape and the
+       white logo area on the left — no white overlay needed. */
+    background-image: url('/navbar-mobile-bg.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    /* left center keeps the white logo zone visible; the landscape fills right */
+    background-position: left center;
+    /* Very subtle glass finish so the pill image shows fully */
+    backdrop-filter: blur(6px) saturate(115%);
+    -webkit-backdrop-filter: blur(6px) saturate(115%);
+  }
+
+  /* Logo link: sits inside the white/cream left area of the pill image.
+     A very faint golden drop-shadow keeps "kani.lk" readable if needed. */
+  .glass-nav .nav-logo-capsule {
+    filter: drop-shadow(0 0 4px rgba(180, 140, 40, 0.30));
+  }
+
+  /* Hamburger / close button: frosted glass pill so it reads clearly over
+     the landscape background. Icon color stays deep forest-green. */
+  .nav-hamburger {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(210, 170, 65, 0.50);
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.30),
+      0 2px 8px -2px rgba(40, 80, 40, 0.18);
+    color: #123F32;
+  }
+  .nav-hamburger:hover {
+    background: rgba(255, 255, 255, 0.90);
+    border-color: rgba(210, 170, 65, 0.70);
+  }
 }
 
 /* ─── Motion ────────────────────────────────────────────────────────── */
