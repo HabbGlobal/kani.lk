@@ -60,7 +60,7 @@ export function HeroSearch({
       {/* Purpose: real radios, styled as compact tabs. The stat line sits in
           the same row, right-aligned — it used to float above the card as
           its own pill and overlapped the hero's bottom edge. */}
-      <fieldset className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-black/[0.08] pb-3">
+      <fieldset className="mb-3 flex flex-col items-stretch justify-between gap-2 border-b border-black/[0.08] pb-3 sm:flex-row sm:items-center">
         <legend className="sr-only">{d.lands.purpose}</legend>
         <div className="flex gap-1">
           {[
@@ -96,13 +96,13 @@ export function HeroSearch({
 
         {statLine && (
           <span
-            className="inline-flex max-w-full items-center gap-2 rounded-[var(--radius-pill)]
-                       bg-[var(--palmyra-gold)] px-4 py-1.5 text-[13px] font-semibold
+            className="inline-flex w-full min-w-0 items-center justify-center gap-2 rounded-[var(--radius-pill)]
+                       bg-[var(--palmyra-gold)] px-4 py-1.5 text-center text-[13px] font-semibold sm:w-auto sm:max-w-full
                        text-[var(--kani-green-deep)] shadow-[0_4px_14px_-4px_rgba(190,155,78,0.55)]
                        sm:text-[14px]"
           >
             <span className="size-1.5 shrink-0 rounded-full bg-[var(--kani-green-deep)]" aria-hidden="true" />
-            <span className="truncate">{statLine}</span>
+            <span className="min-w-0 leading-snug sm:truncate">{statLine}</span>
           </span>
         )}
       </fieldset>

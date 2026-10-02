@@ -324,7 +324,7 @@ export default async function HomePage({
         >
           {d.home.howNote}
         </p>
-        <Reveal className="relative mb-6">
+        <Reveal className="relative mb-6 md:mt-12">
           <p className="mb-2 flex items-center gap-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--palmyra-gold)]">
             {d.home.howEyebrow}
             <svg viewBox="0 0 40 8" className="h-2 w-10" fill="none" aria-hidden="true">
@@ -339,7 +339,7 @@ export default async function HomePage({
             {d.home.howSub}
           </p>
         </Reveal>
-        <ol className="relative grid gap-4 md:mt-28 md:grid-cols-3">
+        <ol className="relative grid gap-4 md:mt-16 md:grid-cols-3">
           {[
             { n: "1", title: d.home.how1Title, body: d.home.how1Body, img: "/how-1.webp" },
             { n: "2", title: d.home.how2Title, body: d.home.how2Body, img: "/how-2.webp" },
